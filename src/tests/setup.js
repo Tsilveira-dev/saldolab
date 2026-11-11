@@ -12,12 +12,10 @@ globalThis.ResizeObserver = class {
   unobserve() {}
   disconnect() {}
 };
-window.matchMedia = vi
-  .fn()
-  .mockImplementation(() => ({
-    matches: false,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-  }));
+window.matchMedia = vi.fn().mockImplementation(() => ({
+  matches: false,
+  addListener() {},
+  removeListener() {},
+  addEventListener() {},
+  removeEventListener() {},
+}));
