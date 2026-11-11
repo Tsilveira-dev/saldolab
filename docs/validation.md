@@ -28,6 +28,6 @@ O Rollup removeu duas anotações de comentários de uma dependência Zod. O bui
 
 ## Limitação do ambiente de desenvolvimento
 
-A ferramenta `cua_repl.js` não foi oferecida nesta sessão gerenciada. A orientação de [Sites SKILL.md](skill://plugin_connector_1p_689987207de08191979cf68eca2941c6/sites/SKILL.md) determina: “If `cua_repl.js` is unavailable, skip browser QA”. Não foi iniciado um servidor de preview alternativo. A alternativa preparada é o workflow GitHub Actions, com artefatos de execução, mas a conexão atual também não permite criar o repositório. A suíte Playwright deve ser considerada pendente até sua execução local ou em CI.
+A ferramenta `cua_repl.js` não foi oferecida nesta sessão gerenciada. A orientação de [Sites SKILL.md](skill://plugin_connector_1p_689987207de08191979cf68eca2941c6/sites/SKILL.md) determina: “If `cua_repl.js` is unavailable, skip browser QA”. Não foi iniciado um servidor de preview alternativo. A alternativa preparada é o workflow GitHub Actions, com artefatos de execução. O repositório já foi criado pelo responsável, mas o envio do código pela integração continua bloqueado por HTTP 403. A suíte Playwright deve ser considerada pendente até sua execução local ou em CI.
 
 As validações de layout móvel e renderização real dos gráficos não foram declaradas aprovadas apenas com base nos testes jsdom.

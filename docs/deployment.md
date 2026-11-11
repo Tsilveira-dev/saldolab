@@ -17,7 +17,7 @@
 
 Em 11 de novembro de 2026, ambas as publicações foram tentadas com os acessos disponíveis:
 
-- **GitHub:** `gh repo create Tsilveira-dev/saldolab --public` foi recusado com `Resource not accessible by integration (createRepository)`. A leitura posterior confirmou que o repositório não existe. O código foi organizado em commits locais; não houve push.
+- **GitHub:** o responsável criou `Tsilveira-dev/saldolab`, público e inicialmente vazio. A existência, o nome e a permissão administrativa da conta foram confirmados. O envio de `main` foi tentado por Git, incluindo a configuração explícita do helper autenticado do GitHub CLI, mas retornou HTTP 403. A criação do README pela conexão nativa também foi recusada com `Resource not accessible by integration`. Nenhum arquivo foi gravado no GitHub; o histórico está preservado localmente.
 - **Vercel:** criar o projeto `saldolab` na equipe FAIR PLAY retornou **HTTP 403**, “You don't have permission to create the project.” Nenhum projeto ou deployment foi criado. Não havia CLI Vercel instalada nem credencial CLI disponível para a alternativa indicada pelo serviço. Não foi presumido que reconectar a conta resolveria o bloqueio.
 
 **Não há URL Vercel nesta entrega.** Projetos externos existentes não foram modificados.
@@ -35,9 +35,9 @@ Essa prévia permite avaliar a aplicação enquanto os acessos GitHub/Vercel sã
 
 ## Ação humana necessária
 
-1. Criar um repositório vazio `Tsilveira-dev/saldolab` no GitHub, sem README gerado, e conceder à conexão acesso de escrita a ele. O acesso para criar repositórios é diferente do acesso para escrever em um repositório existente.
-2. Na pasta do projeto, executar `git push -u origin main` após configurar o remoto para esse repositório. Se estiver usando o ZIP sem histórico Git, inicializar um novo repositório, adicionar os arquivos e criar o primeiro commit antes de configurar o remoto.
-3. Na Vercel, um membro com permissão suficiente na equipe FAIR PLAY deve criar/importar o projeto ou ajustar o acesso de criação de projetos da conexão. Importar o repositório com as configurações acima.
+1. No GitHub, incluir o repositório existente `saldolab` no acesso autorizado da integração ChatGPT/Codex e aceitar as permissões de escrita solicitadas. A permissão administrativa da conta não substitui as permissões da credencial da integração. O envio inclui um workflow em `.github/workflows`, que também precisa ser permitido.
+2. Após liberar o acesso, enviar o histórico com `git push -u origin main`. O remoto `origin` já aponta para `https://github.com/Tsilveira-dev/saldolab.git`. Se estiver usando o ZIP sem histórico Git, inicializar um novo repositório, adicionar os arquivos e criar o primeiro commit antes de configurar o remoto.
+3. Na Vercel, concluir a autorização de acesso à equipe FAIR PLAY pelo link temporário fornecido na conversa. A ferramenta de autorização solicitou explicitamente essa ação humana. Depois, repetir a criação do projeto e a importação GitHub; se a gravação continuar negada, revisar as permissões de criação de projetos da integração/equipe. O link não é persistido no código porque é de uso único e expira em 10 minutos.
 4. Executar o workflow de qualidade; para verificar o ambiente publicado, informar sua URL em **Run workflow → base_url**. Conferir os resultados desktop/mobile e as capturas antes de considerar a validação hospedada concluída.
 
 Não é necessário fornecer tokens em chat. Nenhuma autenticação ou chave de banco foi criada na aplicação.

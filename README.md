@@ -121,7 +121,7 @@ Veja [Arquitetura](docs/architecture.md) e [Contrato do repositório e migraçã
 
 Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`; os assets são servidos diretamente. Não há segredos a configurar.
 
-Repositório preparado para `https://github.com/Tsilveira-dev/saldolab`, ainda **não criado**: a conexão recusou a criação. O histórico está disponível no repositório local e no Git bundle que acompanha a entrega.
+Repositório criado: https://github.com/Tsilveira-dev/saldolab. O envio do código está em andamento; a primeira tentativa de push foi recusada pela conexão com HTTP 403. O histórico completo também está disponível no repositório local e no Git bundle que acompanha a entrega.
 
 Vercel **não publicada**: a plataforma recusou a criação do projeto com HTTP 403. A prévia privada acima foi disponibilizada por Sites. Veja as ações humanas exatas em [docs/deployment.md](docs/deployment.md).
 
