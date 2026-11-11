@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+work/
+.vercel/
+.env
+.env.*
+!.env.example
+*.local
+__pycache__/
+*.pyc
+.DS_Store
