@@ -9,7 +9,7 @@
 Requisitos: **Node.js 24 LTS**, npm e, para os scripts opcionais, Python 3.10 ou superior. Nenhuma variável de ambiente ou chave de API é necessária.
 
 ```bash
-git clone https://github.com/Tsilveira-dev/saldolab.git
+# Extraia o ZIP entregue e abra a pasta do projeto:
 cd saldolab
 npm ci
 npm run dev
@@ -117,9 +117,9 @@ Veja [Arquitetura](docs/architecture.md) e [Contrato do repositório e migraçã
 
 Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`; os assets são servidos diretamente. Não há segredos a configurar.
 
-Repositório: https://github.com/Tsilveira-dev/saldolab
+Repositório preparado para `https://github.com/Tsilveira-dev/saldolab`, ainda **não criado**: a conexão recusou a criação. O histórico está disponível no repositório local e no Git bundle que acompanha a entrega.
 
-Deploy: veja [docs/deployment.md](docs/deployment.md), atualizado após a tentativa de publicação.
+Deploy **não publicado**: a Vercel recusou a criação do projeto com HTTP 403. Veja as ações humanas exatas em [docs/deployment.md](docs/deployment.md).
 
 ## Capturas de tela
 

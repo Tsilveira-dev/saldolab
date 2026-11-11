@@ -1,6 +1,20 @@
 # Verificação da entrega
 
-Este arquivo será atualizado com os resultados efetivamente executados antes da entrega. A existência de uma suíte não significa que ela passou.
+Verificações executadas em 11 de novembro de 2026:
+
+| Verificação              | Resultado                                                       |
+| ------------------------ | --------------------------------------------------------------- |
+| `npm run lint`           | Passou, sem avisos                                              |
+| `npm run format:check`   | Passou                                                          |
+| `npm run test`           | 65 testes passaram em 3 arquivos                                |
+| `npm run build`          | Passou; build estático gerado em `dist/`                        |
+| `npm run check`          | Passou (lint, formatação, testes e build)                       |
+| Python `unittest`        | 2 testes passaram                                               |
+| Gerador Python           | CSV de 54 transações gerado com seed 42, seis meses até 2026-11 |
+| Navegador desktop/mobile | Pendente de execução; suíte configurada                         |
+| CRUD em versão publicada | Pendente; publicação bloqueada por permissões externas          |
+
+O Rollup removeu duas anotações de comentários de uma dependência Zod. O build terminou com sucesso. Os chunks JavaScript ficaram abaixo do aviso de 500 kB. Não há dependência de banco remoto.
 
 ## Escopo dos testes
 
@@ -12,4 +26,6 @@ Este arquivo será atualizado com os resultados efetivamente executados antes da
 
 ## Limitação do ambiente de desenvolvimento
 
-A ferramenta `cua_repl.js` não foi oferecida nesta sessão gerenciada. As orientações de preview do ambiente não permitem improvisar controle de navegador nesse caso. A verificação de navegador será tentada no workflow GitHub Actions, com artefatos de execução. Até haver um resultado executado, a suíte Playwright deve ser considerada pendente.
+A ferramenta `cua_repl.js` não foi oferecida nesta sessão gerenciada. A orientação de [Sites SKILL.md](skill://plugin_connector_1p_689987207de08191979cf68eca2941c6/sites/SKILL.md) determina: “If `cua_repl.js` is unavailable, skip browser QA”. Não foi iniciado um servidor de preview alternativo. A alternativa preparada é o workflow GitHub Actions, com artefatos de execução, mas a conexão atual também não permite criar o repositório. A suíte Playwright deve ser considerada pendente até sua execução local ou em CI.
+
+As validações de layout móvel e renderização real dos gráficos não foram declaradas aprovadas apenas com base nos testes jsdom.
