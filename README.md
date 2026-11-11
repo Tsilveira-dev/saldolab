@@ -4,6 +4,10 @@
 
 > Os dados ficam somente no navegador. Esta versão não possui autenticação, banco remoto ou sincronização. Exporte backups regularmente. O modo demonstração usa exclusivamente registros fictícios.
 
+**Prévia privada publicada com Sites:** https://saldolab-financas.boundlessonyx2.chatgpt.site
+
+**Código e histórico para download:** abra https://saldolab-financas.boundlessonyx2.chatgpt.site/entrega/index.html. O ZIP contém o projeto sem dependências; o Git bundle preserva os commits. A publicação Vercel continua pendente dos acessos descritos abaixo.
+
 ## Executar
 
 Requisitos: **Node.js 24 LTS**, npm e, para os scripts opcionais, Python 3.10 ou superior. Nenhuma variável de ambiente ou chave de API é necessária.
@@ -119,7 +123,7 @@ Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run bu
 
 Repositório preparado para `https://github.com/Tsilveira-dev/saldolab`, ainda **não criado**: a conexão recusou a criação. O histórico está disponível no repositório local e no Git bundle que acompanha a entrega.
 
-Deploy **não publicado**: a Vercel recusou a criação do projeto com HTTP 403. Veja as ações humanas exatas em [docs/deployment.md](docs/deployment.md).
+Vercel **não publicada**: a plataforma recusou a criação do projeto com HTTP 403. A prévia privada acima foi disponibilizada por Sites. Veja as ações humanas exatas em [docs/deployment.md](docs/deployment.md).
 
 ## Capturas de tela
 

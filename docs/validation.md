@@ -2,17 +2,19 @@
 
 Verificações executadas em 11 de novembro de 2026:
 
-| Verificação              | Resultado                                                       |
-| ------------------------ | --------------------------------------------------------------- |
-| `npm run lint`           | Passou, sem avisos                                              |
-| `npm run format:check`   | Passou                                                          |
-| `npm run test`           | 65 testes passaram em 3 arquivos                                |
-| `npm run build`          | Passou; build estático gerado em `dist/`                        |
-| `npm run check`          | Passou (lint, formatação, testes e build)                       |
-| Python `unittest`        | 2 testes passaram                                               |
-| Gerador Python           | CSV de 54 transações gerado com seed 42, seis meses até 2026-11 |
-| Navegador desktop/mobile | Pendente de execução; suíte configurada                         |
-| CRUD em versão publicada | Pendente; publicação bloqueada por permissões externas          |
+| Verificação                | Resultado                                                       |
+| -------------------------- | --------------------------------------------------------------- |
+| `npm run lint`             | Passou, sem avisos                                              |
+| `npm run format:check`     | Passou                                                          |
+| `npm run test`             | 65 testes passaram em 3 arquivos                                |
+| `npm run build`            | Passou; build estático gerado em `dist/`                        |
+| `npm run check`            | Passou (lint, formatação, testes e build)                       |
+| Python `unittest`          | 2 testes passaram                                               |
+| Gerador Python             | CSV de 54 transações gerado com seed 42, seis meses até 2026-11 |
+| Navegador desktop/mobile   | Pendente de execução; suíte configurada                         |
+| Publicação privada Sites   | Concluída, confirmada pelo serviço de hospedagem                |
+| CRUD em versão publicada   | Pendente de verificação em navegador                            |
+| Publicação GitHub e Vercel | Bloqueada por permissões externas                               |
 
 O Rollup removeu duas anotações de comentários de uma dependência Zod. O build terminou com sucesso. Os chunks JavaScript ficaram abaixo do aviso de 500 kB. Não há dependência de banco remoto.
 

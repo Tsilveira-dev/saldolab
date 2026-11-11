@@ -20,7 +20,18 @@ Em 11 de novembro de 2026, ambas as publicações foram tentadas com os acessos 
 - **GitHub:** `gh repo create Tsilveira-dev/saldolab --public` foi recusado com `Resource not accessible by integration (createRepository)`. A leitura posterior confirmou que o repositório não existe. O código foi organizado em commits locais; não houve push.
 - **Vercel:** criar o projeto `saldolab` na equipe FAIR PLAY retornou **HTTP 403**, “You don't have permission to create the project.” Nenhum projeto ou deployment foi criado. Não havia CLI Vercel instalada nem credencial CLI disponível para a alternativa indicada pelo serviço. Não foi presumido que reconectar a conta resolveria o bloqueio.
 
-**Não há URL publicada nesta entrega.** Projetos externos existentes não foram modificados.
+**Não há URL Vercel nesta entrega.** Projetos externos existentes não foram modificados.
+
+## Prévia privada alternativa
+
+A aplicação foi publicada com sucesso por **Sites**, mantendo o acesso privado do proprietário:
+
+- Aplicação: https://saldolab-financas.boundlessonyx2.chatgpt.site
+- Entrega com ZIP e Git bundle: https://saldolab-financas.boundlessonyx2.chatgpt.site/entrega/index.html
+- Configuração dessa prévia: `.openai/hosting.json`, independente de `vercel.json`.
+- O sucesso da publicação foi confirmado pela ferramenta de hospedagem; os fluxos no navegador continuam pendentes da suíte Playwright.
+
+Essa prévia permite avaliar a aplicação enquanto os acessos GitHub/Vercel são resolvidos. Ela não altera a arquitetura local nem adiciona autenticação ou banco à aplicação. A hospedagem privada controla o acesso à prévia.
 
 ## Ação humana necessária
 
