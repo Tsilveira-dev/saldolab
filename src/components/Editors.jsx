@@ -1,0 +1,385 @@
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useFinance } from '../context/FinanceContext';
+import {
+  transactionFormSchema,
+  accountFormSchema,
+  categoryFormSchema,
+  budgetFormSchema,
+  icons,
+} from '../domain/schemas';
+import { centsInput, parseMoney, today } from '../domain/finance';
+import { Field, InlineError } from './ui';
+import Modal from './Modal';
+
+const accountTypes = {
+  checking: 'Conta corrente',
+  digital: 'Conta digital',
+  savings: 'Poupança / reserva',
+  cash: 'Carteira',
+};
+const iconLabels = {
+  wallet: 'Carteira',
+  bank: 'Banco',
+  credit: 'Cartão',
+  food: 'Alimentação',
+  home: 'Casa',
+  car: 'Transporte',
+  book: 'Livro',
+  heart: 'Saúde',
+  coffee: 'Café',
+  shopping: 'Compras',
+  briefcase: 'Trabalho',
+  chart: 'Investimentos',
+  tag: 'Etiqueta',
+};
+export default function Editors() {
+  const { editor, setEditor } = useFinance();
+  if (!editor) return null;
+  return (
+    <Editor
+      key={`${editor.entity}-${editor.row?.id ?? 'new'}`}
+      entity={editor.entity}
+      row={editor.row}
+      onClose={() => setEditor(null)}
+    />
+  );
+}
+function Editor({ entity, row, onClose }) {
+  const { data, month, save } = useFinance();
+  const [error, setError] = useState('');
+  const defaults = {
+    transactions: {
+      description: row?.description ?? '',
+      type: row?.type ?? 'expense',
+      amount: row ? centsInput(row.amountCents) : '',
+      categoryId: row?.categoryId ?? '',
+      accountId: row?.accountId ?? data.accounts[0]?.id ?? '',
+      destinationAccountId: row?.destinationAccountId ?? '',
+      date: row?.date ?? today(),
+      status: row?.status ?? 'confirmed',
+      notes: row?.notes ?? '',
+    },
+    accounts: {
+      name: row?.name ?? '',
+      type: row?.type ?? 'checking',
+      initialBalance: row ? centsInput(row.initialBalanceCents) : '0,00',
+      color: row?.color ?? '#4d6386',
+      icon: row?.icon ?? 'bank',
+    },
+    categories: {
+      name: row?.name ?? '',
+      type: row?.type ?? 'expense',
+      color: row?.color ?? '#408f88',
+      icon: row?.icon ?? 'tag',
+    },
+    budgets: {
+      categoryId: row?.categoryId ?? '',
+      month: row?.month ?? month,
+      limit: row ? centsInput(row.limitCents) : '',
+    },
+  };
+  const schema = {
+    transactions: transactionFormSchema,
+    accounts: accountFormSchema,
+    categories: categoryFormSchema,
+    budgets: budgetFormSchema,
+  }[entity];
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: defaults[entity],
+    shouldFocusError: true,
+  });
+  const type = useWatch({ control, name: 'type' });
+  const submit = handleSubmit(async (values) => {
+    setError('');
+    try {
+      let payload = values;
+      if (entity === 'transactions') {
+        const { amount, ...rest } = values;
+        payload = {
+          ...rest,
+          amountCents: parseMoney(amount),
+          categoryId: type === 'transfer' ? null : values.categoryId,
+          destinationAccountId: type === 'transfer' ? values.destinationAccountId : null,
+        };
+      }
+      if (entity === 'accounts') {
+        const { initialBalance, ...rest } = values;
+        payload = {
+          ...rest,
+          initialBalanceCents: parseMoney(initialBalance),
+          createdAt: row?.createdAt ?? today(),
+        };
+      }
+      if (entity === 'budgets') {
+        const { limit, ...rest } = values;
+        payload = { ...rest, limitCents: parseMoney(limit) };
+      }
+      await save(entity, payload, row?.id);
+      onClose();
+    } catch (cause) {
+      setError(cause.message);
+    }
+  });
+  const field = (key, label, input, extra = {}) => (
+    <Field key={key} label={label} error={errors[key]} {...extra}>
+      {input}
+    </Field>
+  );
+  const input = (key, props = {}) => (
+    <input
+      className={`form-control ${errors[key] ? 'is-invalid' : ''}`}
+      aria-invalid={Boolean(errors[key])}
+      {...register(key)}
+      {...props}
+    />
+  );
+  const select = (key, options, placeholder) => (
+    <select
+      className={`form-select ${errors[key] ? 'is-invalid' : ''}`}
+      aria-invalid={Boolean(errors[key])}
+      {...register(key)}
+    >
+      {placeholder && <option value="">{placeholder}</option>}
+      {options.map(([value, label]) => (
+        <option key={value} value={value}>
+          {label}
+        </option>
+      ))}
+    </select>
+  );
+  const titles = {
+    transactions: 'transação',
+    accounts: 'conta',
+    categories: 'categoria',
+    budgets: 'orçamento',
+  };
+  return (
+    <Modal
+      title={`${row ? 'Editar' : 'Adicionar'} ${titles[entity]}`}
+      onClose={onClose}
+      busy={isSubmitting}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="modal-body-custom">
+          <InlineError message={error} />
+          <div className="form-grid">
+            {entity === 'transactions' && (
+              <>
+                {field(
+                  'type',
+                  'Tipo de movimentação',
+                  select('type', [
+                    ['expense', 'Despesa'],
+                    ['income', 'Receita'],
+                    ['transfer', 'Transferência'],
+                  ]),
+                  { className: 'full-width' },
+                )}
+                {field(
+                  'description',
+                  'Descrição',
+                  input('description', { placeholder: 'Ex.: Compras do mês', maxLength: 100 }),
+                  { className: 'full-width' },
+                )}
+                {field(
+                  'amount',
+                  'Valor (R$)',
+                  input('amount', { inputMode: 'decimal', placeholder: '0,00' }),
+                )}
+                {field('date', 'Data', input('date', { type: 'date' }))}
+                {field(
+                  'accountId',
+                  type === 'transfer' ? 'Conta de origem' : 'Conta',
+                  select(
+                    'accountId',
+                    data.accounts.map((account) => [account.id, account.name]),
+                    'Selecione a conta',
+                  ),
+                )}
+                {type === 'transfer'
+                  ? field(
+                      'destinationAccountId',
+                      'Conta de destino',
+                      select(
+                        'destinationAccountId',
+                        data.accounts.map((account) => [account.id, account.name]),
+                        'Selecione o destino',
+                      ),
+                    )
+                  : field(
+                      'categoryId',
+                      'Categoria',
+                      select(
+                        'categoryId',
+                        data.categories
+                          .filter((category) => category.type === type)
+                          .map((category) => [category.id, category.name]),
+                        'Selecione a categoria',
+                      ),
+                    )}
+                {field(
+                  'status',
+                  'Status',
+                  select('status', [
+                    ['confirmed', 'Confirmado'],
+                    ['pending', 'Pendente'],
+                  ]),
+                  { className: 'full-width' },
+                )}
+                {field(
+                  'notes',
+                  'Observações (opcional)',
+                  <textarea
+                    className="form-control"
+                    {...register('notes')}
+                    rows={3}
+                    maxLength={1000}
+                  />,
+                  { className: 'full-width' },
+                )}
+                {(!data.accounts.length || !data.categories.length) && (
+                  <p className="form-note full-width">
+                    Cadastre suas contas e categorias antes de registrar receitas ou despesas.
+                  </p>
+                )}
+              </>
+            )}
+            {entity === 'accounts' && (
+              <>
+                {field(
+                  'name',
+                  'Nome da conta',
+                  input('name', { placeholder: 'Ex.: Minha conta corrente' }),
+                  { className: 'full-width' },
+                )}
+                {field('type', 'Tipo da conta', select('type', Object.entries(accountTypes)))}
+                {field(
+                  'initialBalance',
+                  'Saldo inicial (R$)',
+                  input('initialBalance', { inputMode: 'decimal' }),
+                  { hint: 'Pode ser negativo. Movimentações serão somadas a esse valor.' },
+                )}
+              </>
+            )}
+            {entity === 'categories' && (
+              <>
+                {field(
+                  'name',
+                  'Nome da categoria',
+                  input('name', { placeholder: 'Ex.: Alimentação' }),
+                  { className: 'full-width' },
+                )}
+                {field(
+                  'type',
+                  'Tipo',
+                  select('type', [
+                    ['expense', 'Despesa'],
+                    ['income', 'Receita'],
+                  ]),
+                  { className: 'full-width' },
+                )}
+              </>
+            )}
+            {(entity === 'accounts' || entity === 'categories') && (
+              <>
+                {field(
+                  'icon',
+                  'Ícone',
+                  select(
+                    'icon',
+                    icons.map((icon) => [icon, iconLabels[icon]]),
+                  ),
+                )}
+                {field(
+                  'color',
+                  'Cor de identificação',
+                  input('color', { type: 'color', className: 'form-control form-control-color' }),
+                )}
+              </>
+            )}
+            {entity === 'budgets' && (
+              <>
+                {field(
+                  'categoryId',
+                  'Categoria de despesa',
+                  select(
+                    'categoryId',
+                    data.categories
+                      .filter((category) => category.type === 'expense')
+                      .map((category) => [category.id, category.name]),
+                    'Selecione a categoria',
+                  ),
+                  { className: 'full-width' },
+                )}
+                {field('month', 'Mês do orçamento', input('month', { type: 'month' }))}
+                {field(
+                  'limit',
+                  'Limite mensal (R$)',
+                  input('limit', { inputMode: 'decimal', placeholder: '0,00' }),
+                )}
+              </>
+            )}
+          </div>
+        </div>
+        <div className="modal-footer-custom">
+          <button type="button" disabled={isSubmitting} className="btn btn-light" onClick={onClose}>
+            Cancelar
+          </button>
+          <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+            {isSubmitting ? 'Salvando…' : row ? 'Salvar alterações' : 'Adicionar registro'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+export function Confirmation() {
+  const { confirmation, setConfirmation } = useFinance();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  if (!confirmation) return null;
+  const close = () => {
+    setError('');
+    setConfirmation(null);
+  };
+  const confirm = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await confirmation.action();
+      close();
+    } catch (cause) {
+      setError(cause.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Modal title={confirmation.title} onClose={close} busy={busy}>
+      <div className="modal-body-custom">
+        <p>{confirmation.message}</p>
+        <InlineError message={error} />
+      </div>
+      <div className="modal-footer-custom">
+        <button disabled={busy} className="btn btn-light" onClick={close}>
+          Cancelar
+        </button>
+        <button
+          disabled={busy}
+          className={`btn ${confirmation.danger ? 'btn-danger' : 'btn-primary'}`}
+          onClick={confirm}
+        >
+          {busy ? 'Aguarde…' : (confirmation.confirmLabel ?? 'Confirmar')}
+        </button>
+      </div>
+    </Modal>
+  );
+}
