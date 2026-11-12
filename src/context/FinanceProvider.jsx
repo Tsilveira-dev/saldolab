@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FinanceContext } from './FinanceContext';
 import { createLocalRepository, StorageError } from '../repositories/localRepository';
+import { createRemoteRepository } from '../repositories/remoteRepository';
 import {
   rememberEditingRequest,
   takeEditingRequest,
@@ -27,7 +28,7 @@ export default function FinanceProvider({ children }) {
   const [activatingEditing, setActivatingEditing] = useState(false);
   const repository = useMemo(() => {
     try {
-      return createLocalRepository({ mode });
+      return mode === 'cloud' ? createRemoteRepository() : createLocalRepository({ mode });
     } catch (cause) {
       return {
         getEditingAccess: () => ({ canWrite: false, supported: false, reason: 'blocked' }),
