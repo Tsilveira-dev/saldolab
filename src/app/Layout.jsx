@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   ArrowUpRight,
   HardDrive,
+  Cloud,
   Plus,
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
@@ -26,6 +27,7 @@ import Editors, { Confirmation } from '../components/Editors';
 import { Toast } from '../components/ui';
 import StorageRecovery from '../pages/StorageRecovery';
 import EditingNotice from '../components/EditingNotice';
+import { authClient } from '../auth/neonClient';
 
 const navigation = [
   ['/', 'Dashboard', LayoutDashboard],
@@ -34,6 +36,7 @@ const navigation = [
   ['/categorias', 'Categorias', Tags],
   ['/orcamentos', 'Orçamentos', ChartPie],
   ['/relatorios', 'Relatórios', ChartNoAxesCombined],
+  ...(authClient ? [['/nuvem', 'Minha nuvem', Cloud]] : []),
 ];
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -164,13 +167,14 @@ export default function Layout() {
           <div className="topbar-right">
             <span className="local-badge">
               <span />
-              Armazenamento local
+              {mode === 'cloud' ? 'Neon PostgreSQL' : 'Armazenamento local'}
             </span>
             <label className="mode-select">
               <span className="visually-hidden">Modo de uso</span>
               <select value={mode} onChange={(event) => switchMode(event.target.value)}>
                 <option value="demo">Modo demonstração</option>
                 <option value="personal">Modo pessoal</option>
+                {authClient && <option value="cloud">Modo nuvem</option>}
               </select>
               <ChevronDown size={13} />
             </label>
@@ -180,8 +184,10 @@ export default function Layout() {
           </div>
         </header>
         <main id="main-content" className="main-content">
-          <EditingNotice />
-          {loading ? (
+          {location.pathname !== '/nuvem' && <EditingNotice />}
+          {location.pathname === '/nuvem' ? (
+            <Outlet />
+          ) : loading ? (
             <div className="loading-state" role="status">
               <div className="spinner-border spinner-border-sm" />
               <span>Organizando suas finanças…</span>
@@ -251,7 +257,8 @@ export default function Layout() {
                   </span>
                   <span>
                     <HardDrive size={12} />
-                    Dados apenas neste navegador{mode === 'demo' ? ' · Demonstração fictícia' : ''}
+                    {mode === 'cloud' ? 'Dados protegidos no Neon' : 'Dados apenas neste navegador'}
+                    {mode === 'demo' ? ' · Demonstração fictícia' : ''}
                   </span>
                 </footer>
                 <button
