@@ -11,6 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.js",
+    "test:neon": "playwright test --config playwright.neon.config.js",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run format:check && npm run test && npm run build"

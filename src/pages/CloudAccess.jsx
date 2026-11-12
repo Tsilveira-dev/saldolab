@@ -3,11 +3,12 @@ import { Cloud, LogIn, LogOut } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { authClient, authClientConfigurationError } from '../auth/neonClient';
 import PasswordRecovery from './PasswordRecovery';
+import { useCloudSession } from '../auth/useCloudSession';
 
 export default function CloudAccess() {
   const { mode, switchMode, reload } = useFinance();
-  const [user, setUser] = useState(null);
-  const [checking, setChecking] = useState(Boolean(authClient));
+  const { data: session, isPending: checking } = useCloudSession();
+  const user = session?.user ?? null;
   const [submitting, setSubmitting] = useState(false);
   const [signUp, setSignUp] = useState(false);
   const [name, setName] = useState('');
@@ -26,28 +27,6 @@ export default function CloudAccess() {
     window.history.replaceState(window.history.state, '', window.location.pathname);
   }, [resetToken, resetError]);
 
-  useEffect(() => {
-    if (!authClient) return;
-    let active = true;
-    authClient
-      .getSession()
-      .then((result) => {
-        if (active) {
-          setUser(result.data?.user ?? null);
-          setError(result.error?.message ?? '');
-        }
-      })
-      .catch(() => {
-        if (active) setError('Não foi possível consultar a sessão.');
-      })
-      .finally(() => {
-        if (active) setChecking(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
   async function submit(event) {
     event.preventDefault();
     if (!authClient) return;
@@ -64,7 +43,6 @@ export default function CloudAccess() {
       const session = await authClient.getSession();
       if (session.error || !session.data?.user)
         throw new Error('Confirme o e-mail, se necessário, e entre novamente.');
-      setUser(session.data.user);
       setPassword('');
     } catch (cause) {
       setError(cause.message ?? 'Não foi possível autenticar.');
@@ -80,7 +58,6 @@ export default function CloudAccess() {
       if (mode === 'cloud') switchMode('personal');
       const result = await authClient.signOut();
       if (result.error) throw new Error(result.error.message);
-      setUser(null);
     } catch (cause) {
       setError(cause.message);
     } finally {

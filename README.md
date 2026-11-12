@@ -125,11 +125,11 @@ Mesma semente e mês final produzem o mesmo CSV. O arquivo contém centavos inte
 
 Chaves locais: `saldolab:v1:demo`, `saldolab:v1:personal` e `saldolab:preferences:v1`. Os componentes não acessam `localStorage`. Os repositórios expõem operações assíncronas e validam o agregado antes da gravação. Um formato desconhecido exige recuperação explícita, sem migração destrutiva automática.
 
-Veja [Arquitetura](docs/architecture.md) e [Contrato do repositório e migração futura](docs/persistence.md). A integração com PostgreSQL, autenticação, API REST e autorização por usuário fica para uma fase posterior, após a escolha do responsável. Filtros no frontend nunca serão usados como proteção de acesso.
+O PR #3 acrescenta Neon Auth, API autenticada e PostgreSQL por usuário, preservando os modos locais. Veja [Arquitetura](docs/architecture.md), [Contrato do repositório](docs/persistence.md) e [auditoria do backend](docs/auditoria-backend-neon.md). O servidor verifica o JWT e aplica autorização; filtros do frontend não protegem acesso.
 
 ## Publicação
 
-Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`; os assets são servidos diretamente. Não há segredos a configurar.
+Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`, preservando `/api/*`. Os modos locais não exigem variáveis. O modo nuvem usa as quatro variáveis de [.env.example](.env.example), com `DATABASE_URL` exclusiva do servidor e escopo do Preview conforme [documentação Neon](docs/preview-vercel-neon.md). A publicação em Production depende de autorização separada.
 
 Repositório publicado: https://github.com/Tsilveira-dev/saldolab. O código de `main` foi confirmado no GitHub; as correções de auditoria ficam em uma branch separada, sem merge automático.
 

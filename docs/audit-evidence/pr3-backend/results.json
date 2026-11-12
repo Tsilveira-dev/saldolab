@@ -1,0 +1,150 @@
+{
+  "date": "2026-11-12",
+  "timezone": "America/Sao_Paulo",
+  "branch": "feat/neon-backend-foundation",
+  "baseCommit": "0e4b26c77896d1e444a6cdfd9760dba59c035ea4",
+  "neonQa": {
+    "branch": "qa-pr3-20261112-auth-crud",
+    "id": "br-plain-firefly-bcycj9zj",
+    "sourceWasEmpty": true,
+    "authAndDatabaseGuard": "PASS"
+  },
+  "preserved": {
+    "githubMain": "c8855b0f7e3e1d7c0fab555d78e041eda6246883",
+    "pr2": "b637c8586b5dc1022488bb742ce76f444efb17f4",
+    "development": {
+      "authUsers": 1,
+      "accounts": 1,
+      "initialBalanceCents": 100000,
+      "categories": 0,
+      "transactions": 0,
+      "budgets": 0
+    },
+    "neonMainFinancialTables": 0
+  },
+  "tests": {
+    "postgresIntegration": {
+      "status": "PASS",
+      "passed": 16,
+      "mockedSql": false
+    },
+    "neonEndToEnd": {
+      "status": "PASS",
+      "passed": 12,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "title": "SDK 0.8.2 fornece JWT real aceito pelo JWKS e pela API; expiração é verificada",
+          "results": ["passed"]
+        },
+        {
+          "title": "CRUD das quatro entidades confirma gravação, leitura, edição e exclusão no Neon SQL",
+          "results": ["passed"]
+        },
+        {
+          "title": "saldo, receita, despesa, pendência, transferência e orçamento mantêm centavos exatos",
+          "results": ["passed"]
+        },
+        {
+          "title": "dois usuários reais não leem, alteram, apagam nem vinculam registros alheios",
+          "results": ["passed"]
+        },
+        {
+          "title": "duas abas produzem HTTP 200/409 nas quatro entidades e preservam a revisão vencedora",
+          "results": ["passed"]
+        },
+        {
+          "title": "UI persiste após reload e novo login, com armazenamento pessoal separado da nuvem",
+          "results": ["passed"]
+        },
+        {
+          "title": "conflito 409 fica visível no editor sem falsa mensagem de sucesso",
+          "results": ["passed"]
+        },
+        {
+          "title": "falha de rede permanece no formulário, sem sucesso ou gravação silenciosa",
+          "results": ["passed"]
+        },
+        {
+          "title": "logout em outra aba retira dados antigos, bloqueia gravação e permite entrar como outro usuário",
+          "results": ["passed"]
+        },
+        {
+          "title": "desktop e mobile mantêm conteúdo e controles acessíveis sem rolagem horizontal",
+          "results": ["passed"]
+        },
+        {
+          "title": "recuperação real redefine senha e impede reutilização do token; entrega SMTP permanece fora desta evidência",
+          "results": ["passed"]
+        },
+        {
+          "title": "sessão expirada no provedor não reabre dados nem operações após recarregar",
+          "results": ["passed"]
+        }
+      ],
+      "annotations": [
+        {
+          "type": "evidence",
+          "description": "Provider password reset TTL: 3600 seconds; mailbox delivery not observed."
+        }
+      ]
+    },
+    "check": {
+      "status": "PASS",
+      "unitTests": 121,
+      "lint": "PASS",
+      "format": "PASS",
+      "build": "PASS"
+    },
+    "generalPlaywright": {
+      "status": "PASS",
+      "passed": 74,
+      "skipped": 6,
+      "failed": 0,
+      "skipReason": "Cloud smoke requires a configured Auth URL; covered separately by the CI cloud-auth-smoke job."
+    },
+    "python": {
+      "status": "PASS",
+      "passed": 2
+    },
+    "dependencies": {
+      "status": "PASS",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    "cloudAuthSmoke": {
+      "status": "PASS",
+      "passed": 3,
+      "realAuth": false,
+      "note": "Configured-URL UI smoke with simulated service responses; real Auth covered by the separate Neon suite."
+    }
+  },
+  "blocked": [
+    {
+      "gate": "final-preview",
+      "reason": "Vercel SSO redirect and integration project lookup 404"
+    },
+    {
+      "gate": "password-reset-mailbox-delivery",
+      "reason": "No controlled inbox access; QA token consumed privately from provider verification table"
+    },
+    {
+      "gate": "revocation-policy",
+      "reason": "Observed QA setting revoke_sessions_on_password_reset=false; stateless JWT valid 900s plus 10s tolerance. No development configuration changed."
+    }
+  ],
+  "githubActions": {
+    "status": "PENDING_PUSH"
+  },
+  "productionDeploymentPerformed": false,
+  "merged": false,
+  "browserBundlePrivateCredentialScan": "PASS"
+}

@@ -20,12 +20,11 @@ export async function listRecords(client, entity, userId) {
 }
 
 export async function snapshot(client, userId) {
-  const [accounts, categories, transactions, budgets] = await Promise.all([
-    listRecords(client, 'accounts', userId),
-    listRecords(client, 'categories', userId),
-    listRecords(client, 'transactions', userId),
-    listRecords(client, 'budgets', userId),
-  ]);
+  // A pg client executes one query at a time inside this snapshot transaction.
+  const accounts = await listRecords(client, 'accounts', userId);
+  const categories = await listRecords(client, 'categories', userId);
+  const transactions = await listRecords(client, 'transactions', userId);
+  const budgets = await listRecords(client, 'budgets', userId);
   return { version: 1, accounts, categories, transactions, budgets };
 }
 
@@ -40,7 +39,7 @@ async function ensureReferenced(client, userId, entity, record) {
       throw new ApiError(422, 'Selecione contas existentes do seu espaço.');
     if (record.type !== 'transfer') {
       const category = await client.query(
-        'SELECT type FROM public.categories WHERE user_id = $1 AND id = $2',
+        'SELECT type FROM public.categories WHERE user_id = $1 AND id = $2 FOR SHARE',
         [userId, record.categoryId],
       );
       if (category.rows[0]?.type !== record.type)
@@ -49,7 +48,7 @@ async function ensureReferenced(client, userId, entity, record) {
   }
   if (entity === 'budgets') {
     const category = await client.query(
-      'SELECT type FROM public.categories WHERE user_id = $1 AND id = $2',
+      'SELECT type FROM public.categories WHERE user_id = $1 AND id = $2 FOR SHARE',
       [userId, record.categoryId],
     );
     if (category.rows[0]?.type !== 'expense')

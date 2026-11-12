@@ -69,7 +69,7 @@ export default function PasswordRecovery({ view, token, onBack }) {
       {view === 'forgot' && sent ? (
         <div role="status" className="alert alert-success">
           Se esse e-mail estiver cadastrado, você receberá um link de recuperação. Verifique também
-          o spam. O link expira em 15 minutos.
+          o spam. O link tem validade limitada; use o mais recente.
         </div>
       ) : view === 'reset' && completed ? (
         <div role="status" className="alert alert-success">

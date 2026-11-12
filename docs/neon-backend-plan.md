@@ -1,10 +1,10 @@
 # SaldoLab — Plano técnico de Neon PostgreSQL (ADR-001)
 
-**Estado:** projeto Neon e branch `development` criados; Managed Better Auth habilitado somente em desenvolvimento; schema inicial aplicado e validado em desenvolvimento. API e frontend autenticado ainda não implementados.
+**Estado atual:** API autenticada e repositório remoto implementados com `pg`, Neon Auth e controle de revisão. A validação integrada está em [auditoria do PR #3](auditoria-backend-neon.md). As seções de planejamento abaixo preservam a proposta original; Drizzle não foi introduzido nesta etapa.
 **Data:** 2026-11-12
 **Base:** main após merge do PR #1. O PR #2 (CSV/contraste) é independente e permanece em revisão.
 
-## Progresso verificado (2026-11-12)
+## Registro histórico do provisionamento inicial (2026-11-12)
 
 - Organização Neon no plano Free; projeto `saldolab` (ID `soft-term-72911921`), AWS `us-east-1`, PostgreSQL 17.
 - Branch de banco `main`: `br-patient-forest-bcfzjc39`, sem tabelas financeiras e sem migração aplicada.

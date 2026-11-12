@@ -1,0 +1,114 @@
+
+> saldolab@1.0.0 test:e2e
+> playwright test
+
+[WebServer] (node:11486) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:11499) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:11517) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:11530) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 80 tests using 2 workers
+
+(node:11547) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › e2e/audit.spec.js:112:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (8.0s)
+  ✓   2 [chromium] › e2e/audit.spec.js:139:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (8.2s)
+  ✓   3 [chromium] › e2e/audit.spec.js:163:1 › contas: criar, ler, editar, excluir e saldo inicial (3.6s)
+  ✓   4 [chromium] › e2e/audit.spec.js:184:1 › transferência preserva patrimônio e protege origem e destino (4.3s)
+  ✓   5 [chromium] › e2e/audit.spec.js:212:1 › categoria: criar, editar, associar e impedir exclusão em uso (4.6s)
+  ✓   6 [chromium] › e2e/audit.spec.js:236:1 › orçamento: gasto, percentual, edição, excedente, duplicata e exclusão (5.6s)
+  ✓   7 [chromium] › e2e/audit.spec.js:268:1 › pendências e confirmação recalculam saldo sem misturar transferências (4.8s)
+  ✓   8 [chromium] › e2e/audit.spec.js:289:1 › backup exportado e importação validada preservam dados até a confirmação (3.1s)
+  ✓   9 [chromium] › e2e/audit.spec.js:326:1 › corrupção mantém conteúdo bruto exportável e aceita recuperação explícita (3.0s)
+  ✓  10 [chromium] › e2e/audit.spec.js:348:1 › armazenamento bloqueado e cota esgotada não sobrescrevem os dados anteriores (4.0s)
+  ✓  12 [chromium] › e2e/audit.spec.js:411:1 › entrada HTML é apresentada como texto, sem executar scripts (3.7s)
+  ✓  11 [chromium] › e2e/audit.spec.js:378:1 › modos ficam separados e restauração da demonstração preserva o pessoal (7.5s)
+  ✓  13 [chromium] › e2e/audit.spec.js:419:1 › filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto (4.3s)
+  ✓  14 [chromium] › e2e/audit.spec.js:482:1 › valores inválidos e transferência para a mesma conta não gravam dados (4.5s)
+  ✓  15 [chromium] › e2e/audit.spec.js:504:1 › cinco resoluções, modo escuro, menu e modais sem overflow de documento (13.4s)
+  -  17 [chromium] › e2e/cloud-smoke.spec.js:10:1 › o Preview com Neon configurado renderiza a página de acesso sem tela branca
+  -  18 [chromium] › e2e/cloud-smoke.spec.js:35:1 › recuperação de senha aparece e não revela se a conta existe
+  -  19 [chromium] › e2e/cloud-smoke.spec.js:54:1 › link de redefinição usa o token sem mantê-lo na barra do navegador
+  ✓  16 [chromium] › e2e/audit.spec.js:545:1 › datas e mês financeiro mantêm São Paulo em cinco fusos na virada do ano (15.8s)
+  ✓  20 [chromium] › e2e/concurrency.spec.js:50:1 › três abas preservam gravações confirmadas e recusam escritores concorrentes (5.4s)
+  ✓  21 [chromium] › e2e/concurrency.spec.js:115:1 › uma aba de consulta não bloqueia a editora e assume edição após ela fechar (4.1s)
+  ✓  22 [chromium] › e2e/concurrency.spec.js:143:1 › outra editora mantém a aba em consulta, sem sucesso falso nem importação ou limpeza (3.6s)
+  ✓  23 [chromium] › e2e/concurrency.spec.js:172:1 › sem Web Locks, avisa somente leitura e desabilita edição preservando os dados (1.6s)
+  ✓  24 [chromium] › e2e/finance.spec.js:9:1 › cria, edita, persiste e exclui uma transação (4.8s)
+  ✓  25 [chromium] › e2e/finance.spec.js:33:1 › navega por todas as páginas, mantém rotas diretas e evita overflow do documento (4.9s)
+  ✓  26 [chromium] › e2e/finance.spec.js:54:1 › isola o modo pessoal e permite voltar à demonstração (2.4s)
+  ✓  27 [chromium] › e2e/finance.spec.js:63:1 › protege conta em uso e exporta backup JSON (3.0s)
+  ✓  28 [chromium] › e2e/finance.spec.js:76:1 › cria orçamento, alerta duplicidade e alterna aparência (3.4s)
+  ✓  29 [chromium] › e2e/finance.spec.js:91:1 › registra aparência do dashboard e verifica ausência de erros de JavaScript (1.9s)
+(node:13079) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13106) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  31 [chromium] › e2e/editing-lifecycle.spec.js:81:1 › recarregar a editora libera a reserva antiga, retoma a edição e preserva gravações (6.9s)
+  ✓  30 [chromium] › e2e/editing-lifecycle.spec.js:43:1 › todas as operações financeiras ficam desabilitadas em consulta; navegação e backup permanecem disponíveis (8.1s)
+  ✓  32 [chromium] › e2e/editing-lifecycle.spec.js:107:1 › navegação SPA e Voltar mantêm a mesma editora, sem duplicar reservas (3.5s)
+  ✓  34 [chromium] › e2e/editing-lifecycle.spec.js:148:1 › trocar de modo libera o anterior e não reserva edição no modo consultado (5.9s)
+  ✓  33 [chromium] › e2e/editing-lifecycle.spec.js:119:1 › encerrar edição libera outra aba; reativação atualiza os dados antes de gravar (12.7s)
+  ✓  36 [chromium] › e2e/editing-lifecycle.spec.js:186:1 › bloqueio do estado de navegação mantém consulta e avisa sem conceder edição (3.8s)
+  ✓  35 [chromium] › e2e/editing-lifecycle.spec.js:166:1 › fechar a consulta preserva a editora; fechar a editora libera quem está consultando (10.2s)
+  ✓  37 [chromium] › e2e/editing-lifecycle.spec.js:205:1 › aba aberta pela editora não herda a permissão nem a retoma ao atualizar (6.7s)
+  ✓  38 [chromium] › e2e/editing-lifecycle.spec.js:225:1 › setItem sem efeito mantém o formulário com erro e não anuncia sucesso (6.8s)
+  ✓  39 [chromium] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: consulta recupera dados atuais sem retomar permissão antiga (7.3s)
+(node:13856) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  40 [chromium] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: editora libera o lock sem retomar permissão antiga (6.9s)
+(node:13997) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  41 [mobile] › e2e/audit.spec.js:112:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (8.4s)
+  ✓  42 [mobile] › e2e/audit.spec.js:139:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (8.0s)
+  ✓  44 [mobile] › e2e/audit.spec.js:184:1 › transferência preserva patrimônio e protege origem e destino (2.7s)
+  ✓  43 [mobile] › e2e/audit.spec.js:163:1 › contas: criar, ler, editar, excluir e saldo inicial (7.9s)
+  ✓  46 [mobile] › e2e/audit.spec.js:236:1 › orçamento: gasto, percentual, edição, excedente, duplicata e exclusão (3.1s)
+  ✓  45 [mobile] › e2e/audit.spec.js:212:1 › categoria: criar, editar, associar e impedir exclusão em uso (8.9s)
+  ✓  47 [mobile] › e2e/audit.spec.js:268:1 › pendências e confirmação recalculam saldo sem misturar transferências (4.8s)
+  ✓  48 [mobile] › e2e/audit.spec.js:289:1 › backup exportado e importação validada preservam dados até a confirmação (2.8s)
+  ✓  49 [mobile] › e2e/audit.spec.js:326:1 › corrupção mantém conteúdo bruto exportável e aceita recuperação explícita (2.9s)
+  ✓  50 [mobile] › e2e/audit.spec.js:348:1 › armazenamento bloqueado e cota esgotada não sobrescrevem os dados anteriores (3.1s)
+  ✓  52 [mobile] › e2e/audit.spec.js:411:1 › entrada HTML é apresentada como texto, sem executar scripts (3.0s)
+  ✓  51 [mobile] › e2e/audit.spec.js:378:1 › modos ficam separados e restauração da demonstração preserva o pessoal (6.6s)
+  ✓  53 [mobile] › e2e/audit.spec.js:419:1 › filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto (4.2s)
+  ✓  54 [mobile] › e2e/audit.spec.js:482:1 › valores inválidos e transferência para a mesma conta não gravam dados (4.2s)
+  ✓  56 [mobile] › e2e/audit.spec.js:545:1 › datas e mês financeiro mantêm São Paulo em cinco fusos na virada do ano (14.5s)
+  -  57 [mobile] › e2e/cloud-smoke.spec.js:10:1 › o Preview com Neon configurado renderiza a página de acesso sem tela branca
+  -  58 [mobile] › e2e/cloud-smoke.spec.js:35:1 › recuperação de senha aparece e não revela se a conta existe
+  -  59 [mobile] › e2e/cloud-smoke.spec.js:54:1 › link de redefinição usa o token sem mantê-lo na barra do navegador
+  ✓  55 [mobile] › e2e/audit.spec.js:504:1 › cinco resoluções, modo escuro, menu e modais sem overflow de documento (18.1s)
+  ✓  61 [mobile] › e2e/concurrency.spec.js:115:1 › uma aba de consulta não bloqueia a editora e assume edição após ela fechar (3.2s)
+  ✓  60 [mobile] › e2e/concurrency.spec.js:50:1 › três abas preservam gravações confirmadas e recusam escritores concorrentes (4.7s)
+  ✓  63 [mobile] › e2e/concurrency.spec.js:172:1 › sem Web Locks, avisa somente leitura e desabilita edição preservando os dados (1.7s)
+  ✓  62 [mobile] › e2e/concurrency.spec.js:143:1 › outra editora mantém a aba em consulta, sem sucesso falso nem importação ou limpeza (4.3s)
+  ✓  64 [mobile] › e2e/finance.spec.js:9:1 › cria, edita, persiste e exclui uma transação (4.4s)
+  ✓  65 [mobile] › e2e/finance.spec.js:33:1 › navega por todas as páginas, mantém rotas diretas e evita overflow do documento (3.6s)
+  ✓  66 [mobile] › e2e/finance.spec.js:54:1 › isola o modo pessoal e permite voltar à demonstração (2.4s)
+  ✓  67 [mobile] › e2e/finance.spec.js:63:1 › protege conta em uso e exporta backup JSON (2.9s)
+  ✓  68 [mobile] › e2e/finance.spec.js:76:1 › cria orçamento, alerta duplicidade e alterna aparência (3.0s)
+(node:15441) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  69 [mobile] › e2e/finance.spec.js:91:1 › registra aparência do dashboard e verifica ausência de erros de JavaScript (2.6s)
+(node:15602) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  70 [mobile] › e2e/editing-lifecycle.spec.js:43:1 › todas as operações financeiras ficam desabilitadas em consulta; navegação e backup permanecem disponíveis (11.7s)
+  ✓  71 [mobile] › e2e/editing-lifecycle.spec.js:81:1 › recarregar a editora libera a reserva antiga, retoma a edição e preserva gravações (9.4s)
+  ✓  72 [mobile] › e2e/editing-lifecycle.spec.js:107:1 › navegação SPA e Voltar mantêm a mesma editora, sem duplicar reservas (5.8s)
+  ✓  74 [mobile] › e2e/editing-lifecycle.spec.js:148:1 › trocar de modo libera o anterior e não reserva edição no modo consultado (7.7s)
+  ✓  73 [mobile] › e2e/editing-lifecycle.spec.js:119:1 › encerrar edição libera outra aba; reativação atualiza os dados antes de gravar (15.2s)
+  ✓  76 [mobile] › e2e/editing-lifecycle.spec.js:186:1 › bloqueio do estado de navegação mantém consulta e avisa sem conceder edição (3.4s)
+  ✓  75 [mobile] › e2e/editing-lifecycle.spec.js:166:1 › fechar a consulta preserva a editora; fechar a editora libera quem está consultando (9.6s)
+  ✓  77 [mobile] › e2e/editing-lifecycle.spec.js:205:1 › aba aberta pela editora não herda a permissão nem a retoma ao atualizar (7.1s)
+  ✓  78 [mobile] › e2e/editing-lifecycle.spec.js:225:1 › setItem sem efeito mantém o formulário com erro e não anuncia sucesso (6.7s)
+  ✓  79 [mobile] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: consulta recupera dados atuais sem retomar permissão antiga (6.9s)
+  ✓  80 [mobile] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: editora libera o lock sem retomar permissão antiga (5.7s)
+
+  6 skipped
+  74 passed (3.8m)

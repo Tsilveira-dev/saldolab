@@ -1,0 +1,20 @@
+[WebServer] (node:16594) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:16607) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:16627) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:16640) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 2 workers
+
+(node:16658) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16657) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/cloud-smoke.spec.js:35:1 › recuperação de senha aparece e não revela se a conta existe (3.4s)
+  ✓  3 [chromium] › e2e/cloud-smoke.spec.js:54:1 › link de redefinição usa o token sem mantê-lo na barra do navegador (1.0s)
+  ✓  2 [chromium] › e2e/cloud-smoke.spec.js:10:1 › o Preview com Neon configurado renderiza a página de acesso sem tela branca (3.9s)
+
+  3 passed (7.8s)

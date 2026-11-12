@@ -4,6 +4,12 @@ import { ApiError } from './errors.js';
 
 let pool;
 
+export async function closeDatabasePool() {
+  const previous = pool;
+  pool = undefined;
+  if (previous) await previous.end();
+}
+
 function connectionPool() {
   if (!process.env.DATABASE_URL) throw new ApiError(503, 'Banco de dados não configurado.');
   if (!pool) {
@@ -14,6 +20,11 @@ function connectionPool() {
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 10000,
       application_name: 'saldolab-api',
+    });
+    // Idle clients can be disconnected by the provider. Handle the pool event
+    // without logging the pg error object (which contains connection details).
+    pool.on('error', (error) => {
+      console.error('SaldoLab database connection interrupted:', error.code ?? error.name);
     });
     attachDatabasePool(pool);
   }

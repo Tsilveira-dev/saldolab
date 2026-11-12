@@ -29,10 +29,23 @@ if (baseURL) {
 export const authClient = client;
 export const authClientConfigurationError = configurationError;
 
-export async function getAuthToken() {
-  if (!authClient) throw new Error('A conexão com a nuvem não está configurada.');
+export class CloudSessionError extends Error {
+  constructor(message, status = 401) {
+    super(message);
+    this.name = 'CloudSessionError';
+    this.status = status;
+  }
+}
+
+export async function getAuthToken({ expectedUserId } = {}) {
+  if (!authClient) throw new CloudSessionError('A conexão com a nuvem não está configurada.', 503);
   const result = await authClient.getSession();
   if (result.error || !result.data?.session?.token)
-    throw new Error('Sua sessão expirou. Entre novamente para acessar a nuvem.');
+    throw new CloudSessionError(
+      'Sua sessão expirou. Entre novamente para acessar a nuvem.',
+      result.error?.status >= 500 ? 503 : 401,
+    );
+  if (expectedUserId !== undefined && result.data.user?.id !== expectedUserId)
+    throw new CloudSessionError('A conta conectada mudou. Reabra seus dados na nuvem.');
   return result.data.session.token;
 }

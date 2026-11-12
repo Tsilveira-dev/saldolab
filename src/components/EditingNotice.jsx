@@ -9,10 +9,11 @@ export default function EditingNotice() {
       <section className="editing-notice" aria-label="Edição no banco de dados" role="status">
         <Pencil size={19} aria-hidden="true" />
         <div>
-          <strong>Dados protegidos na nuvem</strong>
+          <strong>{canWrite ? 'Dados protegidos na nuvem' : 'Nuvem em somente leitura'}</strong>
           <p>
-            Suas alterações são verificadas pelo servidor e salvas no Neon. Conflitos entre sessões
-            exigem recarregar os dados.
+            {canWrite
+              ? 'Suas alterações são verificadas pelo servidor e salvas no Neon. Conflitos entre sessões exigem recarregar os dados.'
+              : 'Confira sua sessão em Minha nuvem ou tente carregar os dados novamente antes de editar.'}
           </p>
         </div>
       </section>
