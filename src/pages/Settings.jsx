@@ -72,7 +72,6 @@ export default function Settings() {
               {[
                 ['demo', 'Demonstração', 'Explore dados fictícios e experimente todas as funções.'],
                 ['personal', 'Pessoal', 'Comece do zero e organize suas próprias finanças.'],
-                ...(import.meta.env.VITE_NEON_AUTH_URL
                   ? [['cloud', 'Nuvem', 'Acesse os dados da sua conta autenticada.']]
                   : []),
               ].map(([value, title, description]) => (
