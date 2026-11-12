@@ -8,7 +8,11 @@ export function downloadFile(content, name, type = 'application/json') {
 }
 const escapeCsv = (value) => {
   let text = String(value ?? '');
-  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  // Some spreadsheet consumers skip whitespace/control prefixes before formulas.
+  // Guard those cells before applying standard CSV quoting.
+  const formula = /^[\s\u0000-\u001f\u007f\u200b-\u200d\u2060]*[=+\-@]/u.test(text);
+  const leadingControl = /^[\t\r\n]/.test(text);
+  if (formula || leadingControl) text = `'${text}`;
   return `"${text.replaceAll('"', '""')}"`;
 };
 export function transactionsCsv(transactions, accounts, categories) {
