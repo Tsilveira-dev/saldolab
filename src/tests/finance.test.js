@@ -147,7 +147,11 @@ describe('regras financeiras em centavos', () => {
     expect(csv).toContain(`"'${expected}"`);
   });
   it('preserva texto normal, separadores, quebras e números na exportação CSV', () => {
-    const csv = transactionsCsv([tx({ description: 'Almoço; café', notes: 'linha 1\nlinha 2' })], [], []);
+    const csv = transactionsCsv(
+      [tx({ description: 'Almoço; café', notes: 'linha 1\nlinha 2' })],
+      [],
+      [],
+    );
     expect(csv).toContain('"Almoço; café"');
     expect(csv).toContain('"linha 1\nlinha 2"');
     expect(csv).toContain('"10,00"');
