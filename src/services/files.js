@@ -14,8 +14,13 @@ const escapeCsv = (value) => {
   while (cursor < text.length) {
     const character = text[cursor];
     const code = text.charCodeAt(cursor);
-    if (code <= 31 || code === 127 || /\s/u.test(character) ||
-        (code >= 0x200b && code <= 0x200d) || code === 0x2060) {
+    if (
+      code <= 31 ||
+      code === 127 ||
+      /\s/u.test(character) ||
+      (code >= 0x200b && code <= 0x200d) ||
+      code === 0x2060
+    ) {
       cursor += 1;
     } else {
       break;
