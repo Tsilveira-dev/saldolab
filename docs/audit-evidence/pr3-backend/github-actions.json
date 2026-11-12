@@ -1,0 +1,30 @@
+{
+  "conclusion": "success",
+  "headSha": "0508e2d86b6433565e5847d0bf4380295c16c7db",
+  "id": 43286033262,
+  "jobs": [
+    {
+      "conclusion": "success",
+      "databaseId": 131419550121,
+      "name": "check",
+      "status": "completed",
+      "url": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262/job/131419550121"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 131419550476,
+      "name": "api-integration",
+      "status": "completed",
+      "url": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262/job/131419550476"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 131419550548,
+      "name": "cloud-auth-smoke",
+      "status": "completed",
+      "url": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262/job/131419550548"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262"
+}

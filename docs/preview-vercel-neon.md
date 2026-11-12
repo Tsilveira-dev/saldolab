@@ -33,7 +33,7 @@ CRUD, cálculos, isolamento A/B, concorrência 409, persistência após novo log
 1. **Preview atual:** liberar o acesso do projeto Vercel `saldolab`, equipe FAIR PLAY, para a integração. A tentativa atual encontra SSO/302 e 404 no projeto pela integração; o funcionamento histórico acima não aprova o commit final.
 2. **E-mail de recuperação:** fluxo técnico real, expiração e uso único passaram em QA; entrega em caixa de e-mail controlada ainda não observada.
 3. **Revogação:** decidir a política após troca de senha. A configuração observada em QA não revoga sessões automaticamente no reset; JWTs são stateless, com validade observada de 900 segundos e tolerância de 10 segundos. Não se promete revogação imediata no logout. Configurações de development não foram alteradas.
-4. **CI do novo head:** conferir os três jobs (`check`, `cloud-auth-smoke`, `api-integration`) no [PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3/checks). PR #2 continua independente. Merge, Production e migração da Neon main dependem de autorização própria.
+   O CI do commit de código `0508e2d` foi aprovado nos três jobs (`check`, `cloud-auth-smoke`, `api-integration`): [execução 43286033262](https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262). Novas atualizações devem manter os [checks do head](https://github.com/Tsilveira-dev/saldolab/pull/3/checks) aprovados. PR #2 continua independente. Merge, Production e migração da Neon main dependem de autorização própria.
 
 ## Execução recomendada ao Codex
 

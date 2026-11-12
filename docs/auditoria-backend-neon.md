@@ -119,7 +119,7 @@ Fornecer pelo ambiente protegido `SALDOLAB_TEST_DATABASE_URL`, `SALDOLAB_TEST_BR
 - Testes/configuração: `tests/integration/*`, `tests/neon/*`, `src/tests/cloudSession.test.jsx`, `vitest.integration.config.js`, `playwright.neon.config.js`, `package.json`, `.github/workflows/check.yml`.
 - Documentação: este relatório, `docs/preview-vercel-neon.md`, `docs/neon-backend-plan.md`, `docs/architecture.md`, nota histórica em `docs/auditoria-final.md`, README e evidências sanitizadas.
 
-O CI do commit antigo não aprova estas alterações. A execução do novo commit e seus jobs devem ser conferidos em [Checks do PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3/checks); o resumo de evidências registra a execução verificada após o push.
+O [GitHub Actions 43286033262](https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262) do commit de código `0508e2d86b6433565e5847d0bf4380295c16c7db` terminou com **PASS nos três jobs**: `check`, `api-integration` e `cloud-auth-smoke`. Os logs do CI confirmam 121 testes unitários, 16 integrados PostgreSQL, 74 Playwright + 6 skips, 3 smoke de Auth e 2 Python. Veja [metadados da execução](audit-evidence/pr3-backend/github-actions.json) e [contagens no CI](audit-evidence/pr3-backend/github-actions.log). A Vercel também aprovou o build desse commit; o smoke do endpoint protegido continua bloqueado em `lookup_deployment`/404. Atualizações documentais posteriores devem manter os [Checks do head do PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3/checks) aprovados.
 
 ## Checklist de revisão e riscos restantes
 
@@ -131,6 +131,6 @@ O CI do commit antigo não aprova estas alterações. A execução do novo commi
 - [ ] Smoke do Preview no commit final após liberar acesso do projeto Vercel à integração. Não executar a suíte destrutiva de fixtures no Preview configurado para development.
 - [ ] Confirmar entrega de recuperação em uma caixa de teste controlada. A validação do token no banco não comprova SMTP/inbox.
 - [ ] Revisar a política de revogação após recuperação: a configuração observada do Auth de QA tem `revoke_sessions_on_password_reset=false`. Nenhuma configuração de development foi alterada. JWTs emitidos usam verificação stateless e podem permanecer aceitos até os 900 segundos de validade, mais tolerância de 10 segundos, mesmo após logout; não se declarou revogação imediata.
-- [ ] Conferir o CI do head final. Nenhum merge ou lançamento está autorizado por este relatório.
+- [x] CI dos três jobs aprovado no commit de código `0508e2d`; conferir o head atual após qualquer atualização documental. Nenhum merge ou lançamento está autorizado por este relatório.
 
 **Recomendação:** revisar o PR #3 mantendo-o draft até resolver Preview, entrega de e-mail e a decisão de revogação de sessões. Os cenários executados passaram nos ambientes descritos; isso não constitui aprovação de Production.

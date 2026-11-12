@@ -142,9 +142,37 @@
     }
   ],
   "githubActions": {
-    "status": "PENDING_PUSH"
+    "status": "PASS",
+    "verifiedCodeCommit": "0508e2d86b6433565e5847d0bf4380295c16c7db",
+    "runId": 43286033262,
+    "url": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43286033262",
+    "jobs": [
+      {
+        "name": "check",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "api-integration",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "cloud-auth-smoke",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "currentHeadChecks": "https://github.com/Tsilveira-dev/saldolab/pull/3/checks"
   },
   "productionDeploymentPerformed": false,
   "merged": false,
-  "browserBundlePrivateCredentialScan": "PASS"
+  "browserBundlePrivateCredentialScan": "PASS",
+  "vercel": {
+    "codeCommit": "0508e2d86b6433565e5847d0bf4380295c16c7db",
+    "build": "SUCCESS",
+    "runtimeSmoke": "BLOCKED",
+    "integrationStatus": 404,
+    "integrationStage": "lookup_deployment"
+  }
 }
