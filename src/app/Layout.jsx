@@ -174,7 +174,7 @@ export default function Layout() {
               <select value={mode} onChange={(event) => switchMode(event.target.value)}>
                 <option value="demo">Modo demonstração</option>
                 <option value="personal">Modo pessoal</option>
-                {authClient && <option value="cloud">Modo nuvem</option>}
+
               </select>
               <ChevronDown size={13} />
             </label>
