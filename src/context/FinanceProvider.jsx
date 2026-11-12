@@ -67,6 +67,7 @@ export default function FinanceProvider({ children }) {
     }
   }, [repository, mode]);
   useEffect(() => {
+    setEditingAccess(repository.getEditingAccess());
     const unsubscribe = repository.subscribeEditing((access) => {
       if (mode === activeMode.current) setEditingAccess(access);
     });
