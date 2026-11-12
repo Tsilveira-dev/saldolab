@@ -96,7 +96,7 @@
   font-size: 9px;
   letter-spacing: 1.6px;
   font-weight: 700;
-  color: #9ca6b1;
+  color: var(--muted);
   padding: 0 13px;
   margin-bottom: 13px;
 }
@@ -111,7 +111,7 @@
   gap: 12px;
   padding: 13px 14px;
   border-radius: 7px;
-  color: #7a8796;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 550;
   min-height: 45px;
@@ -121,7 +121,7 @@
   background: var(--surface-soft);
 }
 .nav-item-custom.active {
-  color: #32735f;
+  color: #28654f;
   background: var(--mint);
   font-weight: 750;
 }
@@ -177,6 +177,9 @@
 }
 .settings-link.active {
   background: var(--mint);
+}
+:root[data-theme='dark'] .nav-item-custom.active {
+  color: #b6ead6;
 }
 .sidebar-footer {
   border-top: 1px solid var(--line);
