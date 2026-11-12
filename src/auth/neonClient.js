@@ -9,8 +9,8 @@ export const authClient = import.meta.env.VITE_NEON_AUTH_URL
 
 export async function getAuthToken() {
   if (!authClient) throw new Error('A conexão com a nuvem não está configurada.');
-  const result = await authClient.token();
-  if (result.error || !result.data?.token)
+  const result = await authClient.getSession();
+  if (result.error || !result.data?.session?.token)
     throw new Error('Sua sessão expirou. Entre novamente para acessar a nuvem.');
-  return result.data.token;
+  return result.data.session.token;
 }
