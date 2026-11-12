@@ -1,0 +1,23 @@
+{
+  "commit": "bf0e4fbc62f456dac6865cbf623d011733b9a8f2",
+  "run": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43148562602",
+  "result": "success",
+  "npm_ci": "success",
+  "npm_run_check": "success",
+  "vitest_passed": 105,
+  "vitest_failed": 0,
+  "playwright_passed": 74,
+  "playwright_failed": 0,
+  "playwright_flaky": 0,
+  "python_passed": 2,
+  "python_failed": 0,
+  "artifact": {
+    "name": "browser-verification",
+    "id": 13912708348
+  },
+  "extract": [
+    "2026-11-12T03:30:08.3675786Z       Tests  105 passed (105)",
+    "2026-11-12T03:32:28.7929641Z   74 passed (1.9m)",
+    "2026-11-12T03:32:28.9710789Z Ran 2 tests in 0.001s"
+  ]
+}
