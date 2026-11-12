@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isValid, parseISO, format } from 'date-fns';
-import { parseMoney } from './finance';
+import { parseMoney } from './finance.js';
 
 const id = z.string().min(1).max(120);
 const name = z

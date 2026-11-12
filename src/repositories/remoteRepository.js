@@ -1,5 +1,5 @@
 import { getAuthToken } from '../auth/neonClient';
-import { validateDataset } from '../domain/schemas';
+import { exportCloudBackup } from './cloudBackup.js';
 
 const entities = new Set(['accounts', 'categories', 'transactions', 'budgets']);
 const checkEntity = (entity) => {
@@ -76,15 +76,7 @@ export function createRemoteRepository({ userId } = {}) {
       }),
     exportBackup: async () => {
       const snap = await call();
-      const clean = Object.fromEntries(
-        [...entities].map((key) => [key, snap[key].map(({ revision: _revision, ...row }) => row)]),
-      );
-      const data = validateDataset({ version: 1, ...clean });
-      return JSON.stringify(
-        { app: 'SaldoLab', exportedAt: new Date().toISOString(), data },
-        null,
-        2,
-      );
+      return exportCloudBackup(snap);
     },
     importBackup: async () => {
       throw new Error(

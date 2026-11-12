@@ -3,6 +3,7 @@ import { Cloud, LogIn, LogOut } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { authClient, authClientConfigurationError } from '../auth/neonClient';
 import PasswordRecovery from './PasswordRecovery';
+import EmailVerification from './EmailVerification';
 import { useCloudSession } from '../auth/useCloudSession';
 
 export default function CloudAccess() {
@@ -15,6 +16,8 @@ export default function CloudAccess() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [verificationView, setVerificationView] = useState(false);
   const [resetToken] = useState(() => new URLSearchParams(window.location.search).get('token'));
   const [resetError] = useState(() => new URLSearchParams(window.location.search).get('error'));
   const [recoveryView, setRecoveryView] = useState(() =>
@@ -32,6 +35,7 @@ export default function CloudAccess() {
     if (!authClient) return;
     setSubmitting(true);
     setError('');
+    setMessage('');
     try {
       const credentials = signUp
         ? { name: name.trim(), email: email.trim(), password }
@@ -39,23 +43,40 @@ export default function CloudAccess() {
       const result = signUp
         ? await authClient.signUp.email(credentials)
         : await authClient.signIn.email(credentials);
-      if (result.error) throw new Error(result.error.message);
+      if (result.error)
+        throw Object.assign(new Error(result.error.message), { code: result.error.code });
+      if (signUp && result.data?.user && !result.data.user.emailVerified && !result.data.token) {
+        setPassword('');
+        setVerificationView(true);
+        return;
+      }
       const session = await authClient.getSession();
       if (session.error || !session.data?.user)
         throw new Error('Confirme o e-mail, se necessário, e entre novamente.');
       setPassword('');
     } catch (cause) {
+      if (
+        ['EMAIL_NOT_VERIFIED', 'EMAIL_NOT_CONFIRMED'].includes(String(cause.code).toUpperCase())
+      ) {
+        setPassword('');
+        setVerificationView(true);
+      }
       setError(cause.message ?? 'Não foi possível autenticar.');
     } finally {
       setSubmitting(false);
     }
   }
 
-  async function signOut() {
+  async function signOut(everywhere = false) {
     setSubmitting(true);
     setError('');
     try {
       if (mode === 'cloud') switchMode('personal');
+      if (everywhere) {
+        const revoked = await authClient.revokeSessions();
+        if (revoked.error)
+          throw new Error('Não foi possível encerrar todas as sessões. Tente novamente.');
+      }
       const result = await authClient.signOut();
       if (result.error) throw new Error(result.error.message);
     } catch (cause) {
@@ -97,6 +118,20 @@ export default function CloudAccess() {
               setError('');
             }}
           />
+        ) : verificationView ? (
+          <EmailVerification
+            initialEmail={email}
+            onBack={() => {
+              setVerificationView(false);
+              setError('');
+            }}
+            onVerified={() => {
+              setVerificationView(false);
+              setSignUp(false);
+              setError('');
+              setMessage('E-mail confirmado. Entre com sua senha.');
+            }}
+          />
         ) : user ? (
           <div>
             <p>
@@ -107,10 +142,25 @@ export default function CloudAccess() {
                 <Cloud size={16} className="me-2" />{' '}
                 {mode === 'cloud' ? 'Atualizar dados' : 'Abrir finanças na nuvem'}
               </button>
-              <button className="btn btn-outline-secondary" onClick={signOut} disabled={submitting}>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => signOut()}
+                disabled={submitting}
+              >
                 <LogOut size={16} className="me-2" /> Sair da conta
               </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => signOut(true)}
+                disabled={submitting}
+              >
+                Sair de todos os dispositivos
+              </button>
             </div>
+            <p className="text-secondary small mt-3">
+              Ao sair de todos os dispositivos, novas sessões exigem login. Acessos já autorizados
+              podem levar até 15 minutos para expirar.
+            </p>
           </div>
         ) : (
           <form onSubmit={submit} className="d-grid gap-3">
@@ -172,6 +222,16 @@ export default function CloudAccess() {
               className="btn btn-link"
               type="button"
               onClick={() => {
+                setVerificationView(true);
+                setError('');
+              }}
+            >
+              Verificar meu e-mail
+            </button>
+            <button
+              className="btn btn-link"
+              type="button"
+              onClick={() => {
                 setSignUp(!signUp);
                 setError('');
               }}
@@ -183,6 +243,11 @@ export default function CloudAccess() {
         {error && (
           <div className="alert alert-danger mt-3" role="alert">
             {error}
+          </div>
+        )}
+        {message && (
+          <div role="status" className="alert alert-success mt-3">
+            {message}
           </div>
         )}
       </div>
