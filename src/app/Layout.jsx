@@ -25,6 +25,7 @@ import { monthLabel, shiftMonth } from '../domain/finance';
 import Editors, { Confirmation } from '../components/Editors';
 import { Toast } from '../components/ui';
 import StorageRecovery from '../pages/StorageRecovery';
+import EditingNotice from '../components/EditingNotice';
 
 const navigation = [
   ['/', 'Dashboard', LayoutDashboard],
@@ -51,6 +52,7 @@ export default function Layout() {
     setEditor,
     toast,
     setToast,
+    canWrite,
   } = useFinance();
   const location = useLocation();
   const page = navigation.find(([path]) => path === location.pathname)?.[1] ?? 'Configurações';
@@ -178,6 +180,7 @@ export default function Layout() {
           </div>
         </header>
         <main id="main-content" className="main-content">
+          <EditingNotice />
           {loading ? (
             <div className="loading-state" role="status">
               <div className="spinner-border spinner-border-sm" />
@@ -253,6 +256,7 @@ export default function Layout() {
                 </footer>
                 <button
                   className="mobile-fab"
+                  disabled={!canWrite}
                   onClick={() => setEditor({ entity: 'transactions' })}
                   aria-label="Adicionar transação"
                 >

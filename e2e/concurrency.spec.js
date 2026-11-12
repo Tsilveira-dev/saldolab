@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { activateEditing, setFinancialTime } from './helpers';
 
 const data = () => ({
   version: 1,
@@ -30,8 +31,8 @@ const data = () => ({
   ],
   budgets: [],
 });
-async function prepare(page) {
-  await page.clock.setFixedTime(new Date('2026-11-11T15:00:00Z'));
+async function prepare(page, editing = true) {
+  await setFinancialTime(page, '2026-11-11T15:00:00Z');
   await page.addInitScript((data) => {
     if (!localStorage.getItem('saldolab:v1:personal'))
       localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
@@ -41,6 +42,7 @@ async function prepare(page) {
     );
   }, data());
   await page.goto('/transacoes');
+  if (editing) await activateEditing(page);
 }
 const stored = (page) =>
   page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:v1:personal')).transactions);
@@ -69,6 +71,7 @@ test('três abas preservam gravações confirmadas e recusam escritores concorre
       page.evaluate(async () => {
         const { createLocalRepository } = await import('/src/repositories/localRepository.js');
         window.qaRepository = createLocalRepository({ mode: 'personal' });
+        await window.qaRepository.startEditing();
       }),
     ),
   );
@@ -109,64 +112,76 @@ test('três abas preservam gravações confirmadas e recusam escritores concorre
   expect(transactions.reduce((sum, tx) => sum + tx.amountCents, 0)).toBe(3000 + successful);
 });
 
-test('editar um formulário antigo não desfaz o valor salvo em outra aba', async ({
+test('uma aba de consulta não bloqueia a editora e assume edição após ela fechar', async ({
   page,
   context,
 }) => {
-  await prepare(page);
-  const second = await context.newPage();
-  await second.clock.setFixedTime(new Date('2026-11-11T15:00:00Z'));
-  await second.goto('/transacoes');
-  for (const tab of [page, second])
-    await tab.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
-  await page.getByRole('dialog').locator('[name=amount]').fill('2500,00');
-  await page.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await second.getByRole('dialog').locator('[name=description]').fill('QA formulário antigo');
-  await second.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(second.getByRole('dialog').getByRole('alert')).toContainText('outra aba');
-  expect((await stored(second))[0]).toMatchObject({
-    amountCents: 250000,
-    description: 'QA receita concorrente',
-  });
-  await second.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
-  await page.close();
-  await second.reload();
-  await second.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
-  await second.getByRole('dialog').locator('[name=amount]').fill('3000,00');
-  await second.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(second.getByRole('dialog')).toHaveCount(0);
-  expect((await stored(second))[0].amountCents).toBe(300000);
-});
-
-test('uma confirmação de exclusão antiga não remove a edição de outra aba', async ({
-  page,
-  context,
-}) => {
+  await prepare(page, false);
+  expect((await page.evaluate(() => navigator.locks.query())).held).toEqual([]);
+  await expect(
+    page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
+  ).toBeDisabled();
   const second = await context.newPage();
   await prepare(second);
-  await page.clock.setFixedTime(new Date('2026-11-11T15:00:00Z'));
-  await page.goto('/transacoes');
-  await page.getByRole('button', { name: 'Excluir QA receita concorrente', exact: true }).click();
   await second.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
   await second.getByRole('dialog').locator('[name=amount]').fill('2500,00');
   await second.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
   await expect(second.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('dialog').getByRole('button', { name: 'Excluir registro' }).click();
-  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('outra aba');
-  expect(await stored(page)).toHaveLength(1);
-  expect((await stored(page))[0].amountCents).toBe(250000);
-});
-
-test('sem Web Locks, preserva dados existentes e recusa edição sem proteção', async ({ page }) => {
-  await page.addInitScript(() =>
-    Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined }),
-  );
-  await prepare(page);
-  const before = await stored(page);
+  await expect.poll(async () => (await stored(page))[0].amountCents).toBe(250000);
+  await second.close();
+  await expect
+    .poll(async () => (await page.evaluate(() => navigator.locks.query())).held.length)
+    .toBe(0);
+  await activateEditing(page);
   await page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
   await page.getByRole('dialog').locator('[name=amount]').fill('3000,00');
   await page.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('edição segura');
-  expect(await stored(page)).toEqual(before);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  expect((await stored(page))[0].amountCents).toBe(300000);
+});
+
+test('outra editora mantém a aba em consulta, sem sucesso falso nem importação ou limpeza', async ({
+  page,
+  context,
+}) => {
+  const writer = await context.newPage();
+  await prepare(writer);
+  await prepare(page, false);
+  await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
+  const notice = page.getByRole('region', { name: 'Permissão de edição' });
+  await expect(notice).toContainText('outra aba');
+  await expect(page.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Excluir QA receita concorrente', exact: true }),
+  ).toBeDisabled();
+  await page.goto('/configuracoes');
+  await expect(page.getByRole('button', { name: 'Importar backup', exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Apagar dados pessoais', exact: true }),
+  ).toBeDisabled();
+  await expect(page.getByLabel('Arquivo de backup JSON')).toBeDisabled();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar backup JSON' }).click();
+  expect((await download).suggestedFilename()).toBe('saldolab-personal-backup.json');
+  expect((await stored(page))[0].amountCents).toBe(100000);
+});
+
+test('sem Web Locks, avisa somente leitura e desabilita edição preservando os dados', async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined }),
+  );
+  await prepare(page, false);
+  await expect(page.getByRole('region', { name: 'Permissão de edição' })).toContainText(
+    'indisponível neste navegador',
+  );
+  await expect(page.getByRole('button', { name: 'Ativar edição', exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
+  ).toBeDisabled();
+  expect((await stored(page))[0].amountCents).toBe(100000);
 });

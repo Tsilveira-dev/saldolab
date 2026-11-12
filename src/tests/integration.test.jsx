@@ -10,7 +10,7 @@ import Accounts from '../pages/Accounts';
 import Categories from '../pages/Categories';
 import Budgets from '../pages/Budgets';
 import Settings from '../pages/Settings';
-import { storageKey } from '../repositories/localRepository';
+import { storageKey, createLocalRepository } from '../repositories/localRepository';
 import { currentMonth, today } from '../domain/finance';
 
 // SVG layout is a browser concern; these tests keep all financial and form logic real.
@@ -49,12 +49,13 @@ const fixture = () => ({
   transactions: [],
   budgets: [],
 });
-function setup(path = '/', data = fixture()) {
+async function setup(path = '/', data = fixture()) {
   window.localStorage.setItem(storageKey('personal'), JSON.stringify(data));
   window.localStorage.setItem(
     'saldolab:preferences:v1',
     JSON.stringify({ mode: 'personal', theme: 'light' }),
   );
+  await createLocalRepository({ mode: 'personal' }).startEditing();
   const user = userEvent.setup();
   const view = render(
     <MemoryRouter initialEntries={[path]}>
@@ -94,7 +95,7 @@ async function addTransaction(
 }
 describe('fluxos integrados React → formulário → repositório → indicadores', () => {
   it('cadastra receita e despesa e atualiza o dashboard imediatamente', async () => {
-    const { user } = setup();
+    const { user } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
     await addTransaction(user, { type: 'income', description: 'Receita teste', amount: '500,10' });
     expect(
@@ -123,7 +124,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
       status: 'confirmed',
       notes: '',
     });
-    const { user } = setup('/transacoes', data);
+    const { user } = await setup('/transacoes', data);
     await screen.findByText('Compra original');
     await user.click(screen.getByRole('button', { name: 'Editar Compra original' }));
     const dialog = within(screen.getByRole('dialog'));
@@ -146,7 +147,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().transactions).toEqual([]);
   });
   it('valida valor positivo antes de permitir qualquer gravação', async () => {
-    const { user } = setup('/transacoes');
+    const { user } = await setup('/transacoes');
     await screen.findByRole('heading', { name: 'Cada movimento conta.' });
     await user.click(screen.getByRole('button', { name: 'Nova transação' }));
     const dialog = within(screen.getByRole('dialog'));
@@ -156,7 +157,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().transactions).toEqual([]);
   });
   it('registra pendência sem alterar o saldo disponível', async () => {
-    const { user } = setup();
+    const { user } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
     await addTransaction(user, { status: 'pending' });
     expect(
@@ -165,7 +166,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(screen.getByText('1 lançamentos pendentes')).toBeInTheDocument();
   });
   it('impede transferir para a própria conta e permite destino distinto', async () => {
-    const { user } = setup('/transacoes');
+    const { user } = await setup('/transacoes');
     await screen.findByRole('heading', { name: 'Cada movimento conta.' });
     await user.click(screen.getByRole('button', { name: 'Nova transação' }));
     const dialog = within(screen.getByRole('dialog'));
@@ -201,7 +202,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
         notes: '',
       })),
     );
-    const { user } = setup('/transacoes', data);
+    const { user } = await setup('/transacoes', data);
     await screen.findByText('Mercado');
     await user.type(screen.getByLabelText('Buscar transações'), 'mercado');
     expect(screen.queryByText('Cinema')).not.toBeInTheDocument();
@@ -209,7 +210,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(screen.getByText('Nenhuma transação encontrada')).toBeInTheDocument();
   });
   it('cria conta e categoria com personalização e mantém seus dados', async () => {
-    const { user } = setup('/contas');
+    const { user } = await setup('/contas');
     await screen.findByRole('heading', { name: 'Um lugar para cada conta.' });
     await user.click(screen.getAllByRole('button', { name: 'Adicionar conta' })[0]);
     let dialog = within(screen.getByRole('dialog'));
@@ -229,7 +230,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().categories.at(-1)).toMatchObject({ name: 'Viagens', icon: 'car' });
   });
   it('cria orçamento e apresenta validação de duplicidade', async () => {
-    const { user } = setup('/orcamentos');
+    const { user } = await setup('/orcamentos');
     await screen.findByRole('heading', { name: 'Seu dinheiro com direção.' });
     for (let index = 0; index < 2; index++) {
       await user.click(screen.getByRole('button', { name: 'Novo orçamento' }));
@@ -247,7 +248,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().budgets[0].month).toBe(currentMonth());
   });
   it('alterna modos sem misturar dados e preserva a preferência no recarregamento', async () => {
-    const { user, unmount } = setup();
+    const { user, unmount } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
     await user.selectOptions(screen.getByLabelText('Modo de uso'), 'demo');
     await screen.findByText('Cinema com amigos');

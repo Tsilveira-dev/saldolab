@@ -29,6 +29,14 @@ it('uma gravação demorada da demonstração não substitui os dados pessoais a
   const personal = {
     snapshot: vi.fn().mockResolvedValue({ marker: 'dados pessoais', accounts: [] }),
   };
+  for (const repo of [demo, personal]) {
+    repo.getEditingAccess = () => ({ canWrite: true, supported: true, reason: 'editing' });
+    repo.subscribeEditing = (listener) => {
+      listener(repo.getEditingAccess());
+      return () => {};
+    };
+    repo.stopEditing = async () => {};
+  }
   createLocalRepository.mockImplementation(({ mode }) => (mode === 'demo' ? demo : personal));
   const user = userEvent.setup();
   render(

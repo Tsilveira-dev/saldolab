@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { activateEditing, setFinancialTime } from './helpers';
 
 const key = 'saldolab:v1:personal';
 const fixture = () => ({
@@ -54,6 +55,7 @@ async function assertExpenseTooltip(page, amount) {
 async function goto(page, path) {
   await page.goto(path);
   await expect(page.locator('main h1')).toBeVisible();
+  await activateEditing(page);
 }
 async function nav(page, name) {
   if (await page.getByRole('button', { name: 'Abrir menu', exact: true }).isVisible())
@@ -94,7 +96,7 @@ async function assertMoney(locator, number) {
   await expect(locator).toContainText(number);
 }
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-11T15:00:00Z'));
+  await setFinancialTime(page, '2026-11-11T15:00:00Z');
   await page.addInitScript(
     ({ key, data }) => {
       if (localStorage.getItem(key) === null) localStorage.setItem(key, JSON.stringify(data));
@@ -378,6 +380,7 @@ test('modos ficam separados e restauração da demonstração preserva o pessoal
   await add(page);
   const original = await snapshot(page);
   await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('demo');
+  await activateEditing(page);
   await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
   await add(page, {
     type: 'expense',
@@ -555,9 +558,10 @@ test('datas e mês financeiro mantêm São Paulo em cinco fusos na virada do ano
     });
     try {
       const page = await context.newPage();
-      await page.clock.setFixedTime(new Date('2026-01-01T01:00:00Z'));
+      await setFinancialTime(page, '2026-01-01T01:00:00Z');
       await page.goto('/');
       await expect(page.locator('input[type=month]')).toHaveValue('2025-12');
+      await activateEditing(page);
       await page.getByRole('button', { name: 'Nova transação', exact: true }).click();
       await expect(page.getByRole('dialog').locator('[name=date]')).toHaveValue('2025-12-31');
     } finally {

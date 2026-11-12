@@ -1,179 +1,161 @@
-# SaldoLab — auditoria técnica, testes e correções do MVP
+# SaldoLab — auditoria e revisão final do PR #1
 
-Auditoria iniciada em 11/11/2026, America/Sao_Paulo. Repositório: https://github.com/Tsilveira-dev/saldolab. Baseline: `main` em `99ae1684380674a15c81817642612d416da262e1`. Correções: [fix/auditoria-saldolab](https://github.com/Tsilveira-dev/saldolab/tree/fix/auditoria-saldolab).
+Revisão de 12/11/2026, America/Sao_Paulo. Branch: `fix/auditoria-saldolab`. PR: https://github.com/Tsilveira-dev/saldolab/pull/1. `main` preservada em `99ae1684380674a15c81817642612d416da262e1`.
 
-O [diagnóstico inicial](auditoria-inicial.md) foi registrado no commit `18f6e11` antes de modificar a aplicação. Esta auditoria utilizou somente dados fictícios e contextos de navegador isolados. Nenhum perfil ou dado financeiro real do usuário foi acessado.
+O [diagnóstico inicial](auditoria-inicial.md) foi registrado antes das primeiras alterações. Os [resultados da primeira rodada](https://github.com/Tsilveira-dev/saldolab/blob/024d0eb2793ce7924af450e7fb0ded1b272f0f61/docs/auditoria-final.md) permanecem no histórico. Esta revisão parte do commit `024d0eb` e substitui sua política de reserva automática por edição explícita. Todos os dados e perfis utilizados são fictícios e isolados.
 
 ## A. Resumo executivo
 
-**A versão publicada continua reprovada para uso financeiro confiável:** foram reproduzidas perda de lançamentos entre abas, sobrescrita de valores por formulário antigo e falha de edição no celular. As correções estão na branch separada e passaram nos cenários executados. Não houve merge nem deploy.
+**As correções estão prontas para revisão e autorização de merge, dentro dos cenários executados.** A revisão confirmou que uma aba aberta somente para consultar reservava edição indevidamente. Também faltavam indicação visual de consulta e cobertura dos ciclos de navegação/retomada. Esses pontos foram corrigidos e os testes locais passaram.
 
-Foram aprovados na branch: CRUD das quatro entidades, saldos em centavos, pendências, transferências sem duplicar receitas/despesas, filtros, relatórios, gráficos, orçamentos excedidos, backup/importação, recuperação explícita de corrupção, erros de cota e separação demonstração/pessoal. Instalação limpa, lint, formatação, build e as suítes automatizadas passaram.
+As páginas agora abrem em **Somente leitura**. Consulta, navegação, filtros, tema, CSV e backup continuam disponíveis; criar, editar, excluir, importar, restaurar e limpar dados financeiros ficam desabilitados. **Ativar edição** recarrega a página com o mesmo mês e filtro de conta e tenta reservar uma única editora para o modo ativo, antes de sua primeira leitura financeira. Isso evita promover uma consulta com um snapshot potencialmente antigo.
 
-A proteção adotada permite **uma aba editora por modo**. Outras abas preservam leitura e exportação, mas não podem gravar. Para transferir a edição, fechar a aba editora e recarregar a outra. Sem Web Locks/contexto seguro, os dados existentes ficam disponíveis para leitura/backup e a escrita é recusada. Isso evita confirmar uma gravação que depois desaparece; não oferece edição colaborativa.
+A aba explicitamente ativada mantém a reserva ao navegar entre rotas internas. **Encerrar edição**, fechar/sair do documento e trocar de modo liberam a reserva. Atualizar uma consulta não a transforma em editora. Atualizar a editora tenta retomá-la no documento novo. Voltar de outro documento, inclusive pelo BFCache, mantém a sessão antiga em consulta, atualiza os dados e exige ativação para editar novamente.
 
-Permanecem pendências P2 de contraste/acessibilidade e reforço da proteção CSV. O armazenamento local não oferece conta de usuário, backup remoto ou recuperação após limpeza do navegador. Aprovação dos cenários executados não equivale a certificação de segurança ou autorização de produção.
+Nenhuma correção foi integrada à `main` ou publicada na Vercel. Os problemas P0 da baseline continuam relevantes para a versão publicada. As correções anteriores de integridade, validação, CRUD móvel, instalação e testes foram preservadas. Não foi implementado banco de dados ou alterado outro projeto.
 
 ## B. Resultados dos testes
 
-### Comandos, na ordem solicitada
+### Comandos executados nesta revisão
 
-| Teste                  | Baseline                          | Após correções | Evidência / observação                                                                                                                     |
-| ---------------------- | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm ci`               | Reprovado                         | Aprovado       | [Log final](audit-evidence/validated-1.log); lockfile reconciliado, sem atualização principal                                              |
-| `npm run lint`         | Aprovado                          | Aprovado       | [Log](audit-evidence/validated-2.log), sem avisos                                                                                          |
-| `npm run format:check` | Aprovado                          | Aprovado       | [Log da sequência](audit-evidence/validated-3.log); documentação e teste adicional conferidos novamente                                    |
-| `npm run test`         | Descoberta indevida, interrompido | Aprovado       | [82 testes finais](audit-evidence/unit-complete-82.log); a sequência completa anterior tinha 81, antes do teste adicional de troca de modo |
-| `npm run build`        | Aprovado                          | Aprovado       | [Log](audit-evidence/validated-5.log); avisos de comentários da dependência Zod não impedem o build                                        |
-| `npm run test:e2e`     | 8/12 com navegador disponível     | Aprovado       | [52/52](audit-evidence/validated-6.log), desktop e emulação móvel, sem retries locais                                                      |
+| Teste                        | Resultado local                  | Evidência                                                                  | Observação                                                                                                                                      |
+| ---------------------------- | -------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`              | Aprovado                         | [Log completo](audit-evidence/pr1-review/check-first.log)                  | Lint sem avisos, formatação, 105 testes Vitest e build                                                                                          |
+| `npm run test:e2e`           | Aprovado                         | [74/74](audit-evidence/pr1-review/e2e-full-first.log)                      | Desktop e emulação móvel; zero falhas e sem retries locais                                                                                      |
+| `npm audit --json`           | Aprovado                         | [Resultado](audit-evidence/pr1-review/npm-audit.json)                      | Zero vulnerabilidades conhecidas; dependências não foram alteradas                                                                              |
+| Python `unittest`            | Aprovado                         | [2/2](audit-evidence/pr1-review/python.log)                                | Regressão do gerador preservada                                                                                                                 |
+| Formatação após documentação | Verificada antes do envio        | [Log](audit-evidence/pr1-review/format-final.log)                          | Inclui este relatório e as novas evidências                                                                                                     |
+| GitHub Actions do PR         | Status do commit atual no GitHub | [Checks do PR #1](https://github.com/Tsilveira-dev/saldolab/pull/1/checks) | O link exato da execução e seu resultado são registrados na descrição do PR após o envio, evitando congelar aqui o status de um commit anterior |
 
-[Códigos de saída, duração e ambiente da sequência](audit-evidence/validated-command-results.json). Node 24.22.1, npm 11.9.0 e Chromium 156.0.8078.79. Foram usadas as variáveis `npm_config_cache=work/npm-cache` e `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`.
+Ambiente local: Node 24.22.1, npm 11.9.0 e Chromium 156.0.8078.79. O comando E2E usou `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`; o cache npm ficou em `work/npm-cache`. O CI instala seu próprio Chromium com Playwright.
 
-Falhas e rechecagens registradas:
+### Cenários solicitados
 
-- A instalação inicial falhou com `EUSAGE`, por entradas transitivas AJV ausentes/inconsistentes no lockfile: [log](audit-evidence/baseline-1.log). Impacto: ambiente limpo/CI não reproduzível; correção: reconciliar o lockfile.
-- A descoberta original de Vitest entrou em dependências temporárias de `work/`; a execução foi interrompida, sem contagem final válida. Os 65 testes restritos a `src/tests` passaram na baseline. Correção: limitar a descoberta aos testes do projeto.
-- O primeiro E2E não iniciou fluxos, pois o navegador esperado não estava no cache. Com Chromium instalado, 8/12 passaram e quatro seletores exatos falharam: [resumo](audit-evidence/baseline-browser-results-summary.json). Foram ajustados os seletores semânticos.
-- Uma repetição falhou porque o cache npm padrão do sandbox não era gravável; os comandos seguintes ficaram sem binários. Foi corrigida a configuração do ambiente, sem mudar dependências: [registro](audit-evidence/environment-retry-summary.json).
-- A primeira rodada das correções terminou com 50/52 E2E: a nova comparação de registro antigo recusava um orçamento com campos calculados pelo cartão. A UI passou a enviar o registro original; [rechecagem 2/2](audit-evidence/budget-recheck.log), seguida de 52/52 completos.
-- Ao ampliar as asserções de atualização dos tooltips após CRUD, um helper tentou medir um path SVG substituído durante a animação e falhou em dois dos quatro casos. A medição passou a usar o contêiner estável do gráfico, aguardando o tooltip; [falha do helper](audit-evidence/chart-hover-harness-before.log) e [rechecagem 4/4](audit-evidence/chart-crud-after.log). Não foi uma falha de cálculo financeiro.
+| Cenário                                                  | Resultado                  | Evidência / asserção                                                                                                                                                                            |
+| -------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Abrir dashboard, listar, consultar e exportar sem editar | Aprovado                   | Nenhum lock de edição e nenhuma inicialização da base financeira; testes unitários e de navegador                                                                                               |
+| Consulta aberta antes de outra aba solicitar edição      | Aprovado                   | A segunda aba consegue editar; a primeira continua consultando e recebe os novos valores                                                                                                        |
+| Indicação visual de consulta e controles indisponíveis   | Aprovado                   | [Desktop](audit-evidence/pr1-review/desktop-readonly.png), [mobile](audit-evidence/pr1-review/mobile-readonly.png); CTAs, ações de linhas, FAB, formulários, importação e limpeza desabilitados |
+| Fechar consulta                                          | Aprovado                   | Reserva da editora permanece com o mesmo `clientId`                                                                                                                                             |
+| Fechar editora / encerrar explicitamente                 | Aprovado                   | Lock desaparece; outra aba ativa edição e preserva as gravações anteriores                                                                                                                      |
+| Atualizar editora                                        | Aprovado                   | Novo documento assume uma única reserva; `clientId` muda e os dados persistem                                                                                                                   |
+| Atualizar consulta, inclusive após encerrar edição       | Aprovado                   | Continua em consulta e sem reserva                                                                                                                                                              |
+| Navegação SPA e Voltar entre rotas internas              | Aprovado                   | Mantêm a mesma reserva, sem duplicação                                                                                                                                                          |
+| Sair do documento e Voltar                               | Aprovado                   | A reserva antiga é liberada; a outra editora pode salvar; o retorno fica em consulta com os novos dados                                                                                         |
+| BFCache real em consulta e antiga editora                | Aprovado localmente        | Mesmo ID de documento e `pageshow.persisted=true` nos quatro casos desktop/mobile; provas abaixo                                                                                                |
+| Aba aberta pela editora                                  | Aprovado                   | Não herda permissão mesmo com estado de sessão copiado; atualizar a nova aba continua sem reservar edição                                                                                       |
+| Trocar demonstração/pessoal                              | Aprovado                   | Libera o modo anterior; o novo começa em consulta; dados continuam separados                                                                                                                    |
+| Falta de Web Locks / bloqueio de navegação               | Aprovado                   | Indicação de indisponibilidade; nenhuma permissão concedida; consulta e backup continuam possíveis                                                                                              |
+| Create/update/delete das quatro entidades                | Aprovado                   | Retorno normalizado corresponde ao JSON realmente persistido; exclusão só conclui após conferir sua gravação                                                                                    |
+| `setItem` sem efeito                                     | Aprovado em falha simulada | Create/update/delete, importação e restauração rejeitam a operação; o navegador mantém formulário com erro e não anuncia sucesso                                                                |
+| Concorrência de três abas                                | Aprovado                   | 20 gravações aceitas preservadas, 40 recusas explícitas, nenhum sucesso perdido; observador novo confere registros e centavos                                                                   |
+| Regressões financeiras e funcionais anteriores           | Aprovado                   | Receita 2.500→3.000→excluir, despesa 750→800→excluir, transferências, pendências, orçamentos, filtros, gráficos, backup, corrupção, cota, datas e cinco resoluções                              |
 
-### Fluxos, integridade e segurança
+Provas do BFCache: [consulta desktop](audit-evidence/pr1-review/bfcache-reader-chromium.json), [editora desktop](audit-evidence/pr1-review/bfcache-editor-chromium.json), [consulta mobile](audit-evidence/pr1-review/bfcache-reader-mobile.json), [editora mobile](audit-evidence/pr1-review/bfcache-editor-mobile.json). As identidades antes/depois são iguais e `restored` é verdadeiro. O teste exige restauração real para a consulta; para a antiga editora, aceita também o carregamento novo que navegadores podem escolher e verifica o mesmo comportamento seguro. Nesta execução local ambos os caminhos de editora foram realmente restaurados do cache.
 
-| Teste                                           | Resultado                             | Evidência                                                                                                                                                      | Observações                                                                                                   |
-| ----------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Receita R$ 2.500 → R$ 3.000 → excluir           | Aprovado na branch                    | `e2e/audit.spec.js`, log E2E                                                                                                                                   | Listagem, recarga, saldo, totais e série do gráfico                                                           |
-| Despesa R$ 750 → R$ 800 → excluir               | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | Saldo e distribuição por categoria recalculados                                                               |
-| Contas e transferências                         | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | CRUD, saldo inicial, origem/destino e bloqueio de exclusão vinculada                                          |
-| Categorias                                      | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | Criar, editar, vincular; exclusão em uso recusada                                                             |
-| Orçamento R$ 1.000, gasto R$ 750, limite R$ 500 | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | 75% → 150%, excedente R$ 250, duplicata recusada e exclusão                                                   |
-| Pendências, filtros, relatórios e CSV           | Aprovado nos casos executados         | Mesmo arquivo/log                                                                                                                                              | Valores zero/inválidos e transferência para mesma conta recusados; ressalva CSV em AUD-007                    |
-| Backup/importação e corrupção                   | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | Arquivo baixado e lido; importação válida só após confirmação; bruto corrompido preservado/exportável         |
-| Cota e armazenamento bloqueado                  | Aprovado na branch                    | Mesmo arquivo/log                                                                                                                                              | Mensagens de erro e dados anteriores preservados                                                              |
-| Modos e restauração demo                        | Aprovado na branch                    | E2E e `provider.test.jsx`                                                                                                                                      | Demo alterada e restaurada sem afetar pessoal; conclusão assíncrona antiga não troca dados do modo atual      |
-| Concorrência: três abas, 60 tentativas          | Aprovado para política de uma editora | [Antes](audit-evidence/concurrency-before.json), [depois](audit-evidence/concurrency-after.json)                                                               | Antes: 60 sucessos, 40 perdidos. Depois: 20 sucessos preservados, 40 recusas explícitas, zero sucesso perdido |
-| Edição/exclusão desatualizadas                  | Aprovado na branch                    | `e2e/concurrency.spec.js`, `src/tests/concurrency.test.js`                                                                                                     | Valor recente preservado; fechar editora e recarregar permite editar na outra aba                             |
-| Datas/cálculos em cinco fusos                   | Aprovado                              | [115 verificações da baseline](audit-evidence/domain-baseline.json), E2E final                                                                                 | UTC, São Paulo, Nova York, Tóquio e Kiritimati; centavos, virada de ano e datas inválidas                     |
-| Tooltips e gráficos SVG reais                   | Aprovado na amostra                   | [Valores](audit-evidence/charts-after.json), [captura](audit-evidence/charts-after.png)                                                                        | Barras/linhas coincidiram com indicadores; rosca com categoria; zero erro de console/rede nessa execução      |
-| Cinco resoluções, menu, tema e modais           | Aprovado nos fluxos executados        | E2E, [mobile corrigido](audit-evidence/mobile-after.png)                                                                                                       | 1440×900, 1366×768, 768×1024, 390×844, 360×740; contraste continua pendente                                   |
-| Contraste de texto do dashboard                 | Reprovado                             | [Amostra computada](audit-evidence/contrast-after.json), [tema claro](audit-evidence/desktop-light-after.png), [escuro](audit-evidence/desktop-dark-after.png) | AUD-008; não é auditoria WCAG completa                                                                        |
-| Entrada HTML maliciosa                          | Aprovado no payload testado           | E2E funcional                                                                                                                                                  | HTML exibido como texto; não criou imagem nem executou handler                                                |
-| `npm audit --json`                              | Aprovado                              | [Resultado](audit-evidence/npm-audit-validated.json)                                                                                                           | Zero vulnerabilidades conhecidas; não prova ausência de falhas no código                                      |
-| Python `unittest`                               | Aprovado                              | [2/2](audit-evidence/python-validated.log)                                                                                                                     | Reprodutibilidade e integridade do gerador                                                                    |
-| Excel/LibreOffice, Safari/iOS e Android reais   | Não executado                         | Limitação declarada                                                                                                                                            | Sem aprovação desses consumidores/dispositivos                                                                |
+O Playwright desabilita BFCache por padrão. O arquivo de ciclo de vida remove explicitamente essa flag. O Voltar aguarda `commit` e o estado da aplicação, pois uma restauração do cache não dispara um novo `load`. As datas financeiras são fixadas sem substituir Navigation Timing ou o relógio das animações.
 
-### Aplicação publicada
+### Falhas intermediárias detectadas e resolvidas
 
-A URL https://saldolab.vercel.app e suas sete páginas foram acessadas, incluindo rotas diretas. [Sete assets JS/CSS](audit-evidence/production-assets-before.json) coincidiram byte a byte com o build da baseline. Não foi possível confirmar o commit por metadados Vercel: a consulta ao projeto na equipe conhecida retornou 404.
+- A reprodução inicial confirmou o dashboard de consulta segurando `saldolab:v1:demo:editor` e a segunda aba recebendo erro apesar dos botões habilitados: [JSON](audit-evidence/pr1-review/reader-blocks-before.json) e [captura](audit-evidence/pr1-review/reader-blocks-before.png).
+- O relógio completo do Playwright removia Navigation Timing e impedia reconhecer uma recarga nos novos testes. A preparação passou a fixar somente `Date`, preservando navegação e eventos reais.
+- Uma primeira tentativa de retomada preparada somente em `pagehide` não foi confiável nos testes. Agora a intenção de retomada é mantida enquanto a edição está ativa e descartada ao encerrar, trocar de modo, abrir uma visita normal ou retornar pelo histórico.
+- Os primeiros testes de BFCache aguardavam `load` e expiravam após a restauração já ter ocorrido. Foram corrigidos para aguardar `commit` e verificar DOM, identidade e `pageshow.persisted`.
+- A primeira asserção do FAB em desktop procurava um botão oculto por CSS pelo papel acessível. A verificação passou a conferir o atributo `disabled` no elemento existente.
 
-Na [rodada publicada](audit-evidence/functional-production-summary.json), 22/26 casos passaram: três falharam pela edição móvel e um por encerramento do transporte de QA enquanto uma requisição ainda estava em andamento. O [complemento publicado](audit-evidence/functional-production-supplement-summary.json) passou em 6/6, incluindo a rechecagem de recuperação após corrigir esse encerramento. Isso não elimina as três falhas de produto. O [formulário antigo também foi reproduzido na URL publicada](audit-evidence/stale-edit-production.json): 250.000 centavos voltaram para 100.000.
+Essas rodadas foram investigadas antes da execução completa final de 105 testes de JavaScript e 74 de navegador.
 
-Localmente, a auditoria funcional inicial teve [23/26](audit-evidence/functional-local-summary.json), mais [4/4 complementares](audit-evidence/functional-local-supplement-summary.json). Os três casos móveis foram corrigidos e passaram na suíte final da branch.
+## C. Problemas identificados nesta revisão
 
-**Limite de HTTPS:** o Chromium recusou diretamente o certificado da inspeção HTTPS deste ambiente (`ERR_CERT_AUTHORITY_INVALID`). Os fluxos publicados usaram recursos reais obtidos pelo cliente HTTP Playwright com proxy e CA confiáveis, repassados ao navegador por `route.fulfill`. TLS permaneceu validado; não foram usados mocks do produto, `ignoreHTTPSErrors` ou flags para ignorar certificados. Esses testes aprovam os fluxos entregues por esse transporte, sem aprovar TLS direto do Chromium. A branch corrigida não foi publicada nem testada em produção.
+### REV-001 — P1 — consulta reservava edição indevidamente — corrigido
 
-A [checagem HTTP final](audit-evidence/production-http-final.json) retornou 200 para as sete rotas, ainda com a entrada JS da baseline. As sondagens de `/.env`, `/.git/config`, `/package.json` e `/entrega/saldolab.zip` receberam o HTML da SPA, idêntico ao da raiz; não expuseram esses arquivos nos caminhos testados. Isso não é uma varredura exaustiva de todos os caminhos.
+- **Componente:** `localRepository.js`, antiga aquisição automática em toda leitura.
+- **Reprodução:** abrir somente o dashboard em uma aba; abrir outra e tentar salvar uma transação.
+- **Resultado anterior:** a consulta segura a reserva e a outra aba não salva.
+- **Causa:** `snapshot`, listagem e exportação usavam o mesmo caminho que adquiria uma reserva de editora por toda a vida do documento.
+- **Correção:** leituras puras, sem reserva e sem inicialização financeira no storage. Ativação explícita num documento novo antes de sua primeira leitura. O repositório recusa promover uma sessão que já leu dados.
+- **Motivo da recarga:** os testes da primeira auditoria mostraram que somente serializar operações não evitava snapshots desatualizados entre processos. Essa proteção foi preservada, sem voltar à escrita concorrente.
 
-## C. Problemas identificados
+### REV-002 — P1 — ausência de indicação e bloqueio visual — corrigido
 
-### AUD-001 — P0 — perda de lançamentos entre abas — corrigido na branch
+- **Componentes:** contexto, `EditingNotice`, componentes de ações, layout, configurações e recuperação.
+- **Reprodução:** abrir uma aba sem reserva e observar criação/edição/exclusão/importação habilitadas, falhando somente ao salvar.
+- **Causa:** a reserva existia apenas dentro do repositório, sem estado observável na UI.
+- **Correção:** `canWrite` e assinatura de acesso no contexto; aviso persistente e ações **Ativar edição / Encerrar edição**. Escritas financeiras indisponíveis ficam desabilitadas, inclusive campos e confirmações. O repositório e o provider também verificam permissão; a proteção não depende do atributo `disabled`.
+- **Preservado:** consulta, navegação, filtros, tema e exportações.
 
-- **Componente:** `src/repositories/localRepository.js`.
-- **Reprodução:** três abas da mesma origem, 3.000 registros de um centavo, 20 criações simultâneas por aba.
-- **Resultado original:** todas as 60 operações retornaram sucesso; agregado final com 3.020 registros, em vez de 3.060, e saldo 40 centavos menor.
-- **Causa:** sequência leitura/alteração/gravação do agregado sem controle de concorrência. Além disso, a experiência com bloqueio apenas por operação ainda perdeu 25 registros por snapshots locais desatualizados entre processos do navegador: [alternativa rejeitada](audit-evidence/operation-lock-only-rejected.json).
-- **Solução:** reserva de uma aba editora por modo durante a vida do documento, serialização de operações na aba e recusa explícita de outras escritoras. Navegadores sem proteção ficam sem escrita. JSON v1 e chaves existentes preservados.
-- **Regressão:** três abas e observador novo confirmam 3.020 registros para 20 gravações aceitas, sem perda de sucesso confirmado. Não se afirma que as 60 tentativas foram aceitas.
+### REV-003 — P1 — ciclo da reserva sem cobertura suficiente — corrigido e testado
 
-### AUD-002 — P0 — formulário antigo sobrescreve valor salvo — corrigido na branch
+- **Componentes:** sessão de edição e ciclo de vida do provider.
+- **Reprodução:** ativar/fechar/recarregar a editora, trocar de modo ou sair e retornar por Voltar/BFCache.
+- **Causa:** a versão anterior guardava uma promessa de reserva por documento, sem expor a perda da permissão à UI ou definir claramente a retomada.
+- **Correção:** sessão observável; liberação em `pagehide`, encerramento e troca de modo; sessão suspensa permanece sem escrita. Recarga retoma somente uma intenção explícita da editora anterior. No BFCache, atualizar leitura e fechar formulários/confirmadores antigos. Uma aba nova não herda permissão.
+- **Regressões:** reserva pendente não pode ser concedida após sair do documento ou depois de uma leitura financeira intermediária. A navegação SPA mantém a reserva; navegação entre documentos a libera.
 
-- **Componentes:** repositório, `FinanceProvider.jsx`, `Editors.jsx` e ações de `Budgets.jsx`.
-- **Reprodução:** editar a mesma receita em duas abas; salvar R$ 2.500 na primeira; alterar somente a descrição na segunda, que ainda contém R$ 1.000, e salvar.
-- **Resultado original:** valor volta silenciosamente para R$ 1.000, inclusive na URL publicada.
-- **Causa:** o salvamento não verifica se o registro exibido ainda corresponde ao persistido.
-- **Solução:** UI envia o registro original; update/delete comparam o esperado antes da alteração, dentro da operação protegida. Conflito mantém o modal com erro e preserva os dados. A reserva da aba também impede outras escritoras.
-- **Regressão:** edição e exclusão antigas recusadas; edição atual funciona. O teste de orçamento detectou uma regressão intermediária por campos calculados extras; as ações agora recebem o registro persistido original, e a suíte completa passou.
+### REV-004 — P1 de robustez financeira — confirmação sem leitura de retorno — reforçado
 
-### AUD-003 — P1 — CRUD de transação inacessível no celular — corrigido na branch
+- **Componente:** método de gravação do repositório.
+- **Limite da constatação:** o navegador nativo deve gravar ou lançar erro em `setItem`; não foi observada uma falha nativa silenciosa. Foi injetado um `setItem` sem efeito para validar a confirmação de sucesso exigida nesta revisão.
+- **Causa anterior:** confiar somente no retorno de `setItem`, sem verificar o conteúdo efetivamente disponível.
+- **Correção:** validar o agregado, gravar, ler de volta e comparar o JSON. Todas as mutações financeiras usam esse caminho. Falha de confirmação rejeita a operação e pede conferir/recarregar; não promete preservação do valor anterior quando o resultado é incerto.
+- **Resultado:** create/update/delete das quatro entidades correspondem ao estado persistido; cinco tipos de mutação não retornam sucesso no teste de gravação sem efeito; UI permanece com erro e sem toast de sucesso.
 
-- **Componentes:** `TransactionTable.jsx` / `src/styles/components.css`.
-- **Reprodução:** abrir tabela com registros em 390×844, com emulação móvel, e clicar em Editar.
-- **Causa:** `span.visually-hidden` absolutamente posicionado no cabeçalho Ações escapa da contenção da tabela, levando o documento a 614 px e deslocando os cliques.
-- **Solução:** `position: relative` nos cabeçalhos; preservar a rolagem da tabela dentro de seu contêiner.
-- **Evidência:** [antes](audit-evidence/mobile-before.png), [geometria anterior](audit-evidence/mobile-before.json), [geometria corrigida](audit-evidence/mobile-after.json). Após: documento com 390 px, modal abre e edição passa.
-- **Teste corrigido:** comparar `scrollWidth` ao `clientWidth`, pois `innerWidth` também era indevidamente ampliado.
+### Problemas da primeira auditoria
 
-### AUD-004 — P1 — `npm ci` falha — corrigido na branch
+| ID      | Prioridade | Estado nesta revisão                                                                                                            |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| AUD-001 | P0         | Proteção contra perda entre abas preservada; o stress continua aprovado                                                         |
+| AUD-002 | P0         | Comparação do registro esperado em editar/excluir preservada e coberta; impedimento visual de escrita em consultas acrescentado |
+| AUD-003 | P1         | Correção de contenção da tabela móvel preservada; CRUD móvel aprovado                                                           |
+| AUD-004 | P1         | Lockfile corrigido preservado; nenhuma dependência atualizada nesta revisão                                                     |
+| AUD-005 | P1         | Descoberta restrita do Vitest preservada                                                                                        |
+| AUD-006 | P2         | Seletores robustos preservados; revisão ampla de rótulos explícitos permanece pendente                                          |
+| AUD-007 | P2         | Reforço de CSV para espaços/quebras antes de fórmulas permanece pendente; nenhum motor de planilha foi testado                  |
+| AUD-008 | P2         | Contraste e legibilidade permanecem pendentes; identidade visual geral preservada                                               |
 
-- **Componente:** `package-lock.json`.
-- **Reprodução:** instalação limpa em Node 24/npm 11.
-- **Causa:** entradas transitivas AJV/json-schema-traverse inconsistentes com a árvore exigida pelo ESLint.
-- **Impacto:** instalação/CI não reproduzível.
-- **Solução:** reconciliar apenas o lockfile, mantendo versões principais; instalação limpa e auditoria de dependências repetidas com sucesso.
+As reproduções, causas e evidências detalhadas desses IDs estão no [relatório da primeira rodada](https://github.com/Tsilveira-dev/saldolab/blob/024d0eb2793ce7924af450e7fb0ded1b272f0f61/docs/auditoria-final.md) e no diagnóstico inicial.
 
-### AUD-005 — P1 — Vitest executa testes de ferramentas temporárias — corrigido na branch
+## D. Cobertura, qualidade e limites
 
-- **Componente:** `vite.config.js`.
-- **Reprodução:** executar `npm run test` com dependências auxiliares em `work/vercel-cli/node_modules`.
-- **Causa:** exclusão `node_modules/**` cobre somente a raiz; substituía os padrões esperados.
-- **Impacto:** execução entra em dependências e não produz resultado confiável do projeto.
-- **Solução:** incluir somente `src/**/*.test.{js,jsx}` e excluir dependências aninhadas, E2E e `work/`.
+- **105 testes Vitest aprovados**, zero reprovados, sete arquivos. A primeira rodada tinha 82; esta revisão acrescenta 23 casos de acesso, ciclo de reserva, intenção de recarga e confirmação da persistência.
+- **74 execuções Playwright aprovadas**, zero reprovadas/ignoradas e sem retries locais. São 37 cenários nos projetos desktop/mobile; a primeira rodada tinha 52 execuções. Acrescentados 11 cenários de ciclo de vida, além da adaptação das verificações de abas ao fluxo explícito de edição.
+- **Dois testes Python aprovados.** Total das suítes locais finais: **181 casos**. As 115 verificações adicionais de domínio da primeira auditoria permanecem como evidência histórica separada.
+- **Cobertura percentual:** não medida.
+- **Build:** aprovado. Permanecem somente os avisos de anotações de comentários de dependência Zod já documentados.
+- **Qualidade do navegador:** contextos novos e dados fictícios; nada foi apagado de um perfil real. Sem erros de console nas capturas dos novos estados. As resoluções e o tema escuro continuam cobertos na suíte completa.
+- **Limites:** mobile é emulação Chromium; Safari/iOS e Android reais não foram executados. BFCache foi comprovado localmente por eventos reais, sem simular `pageshow`. Excel/LibreOffice e uma auditoria WCAG completa continuam pendentes.
 
-### AUD-006 — P2 — seletores E2E frágeis — testes corrigidos; acessibilidade a revisar
+A versão corrigida não foi publicada. A validação anterior de https://saldolab.vercel.app avaliou a baseline e precisou do transporte HTTP Playwright com TLS verificado devido ao certificado da inspeção do ambiente, conforme o relatório histórico. Esta revisão não declara validação em produção das novas correções.
 
-- **Componente:** rótulos implícitos de selects e `e2e/finance.spec.js`.
-- **Reprodução:** selecionar Categoria ou Modo de uso por rótulo exato no Chromium.
-- **Causa:** o nome acessível inclui textos das opções; o seletor exato não encontra o controle, embora jsdom aceite.
-- **Solução aplicada:** localizar o controle por papel `combobox` e prefixo de nome, sem depender das opções. Os quatro casos passaram.
-- **Pendente:** revisar rótulos explícitos/associação `id`–`htmlFor` em uma revisão de acessibilidade.
+## E. Arquivos e correções entregues
 
-### AUD-007 — P2 — proteção CSV incompleta — pendente
+| Arquivos                                                                                                       | Alteração                                                                                            |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `src/repositories/editingSession.js`                                                                           | Estado observável, aquisição explícita antes da primeira leitura, invalidação e liberação da reserva |
+| `src/repositories/editingRequest.js`                                                                           | Intenção de navegação sem dados financeiros, consumida somente em recarga                            |
+| `src/repositories/localRepository.js`                                                                          | Leituras puras, permissão exigida em toda mutação e conferência do JSON gravado                      |
+| `src/context/FinanceProvider.jsx`                                                                              | Acesso no contexto, ativação/encerramento, retomada segura, troca de modo e BFCache                  |
+| `src/components/EditingNotice.jsx`, `src/styles/components.css`                                                | Aviso e controles claros, com os tokens e o layout existentes                                        |
+| `src/app/Layout.jsx`, `src/components/ui.jsx`, `src/components/Editors.jsx`                                    | Desabilitar CTAs, linhas, FAB, campos e confirmação quando a escrita está indisponível               |
+| `src/pages/Settings.jsx`, `src/pages/StorageRecovery.jsx`                                                      | Importação/restauração/limpeza indisponíveis em consulta; exportação preservada                      |
+| `src/tests/editing.test.js`, `editingRequest.test.js`                                                          | 23 novos testes de acesso, ciclo e persistência                                                      |
+| `src/tests/setup.js`, `repository.test.js`, `concurrency.test.js`, `integration.test.jsx`, `provider.test.jsx` | Reservas de teste isoladas e operações anteriores adaptadas à edição explícita                       |
+| `e2e/editing-lifecycle.spec.js`, `e2e/helpers.js`                                                              | 11 novos cenários, BFCache real, datas financeiras sem remover Navigation Timing                     |
+| `e2e/audit.spec.js`, `e2e/concurrency.spec.js`, `e2e/finance.spec.js`                                          | Preservar e adaptar regressões à indicação e ativação da edição                                      |
+| `README.md`, `docs/architecture.md`, `docs/persistence.md`, este relatório e novas evidências                  | Contrato e comportamento atualizados                                                                 |
 
-- **Componente:** `src/services/files.js`, `escapeCsv`.
-- **Reprodução de código:** exportar observação ou ID importado iniciando por espaço ou LF seguido de `=`, `+`, `-` ou `@`; a proteção verifica somente o primeiro caractere.
-- **Causa:** normalização incompleta de conteúdo antes do detector de fórmula.
-- **Risco:** tratamento inseguro por certos consumidores de planilhas. Não foi executada planilha para confirmar execução de fórmula.
-- **Solução recomendada:** ampliar o escape conforme os consumidores suportados e testar arquivos reais em Excel/LibreOffice. Sem alteração nesta rodada de P0/P1; a afirmação ampla de proteção no README foi corrigida.
+O contrato financeiro continua assíncrono, o JSON permanece na versão 1 e as chaves financeiras não mudaram. Não foram removidas funcionalidades nem executadas migrações. O arquivo `vercel.json` continua desabilitando o deploy automático de `fix/auditoria-saldolab`.
 
-### AUD-008 — P2 — contraste insuficiente e textos pequenos — pendente
+Entrega no mesmo [PR #1](https://github.com/Tsilveira-dev/saldolab/pull/1), mantendo-o em rascunho até a decisão do responsável. `main` e a versão publicada permanecem sem estas alterações.
 
-- **Componentes:** tokens, navegação e textos secundários; temas claro e escuro.
-- **Reprodução:** abrir dashboard e comparar as cores computadas de texto/fundo. No menu escuro, o item ativo tem aproximadamente 2,10:1; itens inativos no tema claro, 3,66:1. Esses textos de 12 px exigem 4,5:1 no critério WCAG AA de texto normal.
-- **Causa:** cores fixas e tokens secundários claros/escuros insuficientes, além de textos auxiliares de 8–10 px.
-- **Evidência:** amostra de 128 elementos de texto por tema; 81 no claro e 11 no escuro abaixo do mínimo calculado. Fundos sólidos compostos em sRGB; não é auditoria completa de todos os estados/páginas.
-- **Solução recomendada:** ajustar tokens e estados ativos, aumentar legibilidade e conferir teclado, foco, zoom e leitores de tela sem mudar a identidade geral.
-- **Documentação:** estados antigos de GitHub/Vercel foram atualizados; o diagnóstico inicial permanece como registro histórico.
+## F. Pendências e recomendação
 
-## D. Cobertura e qualidade
+**Recomendo o merge das correções após a autorização do responsável e a confirmação do CI do commit atual.** Os cenários críticos solicitados e as regressões anteriores passaram localmente. Essa recomendação não autoriza merge ou deploy e não significa aprovação completa de acessibilidade, planilhas ou aparelhos reais.
 
-- **Vitest:** 82 aprovados, zero reprovados, cinco arquivos. Baseline: 65 testes do projeto; adicionados 17 casos de regressão/limites.
-- **Playwright:** 52 aprovados, zero reprovados, zero ignorados na execução local final; 26 cenários executados nos projetos desktop/mobile. Baseline original: 12 execuções, das quais quatro falhavam por seletores.
-- **Python:** dois aprovados, zero reprovados.
-- **Total das suítes finais:** 136 casos aprovados. As 115 verificações adicionais de domínio/fusos da baseline são registradas separadamente, sem inflar a contagem das suítes.
-- **Cobertura percentual de código:** não medida.
-- **Build:** aprovado; sem novos avisos de código próprio. As anotações removidas pelo Rollup pertencem ao Zod.
-- **Segurança:** validação do agregado, vínculos, IDs, datas e dinheiro exercitados; payload XSS ficou como texto; zero dependência vulnerável conhecida em `npm audit`. Não há autenticação/banco remoto ou chaves de API exigidas. Não foi implementada criptografia de armazenamento local.
+As cinco prioridades seguintes são:
 
-## E. Correções realizadas
-
-| Arquivos                                                                                                  | Alteração / motivo                                                                                                                   |
-| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/repositories/localRepository.js`                                                                     | Aba editora, operações serializadas, detecção de registro antigo, erros seguros e retorno normalizado do registro salvo              |
-| `src/context/FinanceProvider.jsx`, `src/components/Editors.jsx`                                           | Registro esperado em editar/excluir; resultado assíncrono de outro modo não substitui o atual                                        |
-| `src/pages/Budgets.jsx`                                                                                   | Separar registro original de valores calculados para edição/exclusão com verificação de conflito                                     |
-| `src/styles/components.css`                                                                               | Conter o rótulo oculto e recuperar os cliques no celular                                                                             |
-| `package-lock.json`, `vite.config.js`                                                                     | Instalação reproduzível e descoberta restrita de testes                                                                              |
-| `src/tests/concurrency.test.js`, `provider.test.jsx`, `finance.test.js`, `repository.test.js`, `setup.js` | 17 novos casos: conflitos, concorrência, falta de API, troca assíncrona de modo, IDs duplicados, inexistentes, virada de ano e datas |
-| `e2e/audit.spec.js`, `concurrency.spec.js`, `finance.spec.js`, `playwright.config.js`                     | 40 execuções adicionais desktop/mobile e seletores robustos; Chromium do sistema opcional; dois workers                              |
-| `vercel.json`                                                                                             | Bloquear deploy automático da branch de auditoria                                                                                    |
-| `README.md`, `docs/`                                                                                      | Diagnóstico antes das alterações, evidências, política de edição, resultados e estados de publicação atuais                          |
-
-Branch para revisão: https://github.com/Tsilveira-dev/saldolab/tree/fix/auditoria-saldolab. Nenhum dado financeiro foi migrado, nenhuma chave foi apagada e não foi adicionado banco remoto. A aplicação publicada permanece com a baseline.
-
-## F. Cinco melhorias prioritárias
-
-1. **Revisar e liberar as correções de integridade**, com backup conferido, fechamento das abas antigas e validação posterior à publicação aprovada. Até lá, não aprovar a baseline para dados financeiros importantes.
-2. **Exigir CI aprovado para integrar mudanças**, incluindo concorrência, perda de atualização, CRUD móvel e recuperação. Ampliar a matriz para Firefox/WebKit e aparelhos reais.
-3. **Fortalecer exportação e recuperação**, tratando AUD-007, validando CSV em planilhas e oferecendo lembretes/testes de restauração de backup e limites de cota.
-4. **Revisar acessibilidade e feedback**, corrigindo contraste/legibilidade, rótulos e estados de foco; tornar a condição de aba somente leitura visível antes de preencher um formulário.
-5. **Planejar persistência remota com o responsável**, escolhendo provedor e autenticação antes de implementar. Exigir autorização por usuário, transações, restrições financeiras, migrações testadas, trilha de auditoria e importação explícita do JSON local.
+1. Revisar o PR e seus Checks; antes de uma publicação autorizada, conferir backup e fechar/recarregar todas as abas antigas, pois versões anteriores não respeitam a reserva atual.
+2. Reforçar AUD-007 e testar CSV em Excel/LibreOffice, preservando o ciclo de backup/restauração.
+3. Corrigir contraste, legibilidade e rótulos explícitos, mantendo a identidade visual.
+4. Ampliar a matriz para Firefox, WebKit/Safari e aparelhos reais, incluindo histórico/BFCache e armazenamento restrito.
+5. Planejar com o responsável uma futura persistência remota com autenticação, autorização por usuário, transações, controle de concorrência e migração explícita. Nenhum banco é implementado nesta etapa.

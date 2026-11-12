@@ -47,7 +47,7 @@ export default function Editors() {
   );
 }
 function Editor({ entity, row, onClose }) {
-  const { data, month, save } = useFinance();
+  const { data, month, save, canWrite } = useFinance();
   const [error, setError] = useState('');
   const defaults = {
     transactions: {
@@ -170,7 +170,7 @@ function Editor({ entity, row, onClose }) {
       <form onSubmit={submit} noValidate>
         <div className="modal-body-custom">
           <InlineError message={error} />
-          <div className="form-grid">
+          <fieldset className="form-grid" disabled={!canWrite}>
             {entity === 'transactions' && (
               <>
                 {field(
@@ -327,13 +327,13 @@ function Editor({ entity, row, onClose }) {
                 )}
               </>
             )}
-          </div>
+          </fieldset>
         </div>
         <div className="modal-footer-custom">
           <button type="button" disabled={isSubmitting} className="btn btn-light" onClick={onClose}>
             Cancelar
           </button>
-          <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+          <button type="submit" disabled={isSubmitting || !canWrite} className="btn btn-primary">
             {isSubmitting ? 'Salvando…' : row ? 'Salvar alterações' : 'Adicionar registro'}
           </button>
         </div>
@@ -342,7 +342,7 @@ function Editor({ entity, row, onClose }) {
   );
 }
 export function Confirmation() {
-  const { confirmation, setConfirmation } = useFinance();
+  const { confirmation, setConfirmation, canWrite } = useFinance();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   if (!confirmation) return null;
@@ -373,7 +373,7 @@ export function Confirmation() {
           Cancelar
         </button>
         <button
-          disabled={busy}
+          disabled={busy || !canWrite}
           className={`btn ${confirmation.danger ? 'btn-danger' : 'btn-primary'}`}
           onClick={confirm}
         >

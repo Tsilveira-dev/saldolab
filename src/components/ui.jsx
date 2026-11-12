@@ -23,6 +23,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { money, percentChange } from '../domain/finance';
+import { useFinance } from '../context/FinanceContext';
 
 const iconMap = {
   bank: Landmark,
@@ -62,13 +63,14 @@ export function EmptyState({
   action,
   label = 'Adicionar registro',
 }) {
+  const { canWrite } = useFinance();
   return (
     <div className="empty-state">
       <Inbox size={32} aria-hidden="true" />
       <h3>{title}</h3>
       <p>{description}</p>
       {action && (
-        <button className="btn btn-primary" onClick={action}>
+        <button className="btn btn-primary" onClick={action} disabled={!canWrite}>
           <Plus size={16} />
           {label}
         </button>
@@ -77,6 +79,7 @@ export function EmptyState({
   );
 }
 export function PageHeading({ eyebrow, title, description, action, label }) {
+  const { canWrite } = useFinance();
   return (
     <div className="page-heading">
       <div>
@@ -85,7 +88,7 @@ export function PageHeading({ eyebrow, title, description, action, label }) {
         <p>{description}</p>
       </div>
       {action && (
-        <button className="btn btn-primary" onClick={action}>
+        <button className="btn btn-primary" onClick={action} disabled={!canWrite}>
           <Plus size={18} />
           {label}
         </button>
@@ -108,9 +111,16 @@ export function Panel({ title, subtitle, action, children, className = '' }) {
   );
 }
 export function RowActions({ name, onEdit, onDelete }) {
+  const { canWrite } = useFinance();
   return (
     <div className="row-actions">
-      <button className="icon-button" aria-label={`Editar ${name}`} title="Editar" onClick={onEdit}>
+      <button
+        className="icon-button"
+        aria-label={`Editar ${name}`}
+        title="Editar"
+        onClick={onEdit}
+        disabled={!canWrite}
+      >
         <Pencil size={15} />
       </button>
       <button
@@ -118,6 +128,7 @@ export function RowActions({ name, onEdit, onDelete }) {
         aria-label={`Excluir ${name}`}
         title="Excluir"
         onClick={onDelete}
+        disabled={!canWrite}
       >
         <Trash2 size={15} />
       </button>

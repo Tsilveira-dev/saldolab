@@ -4,11 +4,12 @@ import { createDemoData } from '../services/demo';
 import { totals } from '../domain/finance';
 
 let repo;
-beforeEach(() => {
+beforeEach(async () => {
   repo = createLocalRepository({
     storage: window.localStorage,
     seed: () => createDemoData('2026-11'),
   });
+  await repo.startEditing();
 });
 const transaction = {
   description: 'Novo lançamento',
@@ -132,6 +133,7 @@ describe('repositório assíncrono e integridade', () => {
   });
   it('mantém modos separados e restaura apenas a demonstração', async () => {
     const personal = createLocalRepository({ mode: 'personal' });
+    await personal.startEditing();
     expect((await personal.snapshot()).accounts).toEqual([]);
     await personal.create('accounts', {
       name: 'Pessoal',
@@ -147,6 +149,7 @@ describe('repositório assíncrono e integridade', () => {
   it('exporta e importa backup com todos os dados', async () => {
     const backup = await repo.exportBackup();
     const personal = createLocalRepository({ mode: 'personal' });
+    await personal.startEditing();
     await personal.importBackup(backup);
     expect(await personal.snapshot()).toEqual(await repo.snapshot());
   });

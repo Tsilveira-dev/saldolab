@@ -14,8 +14,9 @@ const values = {
   notes: '',
 };
 let repository;
-beforeEach(() => {
+beforeEach(async () => {
   repository = createLocalRepository({ seed: () => createDemoData('2026-11') });
+  await repository.startEditing();
 });
 
 describe('integridade entre operações concorrentes', () => {
@@ -93,9 +94,9 @@ describe('integridade entre operações concorrentes', () => {
     expect(JSON.parse(await readonly.exportBackup()).data).toEqual(before);
   });
 
-  it('não inicializa nem substitui conteúdo se não houver edição segura', async () => {
+  it('permite consultar base vazia sem inicializar armazenamento nem reservar edição', async () => {
     const readonly = createLocalRepository({ mode: 'personal', lockManager: null });
-    await expect(readonly.snapshot()).rejects.toThrow('edição segura');
+    expect((await readonly.snapshot()).accounts).toEqual([]);
     expect(window.localStorage.getItem(storageKey('personal'))).toBeNull();
   });
 
@@ -107,6 +108,7 @@ describe('integridade entre operações concorrentes', () => {
         request: () => Promise.reject(new DOMException('Permission denied', 'SecurityError')),
       },
     });
+    expect(await blocked.startEditing()).toBe(false);
     await expect(blocked.create('transactions', values)).rejects.toThrow('bloqueou');
     expect(window.localStorage.getItem(storageKey('demo'))).toBe(before);
   });

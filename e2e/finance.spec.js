@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { activateEditing } from './helpers';
 
 async function navigate(page, name) {
   const opener = page.getByRole('button', { name: 'Abrir menu' });
@@ -7,6 +8,7 @@ async function navigate(page, name) {
 }
 test('cria, edita, persiste e exclui uma transação', async ({ page }) => {
   await page.goto('/transacoes');
+  await activateEditing(page);
   await page.getByRole('button', { name: 'Nova transação', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Descrição', { exact: true }).fill('Teste ponta a ponta');
@@ -60,6 +62,7 @@ test('isola o modo pessoal e permite voltar à demonstração', async ({ page })
 });
 test('protege conta em uso e exporta backup JSON', async ({ page }) => {
   await page.goto('/contas');
+  await activateEditing(page);
   await page.getByRole('button', { name: 'Excluir Conta principal', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'Excluir registro' }).click();
@@ -72,6 +75,7 @@ test('protege conta em uso e exporta backup JSON', async ({ page }) => {
 });
 test('cria orçamento, alerta duplicidade e alterna aparência', async ({ page }) => {
   await page.goto('/orcamentos');
+  await activateEditing(page);
   await page.getByRole('button', { name: 'Novo orçamento', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Categoria de despesa').selectOption('education');

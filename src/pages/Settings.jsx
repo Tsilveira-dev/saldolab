@@ -6,8 +6,17 @@ import { parseBackup } from '../repositories/localRepository';
 import { PageHeading, Panel, InlineError } from '../components/ui';
 
 export default function Settings() {
-  const { mode, switchMode, theme, setTheme, repository, mutate, notify, setConfirmation } =
-    useFinance();
+  const {
+    mode,
+    switchMode,
+    theme,
+    setTheme,
+    repository,
+    mutate,
+    notify,
+    setConfirmation,
+    canWrite,
+  } = useFinance();
   const [error, setError] = useState('');
   const inputRef = useRef(null);
   const exportBackup = async () => {
@@ -119,6 +128,7 @@ export default function Settings() {
               </button>
               <button
                 className="btn btn-outline-secondary"
+                disabled={!canWrite}
                 onClick={() => inputRef.current.click()}
               >
                 <Upload size={16} />
@@ -129,6 +139,7 @@ export default function Settings() {
               ref={inputRef}
               aria-label="Arquivo de backup JSON"
               type="file"
+              disabled={!canWrite}
               accept=".json,application/json"
               className="visually-hidden"
               onChange={importFile}
@@ -151,7 +162,7 @@ export default function Settings() {
                 ? 'Restaure as contas e movimentações fictícias para o estado original.'
                 : 'Remova todos os registros pessoais deste navegador. Faça um backup primeiro.'}
             </p>
-            <button className="btn btn-outline-danger" onClick={reset}>
+            <button className="btn btn-outline-danger" onClick={reset} disabled={!canWrite}>
               <RotateCcw size={16} />
               {mode === 'demo' ? 'Restaurar demonstração' : 'Apagar dados pessoais'}
             </button>

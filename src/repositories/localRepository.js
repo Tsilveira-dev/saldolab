@@ -1,5 +1,6 @@
 import { validateDataset } from '../domain/schemas';
 import { createDemoData, emptyDataset, newId } from '../services/demo';
+import { getEditingSession } from './editingSession';
 
 export class StorageError extends Error {
   constructor(message, raw = null) {
@@ -11,41 +12,6 @@ export class StorageError extends Error {
 export const STORAGE_VERSION = 1;
 export const storageKey = (mode) => `saldolab:v${STORAGE_VERSION}:${mode}`;
 const entities = ['accounts', 'categories', 'transactions', 'budgets'];
-// Separate tabs can cache localStorage snapshots even while operation locks are held.
-// Keep one writer per document/mode so an acknowledged save cannot be overwritten by that cache.
-const editorLeases = new WeakMap();
-
-function getEditorLease(lockManager, key) {
-  let leases = editorLeases.get(lockManager);
-  if (!leases) {
-    leases = new Map();
-    editorLeases.set(lockManager, leases);
-  }
-  if (leases.has(key)) return leases.get(key).ready;
-  const lease = { owned: false };
-  lease.ready = new Promise((resolve, reject) => {
-    lockManager
-      .request(`${key}:editor`, { ifAvailable: true }, (lock) => {
-        lease.owned = Boolean(lock);
-        resolve(lease);
-        if (!lock) return;
-        return new Promise((release) => {
-          globalThis.addEventListener?.(
-            'pagehide',
-            () => {
-              lease.owned = false;
-              release();
-            },
-            { once: true },
-          );
-        });
-      })
-      .catch(reject);
-  });
-  leases.set(key, lease);
-  return lease.ready;
-}
-
 export function createLocalRepository({
   mode = 'demo',
   storage,
@@ -54,22 +20,40 @@ export function createLocalRepository({
 } = {}) {
   if (!['demo', 'personal'].includes(mode)) throw new Error('Modo inválido.');
   const key = storageKey(mode);
-  let editorLease;
-  const withLock = async (operation) => {
-    if (!lockManager?.request) return operation();
+  const session = getEditingSession(key, lockManager);
+  let initialData;
+  const assertWritable = () => {
+    const access = session.getAccess();
+    if (access.canWrite) return;
+    throw new StorageError(
+      !access.supported
+        ? 'Este navegador não oferece edição segura entre abas. Use um navegador atualizado em HTTPS ou localhost. Os dados existentes continuam disponíveis para leitura e backup.'
+        : access.reason === 'blocked'
+          ? 'O navegador bloqueou a edição segura. Confira as permissões de armazenamento.'
+          : access.reason === 'other-tab'
+            ? 'A edição está reservada a outra aba. Encerre a edição nela e ative a edição nesta aba. Os dados foram preservados.'
+            : 'Esta aba está em modo somente leitura. Ative a edição para salvar alterações. A página será recarregada para conferir os dados atuais.',
+    );
+  };
+  const withWriteLock = async (operation) => {
+    assertWritable();
     try {
-      editorLease = await getEditorLease(lockManager, key);
-      return await lockManager.request(`${key}:operation`, operation);
+      return await lockManager.request(`${key}:operation`, () => {
+        assertWritable();
+        return operation();
+      });
     } catch (error) {
       if (error.name === 'SecurityError' || error.name === 'NotSupportedError') {
+        await session.stop();
         throw new StorageError(
-          'O navegador bloqueou o acesso seguro aos dados. Permita o armazenamento local e use HTTPS ou localhost.',
+          'O navegador bloqueou a edição segura. Recarregue a página e confira as permissões de armazenamento.',
         );
       }
       throw error;
     }
   };
   const read = () => {
+    session.noteRead();
     let raw;
     try {
       raw = (storage ?? window.localStorage).getItem(key);
@@ -79,9 +63,8 @@ export function createLocalRepository({
       );
     }
     if (raw === null) {
-      const data = validateDataset(mode === 'demo' ? seed() : emptyDataset());
-      write(data);
-      return data;
+      initialData ??= validateDataset(mode === 'demo' ? seed() : emptyDataset());
+      return structuredClone(initialData);
     }
     try {
       return validateDataset(JSON.parse(raw));
@@ -93,22 +76,22 @@ export function createLocalRepository({
     }
   };
   const write = (data) => {
-    if (!lockManager?.request) {
-      throw new StorageError(
-        'Este navegador não oferece edição segura entre abas. Use um navegador atualizado em HTTPS ou localhost. Os dados existentes continuam disponíveis para leitura e backup.',
-      );
-    }
-    if (!editorLease?.owned) {
-      throw new StorageError(
-        'A edição segura está reservada a outra aba ou à sessão anterior. Feche a aba editora e recarregue esta página para editar. Os dados foram preservados.',
-      );
-    }
+    assertWritable();
     const validated = validateDataset(data);
+    const serialized = JSON.stringify(validated);
     try {
-      (storage ?? window.localStorage).setItem(key, JSON.stringify(validated));
+      (storage ?? window.localStorage).setItem(key, serialized);
     } catch {
       throw new StorageError(
         'Não foi possível salvar. O armazenamento pode estar cheio ou bloqueado. Seus dados anteriores foram preservados.',
+      );
+    }
+    try {
+      if ((storage ?? window.localStorage).getItem(key) !== serialized)
+        throw new Error('Unconfirmed write');
+    } catch {
+      throw new StorageError(
+        'Não foi possível confirmar a gravação. Os dados podem ter sido salvos; recarregue e confira antes de tentar novamente.',
       );
     }
     return structuredClone(validated);
@@ -125,20 +108,24 @@ export function createLocalRepository({
   };
   return {
     mode,
+    getEditingAccess: session.getAccess,
+    subscribeEditing: session.subscribe,
+    startEditing: session.start,
+    stopEditing: session.stop,
     async snapshot() {
-      return withLock(() => structuredClone(read()));
+      return structuredClone(read());
     },
     async list(entity) {
       checkEntity(entity);
-      return withLock(() => structuredClone(read()[entity]));
+      return structuredClone(read()[entity]);
     },
     async getById(entity, id) {
       checkEntity(entity);
-      return withLock(() => structuredClone(read()[entity].find((row) => row.id === id) ?? null));
+      return structuredClone(read()[entity].find((row) => row.id === id) ?? null);
     },
     async create(entity, values) {
       checkEntity(entity);
-      return withLock(() => {
+      return withWriteLock(() => {
         const data = read();
         const row = { ...values, id: values.id || newId() };
         data[entity].push(row);
@@ -147,7 +134,7 @@ export function createLocalRepository({
     },
     async update(entity, id, values, { expected } = {}) {
       checkEntity(entity);
-      return withLock(() => {
+      return withWriteLock(() => {
         const data = read();
         const index = data[entity].findIndex((row) => row.id === id);
         if (index < 0) throw new Error('Registro não encontrado. Recarregue os dados.');
@@ -158,7 +145,7 @@ export function createLocalRepository({
     },
     async remove(entity, id, { expected } = {}) {
       checkEntity(entity);
-      return withLock(() => {
+      return withWriteLock(() => {
         const data = read();
         const current = data[entity].find((row) => row.id === id);
         if (!current) throw new Error('Registro não encontrado.');
@@ -183,20 +170,18 @@ export function createLocalRepository({
       });
     },
     async exportBackup() {
-      return withLock(() =>
-        JSON.stringify(
-          { app: 'SaldoLab', exportedAt: new Date().toISOString(), data: read() },
-          null,
-          2,
-        ),
+      return JSON.stringify(
+        { app: 'SaldoLab', exportedAt: new Date().toISOString(), data: read() },
+        null,
+        2,
       );
     },
     async importBackup(text) {
       const data = parseBackup(text);
-      return withLock(() => write(data));
+      return withWriteLock(() => write(data));
     },
     async reset() {
-      return withLock(() => write(mode === 'demo' ? seed() : emptyDataset()));
+      return withWriteLock(() => write(mode === 'demo' ? seed() : emptyDataset()));
     },
   };
 }

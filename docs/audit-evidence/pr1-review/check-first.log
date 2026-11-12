@@ -1,0 +1,57 @@
+
+> saldolab@1.0.0 check
+> npm run lint && npm run format:check && npm run test && npm run build
+
+
+> saldolab@1.0.0 lint
+> eslint . --max-warnings 0
+
+
+> saldolab@1.0.0 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> saldolab@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /workspace/saldolab
+
+
+ Test Files  7 passed (7)
+      Tests  105 passed (105)
+   Start at  03:11:07
+   Duration  21.96s (transform 375ms, setup 690ms, import 13.79s, tests 3.87s, environment 2.67s)
+
+
+> saldolab@1.0.0 build
+> vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+node_modules/zod/v4/core/regexes.js (74:0): A comment
+
+"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
+ * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
+ * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
+
+in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/zod/v4/core/util.js (400:0): A comment
+
+"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
+
+in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+✓ 2930 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                      1.09 kB │ gzip:  0.51 kB
+dist/assets/index-BEEqt6LG.css      36.12 kB │ gzip:  7.78 kB
+dist/assets/vendor-DgmYMAXd.css    231.10 kB │ gzip: 30.61 kB
+dist/assets/index-DExqvqqg.js       71.30 kB │ gzip: 22.16 kB
+dist/assets/vendor-BfChKbxx.js      90.71 kB │ gzip: 30.75 kB
+dist/assets/forms-BgtMQ4U9.js      127.86 kB │ gzip: 39.23 kB
+dist/assets/framework-BbJyW8w8.js  261.16 kB │ gzip: 83.10 kB
+dist/assets/charts-KIEDKTQG.js     362.24 kB │ gzip: 99.29 kB
+✓ built in 4.60s

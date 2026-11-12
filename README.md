@@ -54,11 +54,13 @@ React 19, Vite 7, JavaScript ES6+, Bootstrap 5 customizado, Lucide, React Router
 
 1. Explore a demonstração e seus gráficos.
 2. Selecione **Modo pessoal** no cabeçalho ou em Configurações.
-3. Cadastre contas e categorias antes das primeiras receitas ou despesas.
-4. Registre transações e defina orçamentos para o mês selecionado.
-5. Consulte Relatórios e exporte CSV ou backup JSON.
+3. Clique em **Ativar edição**; a página recarrega com os dados atuais.
+4. Cadastre contas e categorias antes das primeiras receitas ou despesas.
+5. Registre transações e defina orçamentos para o mês selecionado.
+6. Consulte Relatórios e exporte CSV ou backup JSON.
+7. Use **Encerrar edição** para liberar a edição em outra aba.
 
-Na versão corrigida, uma aba edita cada modo por vez. As demais preservam leitura e backup; feche a editora e recarregue a outra para editar. Use navegador atualizado em HTTPS ou localhost.
+As páginas abrem em **Somente leitura**, com controles de gravação financeira desabilitados. Consultar não bloqueia outras abas. A edição precisa ser ativada explicitamente e fica reservada a uma aba por modo; as demais continuam consultando e exportando. Após fechar ou encerrar a editora, ative a edição na outra aba. Atualizar uma consulta não a transforma em editora. Use navegador atualizado em HTTPS ou localhost.
 
 O CRUD valida a operação inteira antes de gravar. Exclusões exigem confirmação. Contas com movimentações e categorias vinculadas a transações ou orçamentos são protegidas. Alterações incompatíveis no tipo de uma categoria também são recusadas.
 
