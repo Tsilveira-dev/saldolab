@@ -23,12 +23,14 @@ jobs:
         run: npm install --save-exact pg jose @vercel/functions @neon/auth
       - name: Verify lockfile reproducibility
         run: npm ci
-      - name: Commit only dependency manifests to feature branch
+      - name: Format application code
+        run: npm run format
+      - name: Commit formatting and dependency manifests to feature branch
         run: |
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add package.json package-lock.json
+          git add package.json package-lock.json api src
           if ! git diff --cached --quiet; then
-            git commit -m "build: lock Neon API and Auth dependencies"
+            git commit -m "style: format Neon backend and frontend changes"
             git push origin HEAD:feat/neon-backend-foundation
           fi
