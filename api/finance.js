@@ -36,7 +36,9 @@ async function handle(request) {
     const entity = params.get('entity');
     if (!entity) {
       if (request.method !== 'GET') throw new ApiError(405, 'Operação não permitida.');
-      return jsonResponse(await withDatabase((client) => snapshot(client, userId), { readOnly: true }));
+      return jsonResponse(
+        await withDatabase((client) => snapshot(client, userId), { readOnly: true }),
+      );
     }
     assertEntity(entity);
     const recordId = params.get('id');
@@ -44,33 +46,44 @@ async function handle(request) {
 
     if (request.method === 'GET') {
       return jsonResponse(
-        await withDatabase(async (client) => {
-          const all = await listRecords(client, entity, userId);
-          if (!recordId) return all;
-          const row = all.find((item) => item.id === recordId);
-          if (!row) throw new ApiError(404, 'Registro não encontrado.');
-          return row;
-        }, { readOnly: true }),
+        await withDatabase(
+          async (client) => {
+            const all = await listRecords(client, entity, userId);
+            if (!recordId) return all;
+            const row = all.find((item) => item.id === recordId);
+            if (!row) throw new ApiError(404, 'Registro não encontrado.');
+            return row;
+          },
+          { readOnly: true },
+        ),
       );
     }
     if (request.method === 'POST') {
       if (recordId !== null) throw new ApiError(422, 'Não especifique ID no cadastro.');
       const body = await parseBody(request);
-      return jsonResponse(await withDatabase((client) => createRecord(client, entity, userId, body)), 201);
+      return jsonResponse(
+        await withDatabase((client) => createRecord(client, entity, userId, body)),
+        201,
+      );
     }
     if (!recordId) throw new ApiError(422, 'Informe o ID do registro.');
     if (request.method === 'PATCH') {
       const body = await parseBody(request);
-      return jsonResponse(await withDatabase((client) => updateRecord(client, entity, userId, recordId, body)));
+      return jsonResponse(
+        await withDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
+      );
     }
     // The delete body carries a required revision: callers cannot delete a stale row.
     const body = await parseBody(request);
     return jsonResponse(
-      await withDatabase((client) => removeRecord(client, entity, userId, recordId, body.expectedRevision)),
+      await withDatabase((client) =>
+        removeRecord(client, entity, userId, recordId, body.expectedRevision),
+      ),
     );
   } catch (error) {
     const mapped = mapDatabaseError(error);
-    if (mapped.status === 500) console.error('SaldoLab API operation failed:', error?.code ?? error?.name);
+    if (mapped.status === 500)
+      console.error('SaldoLab API operation failed:', error?.code ?? error?.name);
     return jsonResponse({ error: mapped.message }, mapped.status);
   }
 }

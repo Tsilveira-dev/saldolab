@@ -1,7 +1,12 @@
 import { ApiError } from './errors.js';
 import {
-  assertEntity, validateWrite, validateWholeRecord,
-  validateId, validateRevision, serializeRow, newRecordId,
+  assertEntity,
+  validateWrite,
+  validateWholeRecord,
+  validateId,
+  validateRevision,
+  serializeRow,
+  newRecordId,
 } from './validation.js';
 
 // SQL table/column identifiers are selected exclusively from the server-side allowlist.
@@ -16,8 +21,10 @@ export async function listRecords(client, entity, userId) {
 
 export async function snapshot(client, userId) {
   const [accounts, categories, transactions, budgets] = await Promise.all([
-    listRecords(client, 'accounts', userId), listRecords(client, 'categories', userId),
-    listRecords(client, 'transactions', userId), listRecords(client, 'budgets', userId),
+    listRecords(client, 'accounts', userId),
+    listRecords(client, 'categories', userId),
+    listRecords(client, 'transactions', userId),
+    listRecords(client, 'budgets', userId),
   ]);
   return { version: 1, accounts, categories, transactions, budgets };
 }
@@ -59,7 +66,8 @@ async function ensureReferenced(client, userId, entity, record) {
         'SELECT EXISTS (SELECT 1 FROM public.transactions WHERE user_id=$1 AND category_id=$2) OR EXISTS (SELECT 1 FROM public.budgets WHERE user_id=$1 AND category_id=$2) AS used',
         [userId, record.id],
       );
-      if (used.rows[0].used) throw new ApiError(409, 'Não é possível mudar o tipo de uma categoria em uso.');
+      if (used.rows[0].used)
+        throw new ApiError(409, 'Não é possível mudar o tipo de uma categoria em uso.');
     }
   }
 }
@@ -74,8 +82,13 @@ export async function createRecord(client, entity, userId, body) {
   const values = [row.id, userId, ...Object.keys(spec.fields).map((key) => row[key])];
   const placeholders = columns.map((_, index) => '$' + (index + 1)).join(', ');
   const { rows } = await client.query(
-    'INSERT INTO public.' + entity + ' (' + columns.join(', ') + ') VALUES (' +
-      placeholders + ') RETURNING *',
+    'INSERT INTO public.' +
+      entity +
+      ' (' +
+      columns.join(', ') +
+      ') VALUES (' +
+      placeholders +
+      ') RETURNING *',
     values,
   );
   return serializeRow(entity, rows[0]);
@@ -84,7 +97,8 @@ export async function createRecord(client, entity, userId, body) {
 export async function updateRecord(client, entity, userId, id, body) {
   const spec = assertEntity(entity);
   validateId(id);
-  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new ApiError(422, 'Dados inválidos.');
+  if (!body || typeof body !== 'object' || Array.isArray(body))
+    throw new ApiError(422, 'Dados inválidos.');
   const { expectedRevision, ...changes } = body;
   validateRevision(expectedRevision);
   validateWrite(entity, changes);
@@ -101,10 +115,15 @@ export async function updateRecord(client, entity, userId, id, body) {
   const fields = Object.keys(changes);
   const setSql = fields.map((key, index) => spec.fields[key] + ' = $' + (index + 3)).join(', ');
   const { rows } = await client.query(
-    'UPDATE public.' + entity + ' SET ' + setSql + ', revision = revision + 1' +
-    (entity === 'transactions' ? ', updated_at = now()' : '') +
-    ' WHERE user_id = $1 AND id = $2 AND revision = $' + (fields.length + 3) +
-    ' RETURNING *',
+    'UPDATE public.' +
+      entity +
+      ' SET ' +
+      setSql +
+      ', revision = revision + 1' +
+      (entity === 'transactions' ? ', updated_at = now()' : '') +
+      ' WHERE user_id = $1 AND id = $2 AND revision = $' +
+      (fields.length + 3) +
+      ' RETURNING *',
     [userId, id, ...fields.map((key) => changes[key]), expectedRevision],
   );
   if (!rows.length) throw new ApiError(409, 'Registro alterado em outra sessão.');
@@ -116,7 +135,8 @@ export async function removeRecord(client, entity, userId, id, expectedRevision)
   validateId(id);
   validateRevision(expectedRevision);
   const { rows } = await client.query(
-    'DELETE FROM public.' + entity +
+    'DELETE FROM public.' +
+      entity +
       ' WHERE user_id = $1 AND id = $2 AND revision = $3 RETURNING id',
     [userId, id, expectedRevision],
   );

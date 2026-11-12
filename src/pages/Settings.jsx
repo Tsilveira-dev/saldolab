@@ -72,7 +72,9 @@ export default function Settings() {
               {[
                 ['demo', 'Demonstração', 'Explore dados fictícios e experimente todas as funções.'],
                 ['personal', 'Pessoal', 'Comece do zero e organize suas próprias finanças.'],
-                ...(import.meta.env.VITE_NEON_AUTH_URL ? [['cloud', 'Nuvem', 'Acesse os dados da sua conta autenticada.']] : []),
+                ...(import.meta.env.VITE_NEON_AUTH_URL
+                  ? [['cloud', 'Nuvem', 'Acesse os dados da sua conta autenticada.']]
+                  : []),
               ].map(([value, title, description]) => (
                 <label className={`mode-option ${mode === value ? 'selected' : ''}`} key={value}>
                   <input
@@ -116,7 +118,9 @@ export default function Settings() {
             <span className="settings-large-icon">
               <HardDrive size={25} />
             </span>
-            <h3>{mode === 'cloud' ? 'Salvo no Neon PostgreSQL' : 'Salvo apenas neste navegador'}</h3>
+            <h3>
+              {mode === 'cloud' ? 'Salvo no Neon PostgreSQL' : 'Salvo apenas neste navegador'}
+            </h3>
             <p>
               {mode === 'cloud'
                 ? 'Seus registros estão vinculados à sua conta no Neon. Você pode exportar um backup JSON; a importação remota ainda não está disponível.'
@@ -151,9 +155,19 @@ export default function Settings() {
           </div>
         </Panel>
         <Panel
-          title={mode === 'demo' ? 'Restaurar demonstração' : mode === 'cloud' ? 'Ações remotas protegidas' : 'Limpar dados pessoais'}
+          title={
+            mode === 'demo'
+              ? 'Restaurar demonstração'
+              : mode === 'cloud'
+                ? 'Ações remotas protegidas'
+                : 'Limpar dados pessoais'
+          }
           subtitle={
-            mode === 'demo' ? 'Um novo começo para explorar' : mode === 'cloud' ? 'Exclusão total indisponível' : 'Operação permanente no modo pessoal'
+            mode === 'demo'
+              ? 'Um novo começo para explorar'
+              : mode === 'cloud'
+                ? 'Exclusão total indisponível'
+                : 'Operação permanente no modo pessoal'
           }
           className="full-width"
         >
@@ -161,10 +175,15 @@ export default function Settings() {
             <p>
               {mode === 'demo'
                 ? 'Restaure as contas e movimentações fictícias para o estado original.'
-                : mode === 'cloud' ? 'Por segurança, a exclusão completa dos dados na nuvem está desabilitada nesta versão.'
+                : mode === 'cloud'
+                  ? 'Por segurança, a exclusão completa dos dados na nuvem está desabilitada nesta versão.'
                   : 'Remova todos os registros pessoais deste navegador. Faça um backup primeiro.'}
             </p>
-            <button className="btn btn-outline-danger" onClick={reset} disabled={!canWrite || mode === 'cloud'}>
+            <button
+              className="btn btn-outline-danger"
+              onClick={reset}
+              disabled={!canWrite || mode === 'cloud'}
+            >
               <RotateCcw size={16} />
               {mode === 'demo' ? 'Restaurar demonstração' : 'Apagar dados pessoais'}
             </button>

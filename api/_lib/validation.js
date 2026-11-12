@@ -4,24 +4,44 @@ import { ApiError } from './errors.js';
 export const entities = {
   accounts: {
     fields: {
-      name: 'name', type: 'type', initialBalanceCents: 'initial_balance_cents',
-      color: 'color', icon: 'icon', createdAt: 'created_at',
+      name: 'name',
+      type: 'type',
+      initialBalanceCents: 'initial_balance_cents',
+      color: 'color',
+      icon: 'icon',
+      createdAt: 'created_at',
     },
   },
   categories: { fields: { name: 'name', type: 'type', color: 'color', icon: 'icon' } },
   transactions: {
     fields: {
-      description: 'description', type: 'type', amountCents: 'amount_cents',
-      categoryId: 'category_id', accountId: 'account_id',
-      destinationAccountId: 'destination_account_id', date: 'date',
-      status: 'status', notes: 'notes',
+      description: 'description',
+      type: 'type',
+      amountCents: 'amount_cents',
+      categoryId: 'category_id',
+      accountId: 'account_id',
+      destinationAccountId: 'destination_account_id',
+      date: 'date',
+      status: 'status',
+      notes: 'notes',
     },
   },
   budgets: { fields: { categoryId: 'category_id', month: 'month', limitCents: 'limit_cents' } },
 };
 const icons = new Set([
-  'wallet', 'bank', 'credit', 'food', 'home', 'car', 'book', 'heart',
-  'coffee', 'shopping', 'briefcase', 'chart', 'tag',
+  'wallet',
+  'bank',
+  'credit',
+  'food',
+  'home',
+  'car',
+  'book',
+  'heart',
+  'coffee',
+  'shopping',
+  'briefcase',
+  'chart',
+  'tag',
 ]);
 const types = {
   accounts: new Set(['checking', 'digital', 'savings', 'cash']),
@@ -34,8 +54,11 @@ const validDate = (value) => {
   return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value;
 };
 const validMonth = (value) => typeof value === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
-const string = (value, min, max) => typeof value === 'string'
-  && value.trim().length >= min && value.trim().length <= max && value.length <= max;
+const string = (value, min, max) =>
+  typeof value === 'string' &&
+  value.trim().length >= min &&
+  value.trim().length <= max &&
+  value.length <= max;
 const int = (value, min, max) => Number.isSafeInteger(value) && value >= min && value <= max;
 const color = (value) => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
 const id = (value) => typeof value === 'string' && value.length >= 1 && value.length <= 120;
@@ -55,7 +78,9 @@ export function validateWrite(entity, value, { create = false } = {}) {
   if (create && keys.length !== Object.keys(spec.fields).length)
     throw new ApiError(422, 'O cadastro precisa de todos os campos.');
 
-  const fail = () => { throw new ApiError(422, 'Há campos financeiros inválidos.'); };
+  const fail = () => {
+    throw new ApiError(422, 'Há campos financeiros inválidos.');
+  };
   for (const [key, field] of Object.entries(value)) {
     let okay;
     if (key === 'name' || key === 'description') okay = string(field, 2, 100);
@@ -68,19 +93,25 @@ export function validateWrite(entity, value, { create = false } = {}) {
     else if (key === 'month') okay = validMonth(field);
     else if (key === 'status') okay = field === 'confirmed' || field === 'pending';
     else if (key === 'notes') okay = text(field, 1000);
-    else if (key === 'destinationAccountId' || key === 'categoryId') okay = field === null || id(field);
+    else if (key === 'destinationAccountId' || key === 'categoryId')
+      okay = field === null || id(field);
     else if (key === 'accountId') okay = id(field);
     if (!okay) fail();
   }
   return value;
 }
 export function validateWholeRecord(entity, row) {
-  const all = Object.fromEntries(Object.keys(entities[entity].fields).map((key) => [key, row[key]]));
+  const all = Object.fromEntries(
+    Object.keys(entities[entity].fields).map((key) => [key, row[key]]),
+  );
   validateWrite(entity, all, { create: true });
   if (entity === 'transactions') {
     if (all.type === 'transfer') {
-      if (all.categoryId !== null || all.destinationAccountId === null ||
-        all.accountId === all.destinationAccountId) {
+      if (
+        all.categoryId !== null ||
+        all.destinationAccountId === null ||
+        all.accountId === all.destinationAccountId
+      ) {
         throw new ApiError(422, 'Transferências exigem duas contas distintas e não têm categoria.');
       }
     } else if (all.categoryId === null || all.destinationAccountId !== null) {
@@ -91,13 +122,16 @@ export function validateWholeRecord(entity, row) {
   }
   return all;
 }
-export function newRecordId() { return randomUUID(); }
+export function newRecordId() {
+  return randomUUID();
+}
 export function serializeRow(entity, row) {
   const data = { id: row.id };
   for (const [key, col] of Object.entries(entities[entity].fields)) {
     const value = row[col];
     data[key] = ['initialBalanceCents', 'amountCents', 'limitCents'].includes(key)
-      ? Number(value) : value;
+      ? Number(value)
+      : value;
   }
   return { ...data, revision: Number(row.revision) };
 }

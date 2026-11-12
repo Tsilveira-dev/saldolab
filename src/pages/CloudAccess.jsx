@@ -17,16 +17,23 @@ export default function CloudAccess() {
   useEffect(() => {
     if (!authClient) return;
     let active = true;
-    authClient.getSession()
+    authClient
+      .getSession()
       .then((result) => {
         if (active) {
           setUser(result.data?.user ?? null);
           setError(result.error?.message ?? '');
         }
       })
-      .catch(() => { if (active) setError('Não foi possível consultar a sessão.'); })
-      .finally(() => { if (active) setChecking(false); });
-    return () => { active = false; };
+      .catch(() => {
+        if (active) setError('Não foi possível consultar a sessão.');
+      })
+      .finally(() => {
+        if (active) setChecking(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function submit(event) {
@@ -62,8 +69,11 @@ export default function CloudAccess() {
       const result = await authClient.signOut();
       if (result.error) throw new Error(result.error.message);
       setUser(null);
-    } catch (cause) { setError(cause.message); }
-    finally { setSubmitting(false); }
+    } catch (cause) {
+      setError(cause.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function openCloud() {
@@ -79,8 +89,8 @@ export default function CloudAccess() {
           <h1 className="h4 m-0">SaldoLab na nuvem</h1>
         </div>
         <p className="text-secondary">
-          Dados pessoais protegidos em PostgreSQL, separados da demonstração e do armazenamento local.
-          O acesso à nuvem não envia automaticamente seus backups.
+          Dados pessoais protegidos em PostgreSQL, separados da demonstração e do armazenamento
+          local. O acesso à nuvem não envia automaticamente seus backups.
         </p>
         {!authClient ? (
           <div role="status" className="alert alert-info">
@@ -90,10 +100,13 @@ export default function CloudAccess() {
           <div role="status">Conferindo sua sessão…</div>
         ) : user ? (
           <div>
-            <p>Conectado como <strong>{user.email}</strong>.</p>
+            <p>
+              Conectado como <strong>{user.email}</strong>.
+            </p>
             <div className="d-flex gap-2 flex-wrap">
               <button className="btn btn-primary" onClick={openCloud} disabled={submitting}>
-                <Cloud size={16} className="me-2" /> {mode === 'cloud' ? 'Atualizar dados' : 'Abrir finanças na nuvem'}
+                <Cloud size={16} className="me-2" />{' '}
+                {mode === 'cloud' ? 'Atualizar dados' : 'Abrir finanças na nuvem'}
               </button>
               <button className="btn btn-outline-secondary" onClick={signOut} disabled={submitting}>
                 <LogOut size={16} className="me-2" /> Sair da conta
@@ -104,30 +117,63 @@ export default function CloudAccess() {
           <form onSubmit={submit} className="d-grid gap-3">
             <h2 className="h5">{signUp ? 'Criar conta' : 'Entrar na minha conta'}</h2>
             {signUp && (
-              <label>Seu nome
-                <input className="form-control mt-1" value={name} onChange={(event) => setName(event.target.value)}
-                  required minLength={2} maxLength={100} autoComplete="name" />
+              <label>
+                Seu nome
+                <input
+                  className="form-control mt-1"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  autoComplete="name"
+                />
               </label>
             )}
-            <label>E-mail
-              <input className="form-control mt-1" type="email" value={email}
-                onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+            <label>
+              E-mail
+              <input
+                className="form-control mt-1"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                autoComplete="email"
+              />
             </label>
-            <label>Senha
-              <input className="form-control mt-1" type="password" value={password}
-                onChange={(event) => setPassword(event.target.value)} required minLength={8}
-                autoComplete={signUp ? 'new-password' : 'current-password'} />
+            <label>
+              Senha
+              <input
+                className="form-control mt-1"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                minLength={8}
+                autoComplete={signUp ? 'new-password' : 'current-password'}
+              />
             </label>
             <button className="btn btn-primary" disabled={submitting} type="submit">
               <LogIn size={16} className="me-2" />
               {submitting ? 'Aguarde…' : signUp ? 'Criar conta' : 'Entrar'}
             </button>
-            <button className="btn btn-link" type="button" onClick={() => { setSignUp(!signUp); setError(''); }}>
+            <button
+              className="btn btn-link"
+              type="button"
+              onClick={() => {
+                setSignUp(!signUp);
+                setError('');
+              }}
+            >
               {signUp ? 'Já tenho uma conta' : 'Quero criar uma conta'}
             </button>
           </form>
         )}
-        {error && <div className="alert alert-danger mt-3" role="alert">{error}</div>}
+        {error && (
+          <div className="alert alert-danger mt-3" role="alert">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );
