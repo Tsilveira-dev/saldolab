@@ -1,11 +1,33 @@
 import { createAuthClient } from '@neon/auth';
 import { BetterAuthReactAdapter } from '@neon/auth/react/adapters';
 
-export const authClient = import.meta.env.VITE_NEON_AUTH_URL
-  ? createAuthClient(import.meta.env.VITE_NEON_AUTH_URL, {
+const baseURL = import.meta.env.VITE_NEON_AUTH_URL;
+let client = null;
+let configurationError = null;
+
+if (baseURL) {
+  try {
+    const url = new URL(baseURL.trim());
+    if (
+      url.protocol !== 'https:' ||
+      !url.pathname.replace(/\\/$/, '').endsWith('/auth') ||
+      url.username ||
+      url.password
+    ) {
+      throw new Error('Formato da URL inválido.');
+    }
+    client = createAuthClient(url.href.replace(/\\/$/, ''), {
       adapter: BetterAuthReactAdapter({ fetchOptions: { credentials: 'include' } }),
-    })
-  : null;
+    });
+  } catch {
+    // Never print the configured value: it might contain credentials by mistake.
+    configurationError =
+      'Não foi possível iniciar o Neon Auth. Confira se VITE_NEON_AUTH_URL é a Base URL HTTPS da branch development e termina em /auth.';
+  }
+}
+
+export const authClient = client;
+export const authClientConfigurationError = configurationError;
 
 export async function getAuthToken() {
   if (!authClient) throw new Error('A conexão com a nuvem não está configurada.');
