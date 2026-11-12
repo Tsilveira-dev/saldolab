@@ -123,6 +123,7 @@ export default function CloudAccess() {
             initialEmail={email}
             onBack={() => {
               setVerificationView(false);
+              setSignUp(false);
               setError('');
             }}
             onVerified={() => {

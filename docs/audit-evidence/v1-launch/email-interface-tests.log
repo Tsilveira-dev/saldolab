@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/saldolab
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  19:48:00
+   Duration  1.68s (transform 99ms, setup 176ms, import 156ms, tests 422ms, environment 714ms)
+

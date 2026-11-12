@@ -1,5 +1,7 @@
 # SaldoLab — auditoria do backend Neon, PR #3
 
+> Histórico da auditoria anterior, preservado. A preparação de lançamento e as novas evidências do Preview, e-mail, sessões e restauração estão em [lançamento v1.0](lancamento-v1.md).
+
 Data: 12/11/2026, America/Sao_Paulo. Repositório `Tsilveira-dev/saldolab`, branch exclusiva `feat/neon-backend-foundation`. Base da revisão: `0e4b26c`. [PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3).
 
 **Resultado: fundação validada em ambiente isolado e preparada para revisão técnica. O merge permanece condicionado aos gates externos abaixo; PR mantido como draft.** As execuções locais usam a API real, PostgreSQL 17 real e, na suíte Neon, Auth/JWKS/SQL reais. Não foi feito merge nem publicação em Production.

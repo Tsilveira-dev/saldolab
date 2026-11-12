@@ -1,5 +1,7 @@
 # Publicação e estado observado
 
+> Histórico da entrega local e do PR #1. Para a versão com nuvem no PR #3, usar [plano Production](migracao-production.md), [relatório v1.0](lancamento-v1.md) e [rollback](rollback.md). Os parágrafos históricos abaixo não significam que a versão atual dispense Auth ou variáveis privadas.
+
 ## Estado da auditoria
 
 - Repositório existente: https://github.com/Tsilveira-dev/saldolab.

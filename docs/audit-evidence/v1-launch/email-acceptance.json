@@ -1,0 +1,8 @@
+{
+  "recipientRedacted": true,
+  "inboxReceiptConfirmedByUser": true,
+  "verificationResetLoginReportedByUser": true,
+  "qaEmailVerifiedAtLastDatabaseCheck": false,
+  "conclusion": "BLOCKED: user report requires corroboration on the correct QA origin",
+  "manualFinancialAcceptance": "User reported missing category; fix passed desktop/mobile local and published tests; owner confirmation pending"
+}

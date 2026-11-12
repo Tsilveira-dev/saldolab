@@ -1,0 +1,8 @@
+{
+  "signupStatus": 200,
+  "signupSessionIssued": false,
+  "signinUnverifiedStatus": 403,
+  "signinUnverifiedSessionIssued": false,
+  "jwtHeaderIssued": false,
+  "errorCode": "EMAIL_NOT_VERIFIED"
+}

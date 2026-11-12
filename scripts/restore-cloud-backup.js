@@ -18,6 +18,8 @@ export function inspectBackup(text) {
 
 export async function restoreBackup(pool, { text, branchId, userId }) {
   const plan = inspectBackup(text);
+  if (['br-patient-forest-bcfzjc39', 'br-wandering-mouse-bc0u10oc'].includes(branchId))
+    throw new Error('RESTORE_PROTECTED_BRANCH');
   if (!branchId || !/^[A-Za-z0-9-]{1,120}$/.test(userId ?? ''))
     throw new Error('RESTORE_TARGET_REQUIRED');
   const client = await pool.connect();

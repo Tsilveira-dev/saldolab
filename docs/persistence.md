@@ -1,5 +1,7 @@
 # Persistência e preparação para banco remoto
 
+> O contrato local abaixo está preservado. O PR #3 implementa o repositório remoto e exportação cloud; a restauração administrativa isolada está documentada em [backups](backups.md). Importação pela interface da nuvem continua bloqueada.
+
 ## Contrato do repositório
 
 `createLocalRepository({ mode, storage?, seed?, lockManager? })` devolve um objeto com os seguintes métodos. `lockManager` usa `navigator.locks` por padrão e pode ser injetado nos testes. Todos retornam `Promise`; erros rejeitam a promessa.

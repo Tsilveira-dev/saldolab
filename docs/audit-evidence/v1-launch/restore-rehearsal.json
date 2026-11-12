@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "sourceBranch": "br-gentle-water-bc8ceb2q",
+  "restoreBranch": "br-cold-base-bc3peopn",
+  "physicalSnapshotFixtureMatches": true,
+  "sourceFixturePreserved": true,
+  "logicalRestore": {
+    "status": "restored",
+    "sha256": "ce098bd9a30d6ad787409e9e3382b3fe9bd6f1e7b69e4186d05a0cd9a09feba5",
+    "counts": {
+      "accounts": 2,
+      "categories": 2,
+      "transactions": 4,
+      "budgets": 1
+    },
+    "identitiesCopied": false,
+    "idsRemapped": true
+  },
+  "restoredBalanceCents": 275000,
+  "budgetSpentCents": 75000,
+  "duplicateRestoreBlocked": true,
+  "durationMs": 973,
+  "backupSha256": "ce098bd9a30d6ad787409e9e3382b3fe9bd6f1e7b69e4186d05a0cd9a09feba5",
+  "productionTouched": false
+}

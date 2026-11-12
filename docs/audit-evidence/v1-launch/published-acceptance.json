@@ -1,0 +1,84 @@
+{
+  "testedCodeCommit": "438e7a5c0301506e0d6cac223899770074b27fcc",
+  "deployment": "https://saldolab-1iwv53x4y-fair-play7.vercel.app",
+  "target": "preview",
+  "qaBranch": "br-gentle-water-bc8ceb2q",
+  "passed": 5,
+  "failed": 0,
+  "cases": [
+    {
+      "title": "Preview publicado exige verificação e não concede sessão antes dela",
+      "status": ["passed"],
+      "annotations": [
+        {
+          "type": "serial",
+          "location": {
+            "file": "/workspace/saldolab/tests/release/published.spec.js",
+            "line": 0,
+            "column": 0
+          }
+        }
+      ]
+    },
+    {
+      "title": "logout global da UI revoga sessões reais; janela do JWT emitido é registrada",
+      "status": ["passed"],
+      "annotations": [
+        {
+          "type": "serial",
+          "location": {
+            "file": "/workspace/saldolab/tests/release/published.spec.js",
+            "line": 0,
+            "column": 0
+          }
+        },
+        {
+          "type": "security-residual",
+          "description": "Global provider sessions revoked; already issued stateless JWT still accepted until exp (900s plus 10s tolerance)."
+        }
+      ]
+    },
+    {
+      "title": "mudança de senha revoga outro dispositivo e recuperação revoga todas as sessões",
+      "status": ["passed"],
+      "annotations": [
+        {
+          "type": "serial",
+          "location": {
+            "file": "/workspace/saldolab/tests/release/published.spec.js",
+            "line": 0,
+            "column": 0
+          }
+        }
+      ]
+    },
+    {
+      "title": "exporta backup da nuvem pela UI publicada sem revisões, sessões ou identidade",
+      "status": ["passed"],
+      "annotations": [
+        {
+          "type": "serial",
+          "location": {
+            "file": "/workspace/saldolab/tests/release/published.spec.js",
+            "line": 0,
+            "column": 0
+          }
+        }
+      ]
+    },
+    {
+      "title": "transação sem categorias conclui cadastro, edição e exclusão no Preview em desktop/mobile",
+      "status": ["passed"],
+      "annotations": [
+        {
+          "type": "serial",
+          "location": {
+            "file": "/workspace/saldolab/tests/release/published.spec.js",
+            "line": 0,
+            "column": 0
+          }
+        }
+      ]
+    }
+  ]
+}

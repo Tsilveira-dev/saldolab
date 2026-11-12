@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.js",
     "test:neon": "playwright test --config playwright.neon.config.js",
+    "test:release": "playwright test --config playwright.release.config.js",
     "backup:restore:qa": "node scripts/restore-cloud-backup.js",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

@@ -102,6 +102,9 @@ it('bloqueia branch incorreta antes de qualquer INSERT', async () => {
     restoreBackup(api.pool, { text: backup(), branchId: 'production', userId }),
   ).rejects.toThrow('RESTORE_QA_MARKER_REQUIRED');
   expect((await snapshot(api.pool, userId)).accounts).toEqual([]);
+  await expect(
+    restoreBackup(api.pool, { text: backup(), branchId: 'br-patient-forest-bcfzjc39', userId }),
+  ).rejects.toThrow('RESTORE_PROTECTED_BRANCH');
 });
 it('rejeita backup corrompido e identidade ausente, sem restauração parcial', async () => {
   const userId = await identity();
