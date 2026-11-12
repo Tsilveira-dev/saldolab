@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Cloud, LogIn, LogOut } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { authClient, authClientConfigurationError } from '../auth/neonClient';
+import PasswordRecovery from './PasswordRecovery';
 
 export default function CloudAccess() {
   const { mode, switchMode, reload } = useFinance();
@@ -13,6 +14,15 @@ export default function CloudAccess() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [resetToken] = useState(() => new URLSearchParams(window.location.search).get('token'));
+  const [resetError] = useState(() => new URLSearchParams(window.location.search).get('error'));
+  const [recoveryView, setRecoveryView] = useState(() => (resetToken || resetError ? 'reset' : null));
+
+  useEffect(() => {
+    if (!resetToken && !resetError) return;
+    // Keep one-time password reset tokens out of subsequent URLs and screenshots.
+    window.history.replaceState(window.history.state, '', window.location.pathname);
+  }, [resetToken, resetError]);
 
   useEffect(() => {
     if (!authClient) return;
@@ -99,6 +109,15 @@ export default function CloudAccess() {
           </div>
         ) : checking ? (
           <div role="status">Conferindo sua sessão…</div>
+        ) : recoveryView ? (
+          <PasswordRecovery
+            view={recoveryView}
+            token={resetToken}
+            onBack={() => {
+              setRecoveryView(null);
+              setError('');
+            }}
+          />
         ) : user ? (
           <div>
             <p>
@@ -158,6 +177,18 @@ export default function CloudAccess() {
               <LogIn size={16} className="me-2" />
               {submitting ? 'Aguarde…' : signUp ? 'Criar conta' : 'Entrar'}
             </button>
+            {!signUp && (
+              <button
+                className="btn btn-link"
+                type="button"
+                onClick={() => {
+                  setRecoveryView('forgot');
+                  setError('');
+                }}
+              >
+                Esqueci minha senha
+              </button>
+            )}
             <button
               className="btn btn-link"
               type="button"
