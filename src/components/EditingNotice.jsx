@@ -2,7 +2,15 @@ import { LockKeyhole, Pencil } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 
 export default function EditingNotice() {
-  const { canWrite, editingAccess, activatingEditing, activateEditing, stopEditing } = useFinance();
+  const { mode, canWrite, editingAccess, activatingEditing, activateEditing, stopEditing } = useFinance();
+  if (mode === 'cloud') return (
+    <section className="editing-notice" aria-label="Edição no banco de dados" role="status">
+      <Pencil size={19} aria-hidden="true" />
+      <div><strong>Dados protegidos na nuvem</strong>
+        <p>Suas alterações são verificadas pelo servidor e salvas no Neon. Conflitos entre sessões exigem recarregar os dados.</p>
+      </div>
+    </section>
+  );
   const descriptions = {
     view: 'Consulte e exporte seus dados livremente. Ativar a edição recarrega a página com os dados atuais e libera criar, alterar ou excluir registros.',
     'other-tab':
