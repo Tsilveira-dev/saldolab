@@ -142,6 +142,10 @@ describe('regras financeiras em centavos', () => {
     ['\t@SUM(1)', '\t@SUM(1)'],
     ['\u200b+1', '\u200b+1'],
     ['  -1+2', '  -1+2'],
+    ['  ＝1+1', '  ＝1+1'],
+    ['＋SUM(1)', '＋SUM(1)'],
+    ['－1+2', '－1+2'],
+    ['＠SUM(1)', '＠SUM(1)'],
   ])('neutraliza fórmulas CSV com prefixos invisíveis: %j', (input, expected) => {
     const csv = transactionsCsv([tx({ description: input })], [], []);
     expect(csv).toContain(`"'${expected}"`);
