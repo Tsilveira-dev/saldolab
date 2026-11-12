@@ -1,0 +1,176 @@
+{
+  "before": {
+    "overflowing": [
+      {
+        "tag": "TH",
+        "class": "",
+        "right": 427.71875,
+        "width": 48.75
+      },
+      {
+        "tag": "TH",
+        "class": "",
+        "right": 511.90625,
+        "width": 84.1875
+      },
+      {
+        "tag": "TH",
+        "class": "text-end",
+        "right": 601.78125,
+        "width": 89.875
+      },
+      {
+        "tag": "TH",
+        "class": "",
+        "right": 720,
+        "width": 118.21875
+      },
+      {
+        "tag": "SPAN",
+        "class": "visually-hidden",
+        "right": 613.78125,
+        "width": 1
+      }
+    ],
+    "scrollX": 0,
+    "scrollY": 0,
+    "innerWidth": 390,
+    "innerHeight": 844,
+    "visual": {
+      "offsetLeft": 0,
+      "offsetTop": 0,
+      "pageLeft": 0,
+      "pageTop": 0,
+      "width": 390,
+      "height": 844,
+      "scale": 1
+    },
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 1150.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "main": {
+      "x": 0,
+      "y": 66,
+      "width": 390,
+      "height": 1084.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "wrapper": {
+      "x": 20,
+      "y": 801.65625,
+      "width": 350,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 350,
+      "overflowX": "auto",
+      "overflowY": "auto"
+    },
+    "table": {
+      "x": 20,
+      "y": 801.65625,
+      "width": 700,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 700,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "button": {
+      "x": 616,
+      "y": 851.65625,
+      "width": 40,
+      "height": 44,
+      "scrollLeft": 0,
+      "scrollWidth": 40,
+      "clientWidth": 40,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    }
+  },
+  "after": {
+    "overflowing": [],
+    "scrollX": 0,
+    "scrollY": 307,
+    "innerWidth": 390,
+    "innerHeight": 844,
+    "visual": {
+      "offsetLeft": 0,
+      "offsetTop": 0,
+      "pageLeft": 0,
+      "pageTop": 307,
+      "width": 390,
+      "height": 844,
+      "scale": 1
+    },
+    "root": {
+      "x": 0,
+      "y": -307,
+      "width": 390,
+      "height": 1150.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "main": {
+      "x": 0,
+      "y": -241,
+      "width": 390,
+      "height": 1084.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "wrapper": {
+      "x": 20,
+      "y": 494.65625,
+      "width": 350,
+      "height": 108,
+      "scrollLeft": 350,
+      "scrollWidth": 700,
+      "clientWidth": 350,
+      "overflowX": "auto",
+      "overflowY": "auto"
+    },
+    "table": {
+      "x": -330,
+      "y": 494.65625,
+      "width": 700,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 700,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "button": {
+      "x": 266,
+      "y": 544.65625,
+      "width": 40,
+      "height": 44,
+      "scrollLeft": 0,
+      "scrollWidth": 40,
+      "clientWidth": 40,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    }
+  },
+  "dialogOpened": 1
+}

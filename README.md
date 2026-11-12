@@ -6,20 +6,26 @@
 
 **Prévia privada publicada com Sites:** https://saldolab-financas.boundlessonyx2.chatgpt.site
 
-**Código e histórico para download:** abra https://saldolab-financas.boundlessonyx2.chatgpt.site/entrega/index.html. O ZIP contém o projeto sem dependências; o Git bundle preserva os commits. A publicação Vercel continua pendente dos acessos descritos abaixo.
+**Código e histórico atuais:** https://github.com/Tsilveira-dev/saldolab. O ZIP e o Git bundle da prévia Sites são uma entrega anterior e não incluem as correções desta auditoria.
+
+**Aplicação publicada auditada:** https://saldolab.vercel.app. As correções estão em `fix/auditoria-saldolab` e aguardam revisão/autorização de merge e deploy. Veja o [diagnóstico inicial](docs/auditoria-inicial.md) e o [relatório final](docs/auditoria-final.md).
 
 ## Executar
 
 Requisitos: **Node.js 24 LTS**, npm e, para os scripts opcionais, Python 3.10 ou superior. Nenhuma variável de ambiente ou chave de API é necessária.
 
 ```bash
-# Extraia o ZIP entregue e abra a pasta do projeto:
+git clone https://github.com/Tsilveira-dev/saldolab.git
 cd saldolab
 npm ci
 npm run dev
 ```
 
-Abra a URL exibida pelo Vite, normalmente `http://localhost:5173`. Para servir o build de produção:
+Abra a URL exibida pelo Vite, normalmente `http://localhost:5173`.
+
+Para revisar as correções antes do merge, execute `git switch fix/auditoria-saldolab` na cópia clonada.
+
+Para servir o build de produção:
 
 ```bash
 npm run build
@@ -34,7 +40,7 @@ npm run preview
 - Categorias com tipo, nome, cor e ícone personalizáveis.
 - Orçamentos por categoria e mês, alertas de consumo e proteção contra duplicidade.
 - Relatórios com intervalo de datas, distribuição de gastos, evolução e recorrências identificadas em pelo menos três meses.
-- CSV com separador `;`, UTF-8 com BOM, valores em reais e proteção contra fórmulas em planilhas.
+- CSV com separador `;`, UTF-8 com BOM e valores em reais. A proteção contra fórmulas exige reforço para espaços/quebras iniciais; veja AUD-007 no relatório.
 - Backup JSON versionado, validação de vínculos e confirmação antes de importar.
 - Modo demonstração com seis meses de histórico e restauração; modo pessoal inicialmente vazio.
 - Preferências de modo e tema persistentes, navegação móvel, foco visível, formulários rotulados e modais acessíveis.
@@ -51,6 +57,8 @@ React 19, Vite 7, JavaScript ES6+, Bootstrap 5 customizado, Lucide, React Router
 3. Cadastre contas e categorias antes das primeiras receitas ou despesas.
 4. Registre transações e defina orçamentos para o mês selecionado.
 5. Consulte Relatórios e exporte CSV ou backup JSON.
+
+Na versão corrigida, uma aba edita cada modo por vez. As demais preservam leitura e backup; feche a editora e recarregue a outra para editar. Use navegador atualizado em HTTPS ou localhost.
 
 O CRUD valida a operação inteira antes de gravar. Exclusões exigem confirmação. Contas com movimentações e categorias vinculadas a transações ou orçamentos são protegidas. Alterações incompatíveis no tipo de uma categoria também são recusadas.
 
@@ -97,7 +105,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-A suíte usa Chromium em desktop e em viewport móvel. O servidor de preview é iniciado automaticamente. Para testar uma publicação já acessível, use `BASE_URL=https://seu-dominio.vercel.app npm run test:e2e`. Cada teste tem contexto de navegador isolado. O workflow GitHub Actions executa as verificações e publica relatórios de navegador como artefatos; também permite informar uma URL via **Run workflow**.
+A suíte usa Chromium em desktop e em viewport móvel. Os servidores de preview do build e de módulos Vite (somente para a prova de concorrência do repositório) são iniciados automaticamente. Em ambiente com Chromium do sistema, use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. Para testar uma publicação já acessível, use `BASE_URL=https://seu-dominio.vercel.app npm run test:e2e`. Cada teste tem contexto de navegador isolado. O workflow GitHub Actions executa as verificações e publica relatórios de navegador como artefatos; também permite informar uma URL via **Run workflow**.
 
 Os testes cobrem criação de receita e despesa, edição, confirmação de exclusão, indicadores, transferências, pendências, filtros, orçamentos, moeda, base zero, vínculos, modos e backup. Os testes React substituem apenas os componentes de gráficos, porque jsdom não tem layout SVG real; a renderização dos gráficos é verificada pela suíte de navegador.
 
@@ -121,9 +129,9 @@ Veja [Arquitetura](docs/architecture.md) e [Contrato do repositório e migraçã
 
 Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`; os assets são servidos diretamente. Não há segredos a configurar.
 
-Repositório criado: https://github.com/Tsilveira-dev/saldolab. O envio do código está em andamento; a primeira tentativa de push foi recusada pela conexão com HTTP 403. O histórico completo também está disponível no repositório local e no Git bundle que acompanha a entrega.
+Repositório publicado: https://github.com/Tsilveira-dev/saldolab. O código de `main` foi confirmado no GitHub; as correções de auditoria ficam em uma branch separada, sem merge automático.
 
-Vercel **não publicada**: a plataforma recusou a criação do projeto com HTTP 403. A prévia privada acima foi disponibilizada por Sites. Veja as ações humanas exatas em [docs/deployment.md](docs/deployment.md).
+A baseline está publicada em https://saldolab.vercel.app. A branch de auditoria bloqueia seu próprio deploy automático e não altera a versão publicada. O histórico de publicação está em [docs/deployment.md](docs/deployment.md).
 
 ## Capturas de tela
 

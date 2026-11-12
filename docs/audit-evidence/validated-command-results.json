@@ -1,0 +1,47 @@
+{
+  "environment": {
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "browser": "Chromium 156.0.8078.79",
+    "npm_config_cache": "work/npm-cache",
+    "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH": "/usr/bin/chromium"
+  },
+  "results": [
+    {
+      "command": "npm ci",
+      "exit_code": 0,
+      "duration_seconds": 8.8,
+      "log": "work/audit/validated-1.log"
+    },
+    {
+      "command": "npm run lint",
+      "exit_code": 0,
+      "duration_seconds": 2.4,
+      "log": "work/audit/validated-2.log"
+    },
+    {
+      "command": "npm run format:check",
+      "exit_code": 0,
+      "duration_seconds": 2.22,
+      "log": "work/audit/validated-3.log"
+    },
+    {
+      "command": "npm run test",
+      "exit_code": 0,
+      "duration_seconds": 16.72,
+      "log": "work/audit/validated-4.log"
+    },
+    {
+      "command": "npm run build",
+      "exit_code": 0,
+      "duration_seconds": 5.3,
+      "log": "work/audit/validated-5.log"
+    },
+    {
+      "command": "npm run test:e2e",
+      "exit_code": 0,
+      "duration_seconds": 130.17,
+      "log": "work/audit/validated-6.log"
+    }
+  ]
+}

@@ -1,0 +1,492 @@
+[
+  {
+    "timezoneId": "UTC",
+    "checks": [
+      {
+        "name": "centavos 0,10 + 0,20",
+        "passed": true
+      },
+      {
+        "name": "data não muda o dia",
+        "passed": true
+      },
+      {
+        "name": "virada para ano anterior",
+        "passed": true
+      },
+      {
+        "name": "virada para ano seguinte",
+        "passed": true
+      },
+      {
+        "name": "base zero sem infinito",
+        "passed": true
+      },
+      {
+        "name": "saldo consolidado",
+        "passed": true
+      },
+      {
+        "name": "saldo origem",
+        "passed": true
+      },
+      {
+        "name": "saldo destino",
+        "passed": true
+      },
+      {
+        "name": "totais confirmados e pendentes",
+        "passed": true
+      },
+      {
+        "name": "orçamento confirmado",
+        "passed": true
+      },
+      {
+        "name": "transferência não é receita nem despesa",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 0",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido -1",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido NaN",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1e3",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1,234",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "update inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "remove inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "dados preservados após operações inválidas",
+        "passed": true
+      }
+    ],
+    "today": "2026-11-11"
+  },
+  {
+    "timezoneId": "America/Sao_Paulo",
+    "checks": [
+      {
+        "name": "centavos 0,10 + 0,20",
+        "passed": true
+      },
+      {
+        "name": "data não muda o dia",
+        "passed": true
+      },
+      {
+        "name": "virada para ano anterior",
+        "passed": true
+      },
+      {
+        "name": "virada para ano seguinte",
+        "passed": true
+      },
+      {
+        "name": "base zero sem infinito",
+        "passed": true
+      },
+      {
+        "name": "saldo consolidado",
+        "passed": true
+      },
+      {
+        "name": "saldo origem",
+        "passed": true
+      },
+      {
+        "name": "saldo destino",
+        "passed": true
+      },
+      {
+        "name": "totais confirmados e pendentes",
+        "passed": true
+      },
+      {
+        "name": "orçamento confirmado",
+        "passed": true
+      },
+      {
+        "name": "transferência não é receita nem despesa",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 0",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido -1",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido NaN",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1e3",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1,234",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "update inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "remove inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "dados preservados após operações inválidas",
+        "passed": true
+      }
+    ],
+    "today": "2026-11-11"
+  },
+  {
+    "timezoneId": "America/New_York",
+    "checks": [
+      {
+        "name": "centavos 0,10 + 0,20",
+        "passed": true
+      },
+      {
+        "name": "data não muda o dia",
+        "passed": true
+      },
+      {
+        "name": "virada para ano anterior",
+        "passed": true
+      },
+      {
+        "name": "virada para ano seguinte",
+        "passed": true
+      },
+      {
+        "name": "base zero sem infinito",
+        "passed": true
+      },
+      {
+        "name": "saldo consolidado",
+        "passed": true
+      },
+      {
+        "name": "saldo origem",
+        "passed": true
+      },
+      {
+        "name": "saldo destino",
+        "passed": true
+      },
+      {
+        "name": "totais confirmados e pendentes",
+        "passed": true
+      },
+      {
+        "name": "orçamento confirmado",
+        "passed": true
+      },
+      {
+        "name": "transferência não é receita nem despesa",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 0",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido -1",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido NaN",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1e3",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1,234",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "update inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "remove inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "dados preservados após operações inválidas",
+        "passed": true
+      }
+    ],
+    "today": "2026-11-11"
+  },
+  {
+    "timezoneId": "Asia/Tokyo",
+    "checks": [
+      {
+        "name": "centavos 0,10 + 0,20",
+        "passed": true
+      },
+      {
+        "name": "data não muda o dia",
+        "passed": true
+      },
+      {
+        "name": "virada para ano anterior",
+        "passed": true
+      },
+      {
+        "name": "virada para ano seguinte",
+        "passed": true
+      },
+      {
+        "name": "base zero sem infinito",
+        "passed": true
+      },
+      {
+        "name": "saldo consolidado",
+        "passed": true
+      },
+      {
+        "name": "saldo origem",
+        "passed": true
+      },
+      {
+        "name": "saldo destino",
+        "passed": true
+      },
+      {
+        "name": "totais confirmados e pendentes",
+        "passed": true
+      },
+      {
+        "name": "orçamento confirmado",
+        "passed": true
+      },
+      {
+        "name": "transferência não é receita nem despesa",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 0",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido -1",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido NaN",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1e3",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1,234",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "update inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "remove inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "dados preservados após operações inválidas",
+        "passed": true
+      }
+    ],
+    "today": "2026-11-11"
+  },
+  {
+    "timezoneId": "Pacific/Kiritimati",
+    "checks": [
+      {
+        "name": "centavos 0,10 + 0,20",
+        "passed": true
+      },
+      {
+        "name": "data não muda o dia",
+        "passed": true
+      },
+      {
+        "name": "virada para ano anterior",
+        "passed": true
+      },
+      {
+        "name": "virada para ano seguinte",
+        "passed": true
+      },
+      {
+        "name": "base zero sem infinito",
+        "passed": true
+      },
+      {
+        "name": "saldo consolidado",
+        "passed": true
+      },
+      {
+        "name": "saldo origem",
+        "passed": true
+      },
+      {
+        "name": "saldo destino",
+        "passed": true
+      },
+      {
+        "name": "totais confirmados e pendentes",
+        "passed": true
+      },
+      {
+        "name": "orçamento confirmado",
+        "passed": true
+      },
+      {
+        "name": "transferência não é receita nem despesa",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 0",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido -1",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido NaN",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1e3",
+        "passed": true
+      },
+      {
+        "name": "formulário inválido 1,234",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "agregado inválido rejeitado",
+        "passed": true
+      },
+      {
+        "name": "update inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "remove inexistente rejeitado",
+        "passed": true
+      },
+      {
+        "name": "dados preservados após operações inválidas",
+        "passed": true
+      }
+    ],
+    "today": "2026-11-11"
+  }
+]
