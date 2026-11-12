@@ -42,7 +42,7 @@ export default function Categories() {
                 <EmptyState
                   title="Crie suas categorias"
                   description="Personalize nome, cor e ícone."
-                  action={() => setEditor({ entity: 'categories' })}
+                  action={() => setEditor({ entity: 'categories', initialType: type })}
                   label="Nova categoria"
                 />
               )}

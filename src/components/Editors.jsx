@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFinance } from '../context/FinanceContext';
@@ -42,13 +42,17 @@ export default function Editors() {
       key={`${editor.entity}-${editor.row?.id ?? 'new'}`}
       entity={editor.entity}
       row={editor.row}
+      initialType={editor.initialType}
       onClose={() => setEditor(null)}
     />
   );
 }
-function Editor({ entity, row, onClose }) {
-  const { data, month, save, canWrite } = useFinance();
+function Editor({ entity, row, initialType, onClose }) {
+  const { data, month, save, mutate, canWrite } = useFinance();
   const [error, setError] = useState('');
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const defaults = {
     transactions: {
       description: row?.description ?? '',
@@ -70,7 +74,7 @@ function Editor({ entity, row, onClose }) {
     },
     categories: {
       name: row?.name ?? '',
-      type: row?.type ?? 'expense',
+      type: row?.type ?? initialType ?? 'expense',
       color: row?.color ?? '#408f88',
       icon: row?.icon ?? 'tag',
     },
@@ -90,6 +94,7 @@ function Editor({ entity, row, onClose }) {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -97,6 +102,51 @@ function Editor({ entity, row, onClose }) {
     shouldFocusError: true,
   });
   const type = useWatch({ control, name: 'type' });
+  const selectedCategoryId = useWatch({ control, name: 'categoryId' });
+  const missingCategory =
+    entity === 'transactions' &&
+    type !== 'transfer' &&
+    !data.categories.some((category) => category.type === type);
+  useEffect(() => {
+    if (
+      entity === 'transactions' &&
+      type !== 'transfer' &&
+      selectedCategoryId &&
+      !data.categories.some(
+        (category) => category.id === selectedCategoryId && category.type === type,
+      )
+    )
+      setValue('categoryId', '');
+  }, [entity, type, selectedCategoryId, data.categories, setValue]);
+  async function createCategory() {
+    if (!canWrite || creatingCategory) return;
+    const parsed = categoryFormSchema.safeParse({
+      name: categoryName.trim(),
+      type,
+      color: '#408f88',
+      icon: 'tag',
+    });
+    if (!parsed.success) {
+      setCategoryError('Informe um nome de categoria entre 2 e 100 caracteres.');
+      return;
+    }
+    setCreatingCategory(true);
+    setCategoryError('');
+    try {
+      const created = await mutate(
+        (repo) => repo.create('categories', parsed.data),
+        'Categoria criada. Conclua a transação.',
+      );
+      if (created?.id) {
+        setValue('categoryId', created.id, { shouldValidate: true, shouldDirty: true });
+        setCategoryName('');
+      }
+    } catch (cause) {
+      setCategoryError(cause.message ?? 'Não foi possível criar a categoria.');
+    } finally {
+      setCreatingCategory(false);
+    }
+  }
   const submit = handleSubmit(async (values) => {
     setError('');
     try {
@@ -146,6 +196,7 @@ function Editor({ entity, row, onClose }) {
       className={`form-select ${errors[key] ? 'is-invalid' : ''}`}
       aria-invalid={Boolean(errors[key])}
       {...register(key)}
+      {...(key === 'categoryId' ? { value: selectedCategoryId ?? '' } : {})}
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map(([value, label]) => (
@@ -165,12 +216,12 @@ function Editor({ entity, row, onClose }) {
     <Modal
       title={`${row ? 'Editar' : 'Adicionar'} ${titles[entity]}`}
       onClose={onClose}
-      busy={isSubmitting}
+      busy={isSubmitting || creatingCategory}
     >
       <form onSubmit={submit} noValidate>
         <div className="modal-body-custom">
           <InlineError message={error} />
-          <fieldset className="form-grid" disabled={!canWrite}>
+          <fieldset className="form-grid" disabled={!canWrite || creatingCategory}>
             {entity === 'transactions' && (
               <>
                 {field(
@@ -245,9 +296,38 @@ function Editor({ entity, row, onClose }) {
                   />,
                   { className: 'full-width' },
                 )}
-                {(!data.accounts.length || !data.categories.length) && (
+                {missingCategory && (
+                  <div className="full-width alert alert-info">
+                    <p role="status">
+                      Você ainda não tem categorias de {type === 'income' ? 'receita' : 'despesa'}.
+                      Crie uma aqui para continuar; os dados desta transação serão mantidos.
+                    </p>
+                    <label className="d-block">
+                      Nome da nova categoria
+                      <input
+                        className="form-control mt-1"
+                        value={categoryName}
+                        maxLength={100}
+                        onChange={(event) => setCategoryName(event.target.value)}
+                        placeholder={type === 'income' ? 'Ex.: Salário' : 'Ex.: Alimentação'}
+                      />
+                    </label>
+                    <InlineError message={categoryError} />
+                    <button
+                      className="btn btn-outline-secondary mt-2"
+                      type="button"
+                      disabled={creatingCategory || categoryName.trim().length < 2}
+                      onClick={createCategory}
+                    >
+                      {creatingCategory
+                        ? 'Criando categoria…'
+                        : `Criar categoria de ${type === 'income' ? 'receita' : 'despesa'}`}
+                    </button>
+                  </div>
+                )}
+                {!data.accounts.length && (
                   <p className="form-note full-width">
-                    Cadastre suas contas e categorias antes de registrar receitas ou despesas.
+                    Cadastre uma conta na página Contas antes de registrar movimentações.
                   </p>
                 )}
               </>
@@ -330,10 +410,19 @@ function Editor({ entity, row, onClose }) {
           </fieldset>
         </div>
         <div className="modal-footer-custom">
-          <button type="button" disabled={isSubmitting} className="btn btn-light" onClick={onClose}>
+          <button
+            type="button"
+            disabled={isSubmitting || creatingCategory}
+            className="btn btn-light"
+            onClick={onClose}
+          >
             Cancelar
           </button>
-          <button type="submit" disabled={isSubmitting || !canWrite} className="btn btn-primary">
+          <button
+            type="submit"
+            disabled={isSubmitting || !canWrite || creatingCategory || missingCategory}
+            className="btn btn-primary"
+          >
             {isSubmitting ? 'Salvando…' : row ? 'Salvar alterações' : 'Adicionar registro'}
           </button>
         </div>

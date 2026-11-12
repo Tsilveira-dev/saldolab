@@ -173,9 +173,9 @@ export default function FinanceProvider({ children }) {
       );
     }
     const request = generation.current;
-    let next;
+    let next, result;
     try {
-      await operation(repository);
+      result = await operation(repository);
       next = await repository.snapshot();
     } catch (cause) {
       if (mode === 'cloud' && cause.status === 401 && request === generation.current) {
@@ -192,6 +192,7 @@ export default function FinanceProvider({ children }) {
     );
     setError(null);
     notify(message);
+    return result;
   };
   const switchMode = (value) => {
     repository.stopEditing();
