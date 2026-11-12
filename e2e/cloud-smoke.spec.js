@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.skip(!process.env.VITE_NEON_AUTH_URL, 'Neon Auth cloud smoke only runs with a configured test URL.');
+
 // A valid-looking public URL is enough to exercise Vite's Neon Auth initialization.
 // No real Neon credentials or account are used in CI.
 test('o Preview com Neon configurado renderiza a página de acesso sem tela branca', async ({
