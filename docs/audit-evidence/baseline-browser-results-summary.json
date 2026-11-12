@@ -1,0 +1,157 @@
+{
+  "source_report": "work/audit/baseline-browser-results.json",
+  "stats": {
+    "startTime": "2026-11-12T01:07:53.698Z",
+    "duration": 75752.392,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "cria, edita, persiste e exclui uma transação",
+      "project": "chromium",
+      "status": "unexpected",
+      "results": [
+        {
+          "status": "timedOut",
+          "errors": [
+            "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+            "Error: locator.selectOption: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Categoria', { exact: true })\u001b[22m\n\n\n  12 |   await dialog.getByLabel('Descrição', { exact: true }).fill('Teste ponta a ponta');\n  13 |   await dialog.getByLabel('Valor (R$)', { exact: true }).fill('35,20');\n> 14 |   await dialog.getByLabel('Categoria', { exact: true }).selectOption('food');\n     |                                                         ^\n  15 |   const month = await page.getByLabel('Mês de referência', { exact: true }).inputValue();\n  16 |   await dialog.getByLabel('Data', { exact: true }).fill(`${month}-10`);\n  17 |   await dialog.getByRole('button', { name: 'Adicionar registro' }).click();\n    at /workspace/saldolab/e2e/finance.spec.js:14:57"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "cria, edita, persiste e exclui uma transação",
+      "project": "mobile",
+      "status": "unexpected",
+      "results": [
+        {
+          "status": "timedOut",
+          "errors": [
+            "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+            "Error: locator.selectOption: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Categoria', { exact: true })\u001b[22m\n\n\n  12 |   await dialog.getByLabel('Descrição', { exact: true }).fill('Teste ponta a ponta');\n  13 |   await dialog.getByLabel('Valor (R$)', { exact: true }).fill('35,20');\n> 14 |   await dialog.getByLabel('Categoria', { exact: true }).selectOption('food');\n     |                                                         ^\n  15 |   const month = await page.getByLabel('Mês de referência', { exact: true }).inputValue();\n  16 |   await dialog.getByLabel('Data', { exact: true }).fill(`${month}-10`);\n  17 |   await dialog.getByRole('button', { name: 'Adicionar registro' }).click();\n    at /workspace/saldolab/e2e/finance.spec.js:14:57"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "navega por todas as páginas, mantém rotas diretas e evita overflow do documento",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "navega por todas as páginas, mantém rotas diretas e evita overflow do documento",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "isola o modo pessoal e permite voltar à demonstração",
+      "project": "chromium",
+      "status": "unexpected",
+      "results": [
+        {
+          "status": "timedOut",
+          "errors": [
+            "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+            "Error: locator.selectOption: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Modo de uso', { exact: true })\u001b[22m\n\n\n  50 | test('isola o modo pessoal e permite voltar à demonstração', async ({ page }) => {\n  51 |   await page.goto('/');\n> 52 |   await page.getByLabel('Modo de uso', { exact: true }).selectOption('personal');\n     |                                                         ^\n  53 |   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();\n  54 |   await page.reload();\n  55 |   await expect(page.getByLabel('Modo de uso', { exact: true })).toHaveValue('personal');\n    at /workspace/saldolab/e2e/finance.spec.js:52:57"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "isola o modo pessoal e permite voltar à demonstração",
+      "project": "mobile",
+      "status": "unexpected",
+      "results": [
+        {
+          "status": "timedOut",
+          "errors": [
+            "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+            "Error: locator.selectOption: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Modo de uso', { exact: true })\u001b[22m\n\n\n  50 | test('isola o modo pessoal e permite voltar à demonstração', async ({ page }) => {\n  51 |   await page.goto('/');\n> 52 |   await page.getByLabel('Modo de uso', { exact: true }).selectOption('personal');\n     |                                                         ^\n  53 |   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();\n  54 |   await page.reload();\n  55 |   await expect(page.getByLabel('Modo de uso', { exact: true })).toHaveValue('personal');\n    at /workspace/saldolab/e2e/finance.spec.js:52:57"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "protege conta em uso e exporta backup JSON",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "protege conta em uso e exporta backup JSON",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "cria orçamento, alerta duplicidade e alterna aparência",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "cria orçamento, alerta duplicidade e alterna aparência",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "registra aparência do dashboard e verifica ausência de erros de JavaScript",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "registra aparência do dashboard e verifica ausência de erros de JavaScript",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    }
+  ]
+}

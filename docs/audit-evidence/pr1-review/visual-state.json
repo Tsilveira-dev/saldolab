@@ -1,0 +1,42 @@
+[
+  {
+    "name": "desktop",
+    "reader": {
+      "locks": [],
+      "financialRaw": null,
+      "rootWidth": 1440,
+      "clientWidth": 1440
+    },
+    "writer": {
+      "locks": [
+        {
+          "clientId": "F2AECA8EB7E11BBCE258EE1C91707A96",
+          "mode": "exclusive",
+          "name": "saldolab:v1:demo:editor"
+        }
+      ],
+      "financialRaw": null
+    },
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "reader": {
+      "locks": [],
+      "financialRaw": null,
+      "rootWidth": 390,
+      "clientWidth": 390
+    },
+    "writer": {
+      "locks": [
+        {
+          "clientId": "0D29F0A34D5951EC74421FA12384E5B3",
+          "mode": "exclusive",
+          "name": "saldolab:v1:demo:editor"
+        }
+      ],
+      "financialRaw": null
+    },
+    "errors": []
+  }
+]

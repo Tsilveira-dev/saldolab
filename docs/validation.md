@@ -1,33 +1,33 @@
-# Verificação da entrega
+# Verificação do MVP
 
-Verificações executadas em 11 de novembro de 2026:
+O estado atual está no [relatório final A–F](auditoria-final.md), com evidências de comandos, testes, falhas reproduzidas e correções. O [diagnóstico inicial](auditoria-inicial.md) foi registrado antes das alterações de código.
 
-| Verificação                | Resultado                                                       |
-| -------------------------- | --------------------------------------------------------------- |
-| `npm run lint`             | Passou, sem avisos                                              |
-| `npm run format:check`     | Passou                                                          |
-| `npm run test`             | 65 testes passaram em 3 arquivos                                |
-| `npm run build`            | Passou; build estático gerado em `dist/`                        |
-| `npm run check`            | Passou (lint, formatação, testes e build)                       |
-| Python `unittest`          | 2 testes passaram                                               |
-| Gerador Python             | CSV de 54 transações gerado com seed 42, seis meses até 2026-11 |
-| Navegador desktop/mobile   | Pendente de execução; suíte configurada                         |
-| Publicação privada Sites   | Concluída, confirmada pelo serviço de hospedagem                |
-| CRUD em versão publicada   | Pendente de verificação em navegador                            |
-| Publicação GitHub e Vercel | Bloqueada por permissões externas                               |
+## Como repetir
 
-O Rollup removeu duas anotações de comentários de uma dependência Zod. O build terminou com sucesso. Os chunks JavaScript ficaram abaixo do aviso de 500 kB. Não há dependência de banco remoto.
+```bash
+npm ci
+npm run lint
+npm run format:check
+npm run test
+npm run build
+npm run test:e2e
+python3 -m unittest discover -s scripts -p 'test_*.py'
+npm audit
+```
 
-## Escopo dos testes
+Instale o navegador antes da sequência com `npx playwright install chromium`, quando necessário. Neste sandbox foi usado o Chromium do sistema, com `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`, e o cache npm ficou em `work/npm-cache` via `npm_config_cache`, pois o cache padrão não era gravável.
 
-- Vitest: valores monetários, saldos, transferências, pendências, filtros, orçamentos, base zero, datas e recorrências.
-- Repositório: CRUD das quatro entidades, persistência, vínculos, compatibilidade, backup, separação de modos, corrupção e cota indisponível.
-- React Testing Library: formulários reais, criação, edição, exclusão com confirmação, indicadores, filtros e alternância de modos.
-- Playwright: rotas diretas, CRUD persistente, proteção de conta, backup, tema, viewport móvel e renderização dos gráficos.
-- Python unittest: semente reproduzível, valores positivos, unicidade e mudança de ano.
+Vitest usa jsdom e substitui apenas os gráficos nos testes de integração da aplicação. Playwright valida SVG, tooltips, operações reais, desktop e emulação móvel em perfis isolados, com dados fictícios. A prova de concorrência também importa o módulo real pelo servidor Vite local. Os demais fluxos usam o build de produção.
 
-## Limitação do ambiente de desenvolvimento
+Os testes em https://saldolab.vercel.app avaliaram a baseline publicada. O certificado da inspeção HTTPS do ambiente não foi aceito diretamente pelo Chromium. Recursos reais foram entregues ao navegador pelo cliente HTTP Playwright com proxy/CA confiáveis e validação TLS ativa. Essa validação não substitui o teste de TLS direto em outro ambiente.
 
-A ferramenta `cua_repl.js` não foi oferecida nesta sessão gerenciada. A orientação de [Sites SKILL.md](skill://plugin_connector_1p_689987207de08191979cf68eca2941c6/sites/SKILL.md) determina: “If `cua_repl.js` is unavailable, skip browser QA”. Não foi iniciado um servidor de preview alternativo. A alternativa preparada é o workflow GitHub Actions, com artefatos de execução. O repositório já foi criado pelo responsável, mas o envio do código pela integração continua bloqueado por HTTP 403. A suíte Playwright deve ser considerada pendente até sua execução local ou em CI.
+As limitações anteriores de execução de navegador foram superadas para esta auditoria por Playwright/Chromium. A suíte já foi executada; não deve mais ser descrita como simplesmente pendente.
 
-As validações de layout móvel e renderização real dos gráficos não foram declaradas aprovadas apenas com base nos testes jsdom.
+## Limites
+
+- Percentual de cobertura de código não medido.
+- Emulação móvel não substitui Safari/iOS e Android reais.
+- A revisão de contraste é uma amostra computada do dashboard, sem certificação WCAG completa.
+- Não foi executado Excel ou LibreOffice para validar fórmulas no CSV.
+- Nenhum dado financeiro real ou perfil do usuário foi utilizado.
+- Sem merge, deploy, alteração de outros repositórios ou migração de dados.

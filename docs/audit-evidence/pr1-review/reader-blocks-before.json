@@ -1,0 +1,6 @@
+{
+  "reader_only_opened_dashboard": true,
+  "held_after_dashboard": ["saldolab:v1:demo:editor"],
+  "second_tab_error": "A edição segura está reservada a outra aba ou à sessão anterior. Feche a aba editora e recarregue esta página para editar. Os dados foram preservados.",
+  "create_button_was_enabled": true
+}

@@ -1,0 +1,172 @@
+{
+  "before": {
+    "overflowing": [
+      {
+        "tag": "SPAN",
+        "class": "visually-hidden",
+        "right": 613.78125,
+        "width": 1
+      },
+      {
+        "tag": "BUTTON",
+        "class": "mobile-fab",
+        "right": 594,
+        "width": 50
+      }
+    ],
+    "scrollX": 0,
+    "scrollY": 0,
+    "innerWidth": 614,
+    "innerHeight": 1329,
+    "visual": {
+      "offsetLeft": 0,
+      "offsetTop": 0,
+      "pageLeft": 0,
+      "pageTop": 0,
+      "width": 390,
+      "height": 844,
+      "scale": 1
+    },
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 1150.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 614,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "main": {
+      "x": 0,
+      "y": 66,
+      "width": 390,
+      "height": 1084.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "wrapper": {
+      "x": 20,
+      "y": 801.65625,
+      "width": 350,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 350,
+      "overflowX": "auto",
+      "overflowY": "auto"
+    },
+    "table": {
+      "x": 20,
+      "y": 801.65625,
+      "width": 700,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 700,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "button": {
+      "x": 616,
+      "y": 851.65625,
+      "width": 40,
+      "height": 44,
+      "scrollLeft": 0,
+      "scrollWidth": 40,
+      "clientWidth": 40,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    }
+  },
+  "after": {
+    "overflowing": [
+      {
+        "tag": "SPAN",
+        "class": "visually-hidden",
+        "right": 613.78125,
+        "width": 1
+      },
+      {
+        "tag": "BUTTON",
+        "class": "mobile-fab",
+        "right": 594,
+        "width": 50
+      }
+    ],
+    "scrollX": 0,
+    "scrollY": 0,
+    "innerWidth": 614,
+    "innerHeight": 1329,
+    "visual": {
+      "offsetLeft": 91,
+      "offsetTop": 452,
+      "pageLeft": 91,
+      "pageTop": 452,
+      "width": 390,
+      "height": 844,
+      "scale": 1
+    },
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 1150.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 614,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "main": {
+      "x": 0,
+      "y": 66,
+      "width": 390,
+      "height": 1084.65625,
+      "scrollLeft": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "wrapper": {
+      "x": 20,
+      "y": 801.65625,
+      "width": 350,
+      "height": 108,
+      "scrollLeft": 350,
+      "scrollWidth": 700,
+      "clientWidth": 350,
+      "overflowX": "auto",
+      "overflowY": "auto"
+    },
+    "table": {
+      "x": -330,
+      "y": 801.65625,
+      "width": 700,
+      "height": 108,
+      "scrollLeft": 0,
+      "scrollWidth": 700,
+      "clientWidth": 700,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    },
+    "button": {
+      "x": 266,
+      "y": 851.65625,
+      "width": 40,
+      "height": 44,
+      "scrollLeft": 0,
+      "scrollWidth": 40,
+      "clientWidth": 40,
+      "overflowX": "visible",
+      "overflowY": "visible"
+    }
+  },
+  "error": "locator.click: Timeout 4000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Editar QA receita', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button title=\"Editar\" class=\"icon-button\" aria-label=\"Editar QA receita\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <span>…</span> from <div class=\"inline-summary\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <th scope=\"col\">…</th> from <thead>…</thead> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"inline-summary\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <div class=\"inline-summary\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <th scope=\"col\">…</th> from <thead>…</thead> subtree intercepts pointer events\u001b[22m\n\u001b[2m  3 × retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"inline-summary\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <th scope=\"col\">…</th> from <thead>…</thead> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - <div class=\"inline-summary\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n",
+  "dialogOpened": 0
+}

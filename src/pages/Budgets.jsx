@@ -5,9 +5,12 @@ export default function Budgets() {
   const { data, month, accountId, setEditor, remove } = useFinance();
   const budgets = data.budgets
     .filter((budget) => budget.month === month)
-    .map((budget) => budgetProgress(budget, filterTransactions(data.transactions, { accountId })));
-  const spent = budgets.reduce((sum, budget) => sum + budget.spent, 0);
-  const limit = budgets.reduce((sum, budget) => sum + budget.limitCents, 0);
+    .map((record) => ({
+      record,
+      progress: budgetProgress(record, filterTransactions(data.transactions, { accountId })),
+    }));
+  const spent = budgets.reduce((sum, { progress }) => sum + progress.spent, 0);
+  const limit = budgets.reduce((sum, { record }) => sum + record.limitCents, 0);
   return (
     <>
       <PageHeading
@@ -41,7 +44,7 @@ export default function Budgets() {
       )}
       {budgets.length ? (
         <div className="budget-grid">
-          {budgets.map((budget) => {
+          {budgets.map(({ record, progress: budget }) => {
             const category = data.categories.find((category) => category.id === budget.categoryId);
             return (
               <article className="panel budget-card" key={budget.id}>
@@ -57,8 +60,8 @@ export default function Budgets() {
                   </span>
                   <RowActions
                     name={`orçamento ${category?.name}`}
-                    onEdit={() => setEditor({ entity: 'budgets', row: budget })}
-                    onDelete={() => remove('budgets', budget)}
+                    onEdit={() => setEditor({ entity: 'budgets', row: record })}
+                    onDelete={() => remove('budgets', record)}
                   />
                 </div>
                 <BudgetBar item={budget} category={category} />

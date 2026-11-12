@@ -6,7 +6,7 @@ import { parseBackup } from '../repositories/localRepository';
 import { InlineError } from '../components/ui';
 
 export default function StorageRecovery() {
-  const { error, mode, switchMode, reload, mutate, setConfirmation } = useFinance();
+  const { error, mode, switchMode, reload, mutate, setConfirmation, canWrite } = useFinance();
   const [importError, setImportError] = useState('');
   const ref = useRef(null);
   const recover = async (event) => {
@@ -44,7 +44,11 @@ export default function StorageRecovery() {
             Exportar conteúdo original
           </button>
         )}
-        <button className="btn btn-outline-secondary" onClick={() => ref.current.click()}>
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => ref.current.click()}
+          disabled={!canWrite}
+        >
           <Upload size={17} />
           Importar backup válido
         </button>
@@ -61,6 +65,7 @@ export default function StorageRecovery() {
       <input
         ref={ref}
         type="file"
+        disabled={!canWrite}
         accept=".json"
         onChange={recover}
         aria-label="Backup para recuperação"

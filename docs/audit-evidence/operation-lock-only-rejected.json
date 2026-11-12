@@ -1,0 +1,11 @@
+{
+  "persisted_count": 3035,
+  "persisted_cents": 3035,
+  "seed": 3000,
+  "successful_writes": 60,
+  "expected_count": 3060,
+  "observed_count": 3035,
+  "expected_cents": 3060,
+  "observed_cents": 3035,
+  "lost_records": 25
+}

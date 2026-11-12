@@ -1,0 +1,79 @@
+{
+  "source_report": "work/audit/functional-production-supplement.json",
+  "stats": {
+    "startTime": "2026-11-12T01:25:12.909Z",
+    "duration": 26138.763,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "corrupção mantém conteúdo bruto exportável e aceita recuperação explícita",
+      "project": "desktop",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "corrupção mantém conteúdo bruto exportável e aceita recuperação explícita",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto",
+      "project": "desktop",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "valores inválidos e transferência para a mesma conta não gravam dados",
+      "project": "desktop",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "valores inválidos e transferência para a mesma conta não gravam dados",
+      "project": "mobile",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "errors": []
+        }
+      ]
+    }
+  ]
+}

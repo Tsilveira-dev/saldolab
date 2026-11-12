@@ -1,0 +1,85 @@
+
+> saldolab@1.0.0 test:e2e
+> playwright test --grep receita 2500|despesa 750
+
+[WebServer] (node:30323) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:30354) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 2 workers
+
+(node:30373) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30372) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (4.5s)
+(node:30655) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › e2e/audit.spec.js:107:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (7.6s)
+(node:30795) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 [mobile] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (3.1s)
+  ✓  3 [mobile] › e2e/audit.spec.js:107:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (6.8s)
+
+
+  1) [chromium] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento ──
+
+    TypeError: Cannot read properties of null (reading 'width')
+
+      46 |   await expect(sector).toBeVisible();
+      47 |   const box = await sector.boundingBox();
+    > 48 |   await sector.hover({ position: { x: box.width - 5, y: box.height / 2 } });
+         |                                           ^
+      49 |   await expect(page.locator('.donut-wrap .chart-tooltip')).toContainText(amount);
+      50 | }
+      51 | async function goto(page, path) {
+        at assertExpenseTooltip (/workspace/saldolab/e2e/audit.spec.js:48:43)
+        at /workspace/saldolab/e2e/audit.spec.js:140:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento ────
+
+    TypeError: Cannot read properties of null (reading 'width')
+
+      46 |   await expect(sector).toBeVisible();
+      47 |   const box = await sector.boundingBox();
+    > 48 |   await sector.hover({ position: { x: box.width - 5, y: box.height / 2 } });
+         |                                           ^
+      49 |   await expect(page.locator('.donut-wrap .chart-tooltip')).toContainText(amount);
+      50 | }
+      51 | async function goto(page, path) {
+        at assertExpenseTooltip (/workspace/saldolab/e2e/audit.spec.js:48:43)
+        at /workspace/saldolab/e2e/audit.spec.js:140:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/audit-despesa-750-→-800-→-excluir-saldo-rosca-e-orçamento-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento ───
+    [mobile] › e2e/audit.spec.js:134:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento ─────
+  2 passed (17.7s)

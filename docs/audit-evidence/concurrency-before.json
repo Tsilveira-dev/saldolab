@@ -1,0 +1,9 @@
+{
+  "seed": 3000,
+  "successful_writes": 60,
+  "expected_count": 3060,
+  "observed_count": 3020,
+  "expected_cents": 3060,
+  "observed_cents": 3020,
+  "lost_records": 40
+}

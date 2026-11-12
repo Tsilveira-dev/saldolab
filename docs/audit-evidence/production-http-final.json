@@ -1,0 +1,90 @@
+[
+  {
+    "path": "/",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/transacoes",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/contas",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/categorias",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/orcamentos",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/relatorios",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/configuracoes",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/.env",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/.git/config",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/package.json",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  },
+  {
+    "path": "/entrega/saldolab.zip",
+    "http_status": 200,
+    "bytes": 1093,
+    "sha256": "015b00c3c89965f2216e520f8c5c94e20f24d6a43b846a5b2fb256d8bec7efb4",
+    "spa_html": true,
+    "baseline_entry": true
+  }
+]

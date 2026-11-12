@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FinanceContext } from './FinanceContext';
-import { createLocalRepository } from '../repositories/localRepository';
+import { createLocalRepository, StorageError } from '../repositories/localRepository';
+import {
+  rememberEditingRequest,
+  takeEditingRequest,
+  clearEditingRequest,
+} from '../repositories/editingRequest';
 import { currentMonth } from '../domain/finance';
 import { readPreferences, savePreferences } from '../repositories/preferencesRepository';
 
 export default function FinanceProvider({ children }) {
   const [preferences] = useState(readPreferences);
+  const activeMode = useRef(preferences.mode);
   const [mode, setMode] = useState(preferences.mode);
   const [month, setMonth] = useState(currentMonth);
   const [accountId, setAccountId] = useState('');
@@ -17,40 +23,91 @@ export default function FinanceProvider({ children }) {
   const [editor, setEditor] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
   const generation = useRef(0);
+  const startup = useRef(null);
+  const [activatingEditing, setActivatingEditing] = useState(false);
   const repository = useMemo(() => {
     try {
       return createLocalRepository({ mode });
     } catch (cause) {
       return {
+        getEditingAccess: () => ({ canWrite: false, supported: false, reason: 'blocked' }),
+        subscribeEditing: () => () => {},
+        startEditing: async () => false,
+        stopEditing: async () => {},
         snapshot: async () => {
           throw cause;
         },
       };
     }
   }, [mode]);
+  const [editingAccess, setEditingAccess] = useState(() => repository.getEditingAccess());
+  useEffect(() => {
+    if (!editingAccess.canWrite) return;
+    try {
+      rememberEditingRequest({ mode, month, accountId });
+    } catch {
+      // A reload safely returns to reading when navigation state is unavailable.
+    }
+  }, [editingAccess.canWrite, mode, month, accountId]);
   const reload = useCallback(async () => {
     const request = ++generation.current;
+    const requestMode = mode;
     setLoading(true);
     try {
       const next = await repository.snapshot();
-      if (request === generation.current) {
+      if (request === generation.current && requestMode === activeMode.current) {
         setData(next);
         setError(null);
       }
     } catch (cause) {
-      if (request === generation.current) setError(cause);
+      if (request === generation.current && requestMode === activeMode.current) setError(cause);
     } finally {
-      if (request === generation.current) setLoading(false);
+      if (request === generation.current && requestMode === activeMode.current) setLoading(false);
     }
-  }, [repository]);
+  }, [repository, mode]);
   useEffect(() => {
-    reload();
-    const onStorage = () => reload();
-    window.addEventListener('storage', onStorage);
-    return () => {
-      window.removeEventListener('storage', onStorage);
+    const unsubscribe = repository.subscribeEditing((access) => {
+      if (mode === activeMode.current) setEditingAccess(access);
+    });
+    if (!startup.current) {
+      const request = takeEditingRequest();
+      startup.current = {
+        request,
+        ready: request?.mode === mode ? repository.startEditing() : Promise.resolve(false),
+      };
+    }
+    let mounted = true;
+    startup.current.ready.then(() => {
+      if (!mounted) return;
+      const request = startup.current.request;
+      if (request?.mode === mode) {
+        if (/^\d{4}-\d{2}$/.test(request.month)) setMonth(request.month);
+        if (typeof request.accountId === 'string') setAccountId(request.accountId);
+        startup.current.request = null;
+      }
+      reload();
+    });
+    const onStorage = (event) => {
+      if (event.key === null || event.key === `saldolab:v1:${mode}`) reload();
     };
-  }, [reload]);
+    const onPageShow = (event) => {
+      if (!event.persisted) return;
+      clearEditingRequest();
+      setEditor(null);
+      setConfirmation(null);
+      setToast(null);
+      setEditingAccess(repository.getEditingAccess());
+      reload();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      mounted = false;
+      unsubscribe();
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('pageshow', onPageShow);
+    };
+  }, [reload, repository, mode]);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
@@ -63,9 +120,35 @@ export default function FinanceProvider({ children }) {
     return () => clearTimeout(timer);
   }, [toast]);
   const notify = useCallback((message, variant = 'success') => setToast({ message, variant }), []);
+  const activateEditing = () => {
+    try {
+      rememberEditingRequest({ mode, month, accountId });
+      setActivatingEditing(true);
+      window.location.reload();
+    } catch {
+      setActivatingEditing(false);
+      notify(
+        'Não foi possível ativar a edição. Confira as permissões do navegador; a consulta e o backup continuam disponíveis.',
+        'danger',
+      );
+    }
+  };
+  const stopEditing = async () => {
+    clearEditingRequest();
+    setEditor(null);
+    setConfirmation(null);
+    setToast(null);
+    await repository.stopEditing();
+  };
   const mutate = async (operation, message = 'Alterações salvas.') => {
+    if (!repository.getEditingAccess().canWrite) {
+      throw new StorageError(
+        'Esta aba está em modo somente leitura. Ative a edição para salvar alterações.',
+      );
+    }
     await operation(repository);
     const next = await repository.snapshot();
+    if (mode !== activeMode.current) return;
     setData(next);
     setAccountId((previous) =>
       next.accounts.some((account) => account.id === previous) ? previous : '',
@@ -74,21 +157,32 @@ export default function FinanceProvider({ children }) {
     notify(message);
   };
   const switchMode = (value) => {
+    repository.stopEditing();
+    clearEditingRequest();
+    setEditingAccess({
+      canWrite: false,
+      supported: Boolean(navigator.locks?.request),
+      reason: 'view',
+    });
+    activeMode.current = value;
     setEditor(null);
     setConfirmation(null);
     setData(null);
     setAccountId('');
     setMode(value);
   };
-  const save = async (entity, values, id) =>
-    mutate((repo) => (id ? repo.update(entity, id, values) : repo.create(entity, values)));
+  const save = async (entity, values, id, expected) =>
+    mutate((repo) =>
+      id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values),
+    );
   const remove = (entity, row) =>
     setConfirmation({
       title: 'Excluir registro?',
       message: `“${row.description ?? row.name ?? 'Este orçamento'}” será removido. Essa ação não pode ser desfeita.`,
       confirmLabel: 'Excluir registro',
       danger: true,
-      action: () => mutate((repo) => repo.remove(entity, row.id), 'Registro excluído.'),
+      action: () =>
+        mutate((repo) => repo.remove(entity, row.id, { expected: row }), 'Registro excluído.'),
     });
   return (
     <FinanceContext.Provider
@@ -104,6 +198,11 @@ export default function FinanceProvider({ children }) {
         loading,
         reload,
         repository,
+        canWrite: editingAccess.canWrite,
+        editingAccess,
+        activatingEditing,
+        activateEditing,
+        stopEditing,
         toast,
         setToast,
         notify,

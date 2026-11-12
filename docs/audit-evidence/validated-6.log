@@ -1,0 +1,73 @@
+
+> saldolab@1.0.0 test:e2e
+> playwright test
+
+[WebServer] (node:26690) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:26720) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 52 tests using 2 workers
+
+(node:26738) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:26739) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › e2e/audit.spec.js:91:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (8.3s)
+  ✓   2 [chromium] › e2e/audit.spec.js:115:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (9.2s)
+  ✓   3 [chromium] › e2e/audit.spec.js:136:1 › contas: criar, ler, editar, excluir e saldo inicial (3.1s)
+  ✓   4 [chromium] › e2e/audit.spec.js:157:1 › transferência preserva patrimônio e protege origem e destino (4.1s)
+  ✓   5 [chromium] › e2e/audit.spec.js:185:1 › categoria: criar, editar, associar e impedir exclusão em uso (4.6s)
+  ✓   6 [chromium] › e2e/audit.spec.js:209:1 › orçamento: gasto, percentual, edição, excedente, duplicata e exclusão (5.6s)
+  ✓   8 [chromium] › e2e/audit.spec.js:262:1 › backup exportado e importação validada preservam dados até a confirmação (2.8s)
+  ✓   7 [chromium] › e2e/audit.spec.js:241:1 › pendências e confirmação recalculam saldo sem misturar transferências (5.5s)
+  ✓   9 [chromium] › e2e/audit.spec.js:299:1 › corrupção mantém conteúdo bruto exportável e aceita recuperação explícita (2.8s)
+  ✓  10 [chromium] › e2e/audit.spec.js:321:1 › armazenamento bloqueado e cota esgotada não sobrescrevem os dados anteriores (3.2s)
+  ✓  12 [chromium] › e2e/audit.spec.js:383:1 › entrada HTML é apresentada como texto, sem executar scripts (2.9s)
+  ✓  11 [chromium] › e2e/audit.spec.js:351:1 › modos ficam separados e restauração da demonstração preserva o pessoal (6.1s)
+  ✓  13 [chromium] › e2e/audit.spec.js:391:1 › filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto (3.4s)
+  ✓  14 [chromium] › e2e/audit.spec.js:454:1 › valores inválidos e transferência para a mesma conta não gravam dados (3.5s)
+  ✓  15 [chromium] › e2e/audit.spec.js:476:1 › cinco resoluções, modo escuro, menu e modais sem overflow de documento (9.8s)
+  ✓  16 [chromium] › e2e/audit.spec.js:517:1 › datas e mês financeiro mantêm São Paulo em cinco fusos na virada do ano (11.4s)
+  ✓  17 [chromium] › e2e/concurrency.spec.js:48:1 › três abas preservam gravações confirmadas e recusam escritores concorrentes (7.6s)
+  ✓  18 [chromium] › e2e/concurrency.spec.js:112:1 › editar um formulário antigo não desfaz o valor salvo em outra aba (3.6s)
+  ✓  20 [chromium] › e2e/concurrency.spec.js:161:1 › sem Web Locks, preserva dados existentes e recusa edição sem proteção (2.2s)
+  ✓  19 [chromium] › e2e/concurrency.spec.js:142:1 › uma confirmação de exclusão antiga não remove a edição de outra aba (3.8s)
+  ✓  21 [chromium] › e2e/finance.spec.js:8:1 › cria, edita, persiste e exclui uma transação (4.4s)
+  ✓  22 [chromium] › e2e/finance.spec.js:31:1 › navega por todas as páginas, mantém rotas diretas e evita overflow do documento (4.1s)
+  ✓  23 [chromium] › e2e/finance.spec.js:52:1 › isola o modo pessoal e permite voltar à demonstração (2.5s)
+  ✓  24 [chromium] › e2e/finance.spec.js:61:1 › protege conta em uso e exporta backup JSON (2.2s)
+  ✓  25 [chromium] › e2e/finance.spec.js:73:1 › cria orçamento, alerta duplicidade e alterna aparência (2.7s)
+  ✓  26 [chromium] › e2e/finance.spec.js:87:1 › registra aparência do dashboard e verifica ausência de erros de JavaScript (2.0s)
+(node:28326) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:28334) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  27 [mobile] › e2e/audit.spec.js:91:1 › receita 2500 → 3000 → excluir: indicadores, gráfico e persistência (6.2s)
+  ✓  28 [mobile] › e2e/audit.spec.js:115:1 › despesa 750 → 800 → excluir: saldo, rosca e orçamento (6.1s)
+  ✓  30 [mobile] › e2e/audit.spec.js:157:1 › transferência preserva patrimônio e protege origem e destino (3.0s)
+  ✓  29 [mobile] › e2e/audit.spec.js:136:1 › contas: criar, ler, editar, excluir e saldo inicial (7.3s)
+  ✓  32 [mobile] › e2e/audit.spec.js:209:1 › orçamento: gasto, percentual, edição, excedente, duplicata e exclusão (3.3s)
+  ✓  31 [mobile] › e2e/audit.spec.js:185:1 › categoria: criar, editar, associar e impedir exclusão em uso (8.7s)
+  ✓  34 [mobile] › e2e/audit.spec.js:262:1 › backup exportado e importação validada preservam dados até a confirmação (1.9s)
+  ✓  33 [mobile] › e2e/audit.spec.js:241:1 › pendências e confirmação recalculam saldo sem misturar transferências (4.3s)
+  ✓  35 [mobile] › e2e/audit.spec.js:299:1 › corrupção mantém conteúdo bruto exportável e aceita recuperação explícita (2.4s)
+  ✓  36 [mobile] › e2e/audit.spec.js:321:1 › armazenamento bloqueado e cota esgotada não sobrescrevem os dados anteriores (2.4s)
+  ✓  38 [mobile] › e2e/audit.spec.js:383:1 › entrada HTML é apresentada como texto, sem executar scripts (2.1s)
+  ✓  37 [mobile] › e2e/audit.spec.js:351:1 › modos ficam separados e restauração da demonstração preserva o pessoal (5.2s)
+  ✓  39 [mobile] › e2e/audit.spec.js:391:1 › filtros combinados, datas, relatórios e CSV refletem o mesmo conjunto (3.2s)
+  ✓  40 [mobile] › e2e/audit.spec.js:454:1 › valores inválidos e transferência para a mesma conta não gravam dados (3.3s)
+  ✓  42 [mobile] › e2e/audit.spec.js:517:1 › datas e mês financeiro mantêm São Paulo em cinco fusos na virada do ano (11.0s)
+  ✓  41 [mobile] › e2e/audit.spec.js:476:1 › cinco resoluções, modo escuro, menu e modais sem overflow de documento (15.5s)
+  ✓  44 [mobile] › e2e/concurrency.spec.js:112:1 › editar um formulário antigo não desfaz o valor salvo em outra aba (3.0s)
+  ✓  43 [mobile] › e2e/concurrency.spec.js:48:1 › três abas preservam gravações confirmadas e recusam escritores concorrentes (6.9s)
+  ✓  46 [mobile] › e2e/concurrency.spec.js:161:1 › sem Web Locks, preserva dados existentes e recusa edição sem proteção (3.2s)
+  ✓  45 [mobile] › e2e/concurrency.spec.js:142:1 › uma confirmação de exclusão antiga não remove a edição de outra aba (4.2s)
+  ✓  47 [mobile] › e2e/finance.spec.js:8:1 › cria, edita, persiste e exclui uma transação (4.5s)
+  ✓  48 [mobile] › e2e/finance.spec.js:31:1 › navega por todas as páginas, mantém rotas diretas e evita overflow do documento (5.9s)
+  ✓  49 [mobile] › e2e/finance.spec.js:52:1 › isola o modo pessoal e permite voltar à demonstração (3.3s)
+  ✓  50 [mobile] › e2e/finance.spec.js:61:1 › protege conta em uso e exporta backup JSON (3.2s)
+  ✓  51 [mobile] › e2e/finance.spec.js:73:1 › cria orçamento, alerta duplicidade e alterna aparência (2.8s)
+  ✓  52 [mobile] › e2e/finance.spec.js:87:1 › registra aparência do dashboard e verifica ausência de erros de JavaScript (2.6s)
+
+  52 passed (2.2m)

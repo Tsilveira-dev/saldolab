@@ -4,11 +4,12 @@ import { createDemoData } from '../services/demo';
 import { totals } from '../domain/finance';
 
 let repo;
-beforeEach(() => {
+beforeEach(async () => {
   repo = createLocalRepository({
     storage: window.localStorage,
     seed: () => createDemoData('2026-11'),
   });
+  await repo.startEditing();
 });
 const transaction = {
   description: 'Novo lançamento',
@@ -22,6 +23,23 @@ const transaction = {
   notes: '',
 };
 describe('repositório assíncrono e integridade', () => {
+  it('recusa IDs duplicados sem modificar o agregado', async () => {
+    await repo.create('transactions', { ...transaction, id: 'qa-unique' });
+    const before = await repo.snapshot();
+    await expect(repo.create('transactions', { ...transaction, id: 'qa-unique' })).rejects.toThrow(
+      'duplicados',
+    );
+    expect(await repo.snapshot()).toEqual(before);
+  });
+  it('trata consultas e alterações de registros inexistentes sem efeitos colaterais', async () => {
+    const before = await repo.snapshot();
+    expect(await repo.getById('transactions', 'missing')).toBeNull();
+    await expect(repo.update('transactions', 'missing', { amountCents: 100 })).rejects.toThrow(
+      'não encontrado',
+    );
+    await expect(repo.remove('transactions', 'missing')).rejects.toThrow('não encontrado');
+    expect(await repo.snapshot()).toEqual(before);
+  });
   it('cria receita, consulta por id e persiste após recriar o repositório', async () => {
     const created = await repo.create('transactions', transaction);
     const reopened = createLocalRepository();
@@ -115,6 +133,7 @@ describe('repositório assíncrono e integridade', () => {
   });
   it('mantém modos separados e restaura apenas a demonstração', async () => {
     const personal = createLocalRepository({ mode: 'personal' });
+    await personal.startEditing();
     expect((await personal.snapshot()).accounts).toEqual([]);
     await personal.create('accounts', {
       name: 'Pessoal',
@@ -130,6 +149,7 @@ describe('repositório assíncrono e integridade', () => {
   it('exporta e importa backup com todos os dados', async () => {
     const backup = await repo.exportBackup();
     const personal = createLocalRepository({ mode: 'personal' });
+    await personal.startEditing();
     await personal.importBackup(backup);
     expect(await personal.snapshot()).toEqual(await repo.snapshot());
   });

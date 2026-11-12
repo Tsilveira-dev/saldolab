@@ -1,0 +1,41 @@
+{
+  "commands": [
+    {
+      "command": "npm ci",
+      "exit_code": 254,
+      "duration_seconds": 8.88,
+      "log": "work/audit/verified-1.log"
+    },
+    {
+      "command": "npm run lint",
+      "exit_code": 127,
+      "duration_seconds": 0.3,
+      "log": "work/audit/verified-2.log"
+    },
+    {
+      "command": "npm run format:check",
+      "exit_code": 127,
+      "duration_seconds": 0.35,
+      "log": "work/audit/verified-3.log"
+    },
+    {
+      "command": "npm run test",
+      "exit_code": 127,
+      "duration_seconds": 0.29,
+      "log": "work/audit/verified-4.log"
+    },
+    {
+      "command": "npm run build",
+      "exit_code": 127,
+      "duration_seconds": 0.26,
+      "log": "work/audit/verified-5.log"
+    },
+    {
+      "command": "npm run test:e2e",
+      "exit_code": 1,
+      "duration_seconds": 0.82,
+      "log": "work/audit/verified-6.log"
+    }
+  ],
+  "cause": "Default npm cache /home/agent/.npm was unavailable for writes in this sandbox; dependency installation failed and subsequent commands had missing binaries. Retried with npm_config_cache in work/npm-cache. No TLS checks disabled."
+}
