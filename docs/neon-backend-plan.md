@@ -4,7 +4,6 @@
 **Data:** 2026-11-12
 **Base:** main após merge do PR #1. O PR #2 (CSV/contraste) é independente e permanece em revisão.
 
-
 ## Progresso verificado (2026-11-12)
 
 - Organização Neon no plano Free; projeto `saldolab` (ID `soft-term-72911921`), AWS `us-east-1`, PostgreSQL 17.
@@ -44,16 +43,17 @@ Evoluir o SaldoLab (React + Vite + Bootstrap, hospedado na Vercel) para aplicaç
 
 **Identidade:** usuários e sessões são geridos pelo Neon Auth no esquema neon_auth, sem duplicar senhas. User ID é texto opaco validado a partir do contexto autenticado.
 
-| Tabela | Campos principais | Regras |
-|---|---|---|
-| accounts | id UUID, user_id TEXT, name, type, initial_balance_cents BIGINT, created_at, revision | Uma conta sempre pertence a um usuário |
-| categories | id UUID, user_id TEXT, name, type, color, icon, revision | Tipo income/expense; proteção quando usada |
+| Tabela       | Campos principais                                                                                                                                                          | Regras                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| accounts     | id UUID, user_id TEXT, name, type, initial_balance_cents BIGINT, created_at, revision                                                                                      | Uma conta sempre pertence a um usuário                  |
+| categories   | id UUID, user_id TEXT, name, type, color, icon, revision                                                                                                                   | Tipo income/expense; proteção quando usada              |
 | transactions | id UUID, user_id TEXT, description, type, amount_cents BIGINT, category_id, account_id, destination_account_id, date DATE, status, notes, revision, created_at, updated_at | Receitas/despesas/transferências com vínculos coerentes |
-| budgets | id UUID, user_id TEXT, category_id, month CHAR(7), limit_cents BIGINT, revision | UNIQUE(user_id, category_id, month) |
+| budgets      | id UUID, user_id TEXT, category_id, month CHAR(7), limit_cents BIGINT, revision                                                                                            | UNIQUE(user_id, category_id, month)                     |
 
 Propriedade da linha: aplicar user_id em **todas** as consultas e mutações. Definir constraints e FKs de propriedade (por exemplo, referência composta user_id + account_id) para impedir que uma transação aponte para conta ou categoria de outra pessoa. Sem cascade de exclusão de contas/categorias em uso.
 
 Regras financeiras:
+
 - Montantes em centavos inteiros, positivos nas transações; validar limites, precisão e serialização de BIGINT sem perda de precisão em JavaScript.
 - Transferência entre duas contas distintas de um mesmo usuário; uma transação representa ambos os lados, sem receita/despesa fictícia.
 - Transferências e pendentes são excluídas das somas respectivas conforme o contrato atual.
