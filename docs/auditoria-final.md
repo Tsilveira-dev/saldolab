@@ -53,7 +53,7 @@ Ambiente local: Node 24.22.1, npm 11.9.0 e Chromium 156.0.8078.79. O comando E2E
 
 Provas do BFCache: [consulta desktop](audit-evidence/pr1-review/bfcache-reader-chromium.json), [editora desktop](audit-evidence/pr1-review/bfcache-editor-chromium.json), [consulta mobile](audit-evidence/pr1-review/bfcache-reader-mobile.json), [editora mobile](audit-evidence/pr1-review/bfcache-editor-mobile.json). As identidades antes/depois são iguais e `restored` é verdadeiro. O teste exige restauração real para a consulta; para a antiga editora, aceita também o carregamento novo que navegadores podem escolher e verifica o mesmo comportamento seguro. Nesta execução local ambos os caminhos de editora foram realmente restaurados do cache.
 
-O Playwright desabilita BFCache por padrão. O arquivo de ciclo de vida remove explicitamente essa flag. O Voltar aguarda `commit` e o estado da aplicação, pois uma restauração do cache não dispara um novo `load`. As datas financeiras são fixadas sem substituir Navigation Timing ou o relógio das animações.
+O Playwright desabilita BFCache por padrão. O arquivo de ciclo de vida remove explicitamente essa flag e usa `channel: chromium`, com o binário completo e o novo modo headless. O headless shell padrão do Playwright não restaurou documentos no CI, apesar de os controles e dados estarem corretos. O Voltar aguarda `commit` e o estado da aplicação, pois uma restauração do cache não dispara um novo `load`. As datas financeiras são fixadas sem substituir Navigation Timing ou o relógio das animações.
 
 ### Falhas intermediárias detectadas e resolvidas
 
@@ -63,7 +63,9 @@ O Playwright desabilita BFCache por padrão. O arquivo de ciclo de vida remove e
 - Os primeiros testes de BFCache aguardavam `load` e expiravam após a restauração já ter ocorrido. Foram corrigidos para aguardar `commit` e verificar DOM, identidade e `pageshow.persisted`.
 - A primeira asserção do FAB em desktop procurava um botão oculto por CSS pelo papel acessível. A verificação passou a conferir o atributo `disabled` no elemento existente.
 
-Essas rodadas foram investigadas antes da execução completa final de 105 testes de JavaScript e 74 de navegador.
+A primeira execução no GitHub Actions teve 105 testes Vitest aprovados e 72/74 E2E: os dois casos de consulta retornaram um documento novo, falhando na exigência de BFCache real. A suíte de ciclo de vida passou a selecionar o canal Chromium completo, mantendo as asserções de identidade e `pageshow.persisted`. [Registro da execução](audit-evidence/pr1-review/ci-first-summary.json). Não foi removida a exigência de cache real para tornar o CI verde.
+
+A execução local completa registrou 105 testes de JavaScript e 74 de navegador aprovados; a seleção explícita do canal de navegador foi rechecada antes do novo envio.
 
 ## C. Problemas identificados nesta revisão
 

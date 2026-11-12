@@ -1,0 +1,23 @@
+
+> saldolab@1.0.0 test:e2e
+> playwright test e2e/editing-lifecycle.spec.js --grep histórico com BFCache
+
+[WebServer] (node:47004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 2 workers
+
+(node:47023) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:47022) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: consulta recupera dados atuais sem retomar permissão antiga (7.8s)
+  ✓  2 [chromium] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: editora libera o lock sem retomar permissão antiga (7.8s)
+(node:47336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:47345) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [mobile] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: consulta recupera dados atuais sem retomar permissão antiga (5.4s)
+  ✓  4 [mobile] › e2e/editing-lifecycle.spec.js:263:5 › histórico com BFCache habilitado › sair e Voltar: editora libera o lock sem retomar permissão antiga (5.1s)
+
+  4 passed (18.0s)

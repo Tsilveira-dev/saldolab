@@ -4,6 +4,9 @@ import { activateEditing, setFinancialTime } from './helpers';
 
 // Playwright disables BFCache by default; use the real cached-document path here.
 test.use({
+  // The default headless shell does not restore BFCache documents in CI.
+  // Use the full Chromium binary with its new headless mode instead.
+  channel: 'chromium',
   launchOptions: {
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
       ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
@@ -283,7 +286,14 @@ test.describe('histórico com BFCache habilitado', () => {
         page.getByRole('button', { name: 'Nova transação', exact: true }),
       ).toBeDisabled();
       await expect(page.getByText('QA durante ausência', { exact: true })).toBeVisible();
-      const lifecycle = await page.evaluate(() => window.qaLifecycle);
+      const lifecycle = await page.evaluate(() => {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        return {
+          ...window.qaLifecycle,
+          navigationType: navigation?.type,
+          notRestoredReasons: navigation?.notRestoredReasons?.toJSON?.() ?? null,
+        };
+      });
       const evidencePath = info.outputPath('lifecycle.json');
       await writeFile(
         evidencePath,

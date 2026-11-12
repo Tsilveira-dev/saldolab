@@ -1,0 +1,25 @@
+{
+  "commit": "11a00fac4ed47f97cd22e786342f8bda701c2982",
+  "run": "https://github.com/Tsilveira-dev/saldolab/actions/runs/43147825441",
+  "result": "failure",
+  "vitest_passed": 105,
+  "e2e_passed": 72,
+  "e2e_failed": 2,
+  "failure": "BFCache reader tests received a new document ID in the default Playwright headless shell; all data/read-only assertions before the identity assertion passed. Full Chromium channel selected for the lifecycle suite; assertions retained.",
+  "extract": [
+    "2026-11-12T03:25:22.8064682Z     Expected: \"ba603126-5fdb-4b7a-81eb-a353a103ffce\"",
+    "2026-11-12T03:25:22.8065155Z     Received: \"2571b0e5-5411-426e-b325-004cd2f8b609\"",
+    "2026-11-12T03:25:22.8081800Z     Expected: \"ad706248-5ba3-411f-9e54-ba7ef1a99d93\"",
+    "2026-11-12T03:25:22.8082241Z     Received: \"26b08197-2344-46a5-b21c-8103ce47e760\"",
+    "2026-11-12T03:25:22.8100910Z     Expected: \"df19b153-3867-4b30-be63-076c312b0709\"",
+    "2026-11-12T03:25:22.8101548Z     Received: \"43d9745a-3ec2-4195-9279-ec160fec1653\"",
+    "2026-11-12T03:25:22.8123548Z     Expected: \"616a3aba-dfb9-4a51-af9f-6584fa30c74e\"",
+    "2026-11-12T03:25:22.8124014Z     Received: \"4cdd4317-cde4-4311-b8cd-cd863843f70e\"",
+    "2026-11-12T03:25:22.8145331Z     Expected: \"39541b1d-8027-42d7-b587-9621877d620a\"",
+    "2026-11-12T03:25:22.8145798Z     Received: \"0c16d5ef-fe4f-4422-ba97-a4fba4c09cf9\"",
+    "2026-11-12T03:25:22.8167860Z     Expected: \"e5f7b140-de52-4ae5-9f2f-8c3292c0dad6\"",
+    "2026-11-12T03:25:22.8168339Z     Received: \"b7a2613e-42aa-4f6c-8de7-5f016caf5aa7\"",
+    "2026-11-12T03:25:22.8188430Z   2 failed",
+    "2026-11-12T03:25:22.8192226Z   72 passed (1.6m)"
+  ]
+}
