@@ -5,16 +5,28 @@
   "outputDirectory": "dist",
   "git": {
     "deploymentEnabled": {
-      "fix/auditoria-saldolab": false
+      "fix/auditoria-saldolab": false,
+      "feat/neon-backend-foundation": false
     }
   },
-  "rewrites": [{ "source": "/((?!assets/|favicon.svg).*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/((?!api(?:/|$)|assets/|favicon.svg).*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     }
   ]
