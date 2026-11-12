@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Cloud, LogIn, LogOut } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
-import { authClient } from '../auth/neonClient';
+import { authClient, authClientConfigurationError } from '../auth/neonClient';
 
 export default function CloudAccess() {
   const { mode, switchMode, reload } = useFinance();
@@ -94,7 +94,7 @@ export default function CloudAccess() {
         </p>
         {!authClient ? (
           <div role="status" className="alert alert-info">
-            A conexão ainda não foi configurada neste ambiente. O modo local continua disponível.
+            {authClientConfigurationError ?? 'A conexão ainda não foi configurada neste ambiente. O modo local continua disponível.'}
           </div>
         ) : checking ? (
           <div role="status">Conferindo sua sessão…</div>
