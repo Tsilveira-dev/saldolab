@@ -8,7 +8,10 @@ test('o Preview com Neon configurado renderiza a página de acesso sem tela bran
   page,
 }) => {
   const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', (error) => errors.push(error.stack ?? error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push('console: ' + message.text());
+  });
 
   await page.route('**/*.neonauth.*/**', async (route) =>
     route.fulfill({
@@ -19,6 +22,8 @@ test('o Preview com Neon configurado renderiza a página de acesso sem tela bran
   );
 
   await page.goto('/nuvem');
+  await page.waitForTimeout(1000);
+  expect(errors, 'JavaScript errors during Neon initialization').toEqual([]);
   await expect(page.getByRole('heading', { name: 'SaldoLab na nuvem' })).toBeVisible();
   await expect(page.locator('#root')).not.toBeEmpty();
   expect(errors).toEqual([]);
