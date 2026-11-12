@@ -31,3 +31,36 @@ test('o Preview com Neon configurado renderiza a página de acesso sem tela bran
   await expect(page.locator('#root')).not.toBeEmpty();
   expect(errors).toEqual([]);
 });
+
+
+test('recuperação de senha aparece e não revela se a conta existe', async ({ page }) => {
+  await page.route('**/*.neonauth.*/**', async (route) => {
+    if (route.request().url().endsWith('/request-password-reset')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: null, error: null }),
+    });
+  });
+  await page.goto('/nuvem');
+  await page.getByRole('button', { name: 'Esqueci minha senha' }).click();
+  await expect(page.getByRole('heading', { name: 'Esqueci minha senha' })).toBeVisible();
+  await page.getByRole('textbox', { name: 'E-mail da sua conta' }).fill('test@example.com');
+  await page.getByRole('button', { name: 'Enviar link de recuperação' }).click();
+  await expect(page.getByText(/Se esse e-mail estiver cadastrado/)).toBeVisible();
+});
+
+test('link de redefinição usa o token sem mantê-lo na barra do navegador', async ({ page }) => {
+  await page.route('**/*.neonauth.*/**', async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: null, error: null }),
+    }),
+  );
+  await page.goto('/nuvem?token=token-ficticio-de-teste');
+  await expect(page.getByRole('heading', { name: 'Redefinir senha' })).toBeVisible();
+  await expect.poll(() => page.url()).not.toContain('token-ficticio-de-teste');
+});
