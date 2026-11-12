@@ -136,6 +136,23 @@ describe('regras financeiras em centavos', () => {
   });
   it('valida todos os vínculos dos dados demonstrativos', () =>
     expect(validateDataset(createDemoData('2026-11')).transactions).toHaveLength(90));
+  it.each([
+    ['  =1+1', '  =1+1'],
+    ['\n=2+2', '\n=2+2'],
+    ['\t@SUM(1)', '\t@SUM(1)'],
+    ['\u200b+1', '\u200b+1'],
+    ['  -1+2', '  -1+2'],
+  ])('neutraliza fórmulas CSV com prefixos invisíveis: %j', (input, expected) => {
+    const csv = transactionsCsv([tx({ description: input })], [], []);
+    expect(csv).toContain(`"'${expected}"`);
+  });
+  it('preserva texto normal, separadores, quebras e números na exportação CSV', () => {
+    const csv = transactionsCsv([tx({ description: 'Almoço; café', notes: 'linha 1\nlinha 2' })], [], []);
+    expect(csv).toContain('"Almoço; café"');
+    expect(csv).toContain('"linha 1\nlinha 2"');
+    expect(csv).toContain('"10,00"');
+    expect(csv.startsWith('\ufeff')).toBe(true);
+  });
   it('protege a exportação CSV contra fórmulas e escapa aspas', () => {
     const csv = transactionsCsv([tx({ description: '=SUM("A1")' })], [], []);
     expect(csv).toContain("'=");
