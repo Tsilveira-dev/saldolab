@@ -5,8 +5,7 @@
   "outputDirectory": "dist",
   "git": {
     "deploymentEnabled": {
-      "fix/auditoria-saldolab": false,
-      "feat/neon-backend-foundation": false
+      "fix/auditoria-saldolab": false
     }
   },
   "rewrites": [
