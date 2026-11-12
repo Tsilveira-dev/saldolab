@@ -88,7 +88,4 @@ async function handle(request) {
   }
 }
 
-export const GET = handle;
-export const POST = handle;
-export const PATCH = handle;
-export const DELETE = handle;
+export default { fetch: handle };
