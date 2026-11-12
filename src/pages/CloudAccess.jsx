@@ -94,7 +94,8 @@ export default function CloudAccess() {
         </p>
         {!authClient ? (
           <div role="status" className="alert alert-info">
-            {authClientConfigurationError ?? 'A conexão ainda não foi configurada neste ambiente. O modo local continua disponível.'}
+            {authClientConfigurationError ??
+              'A conexão ainda não foi configurada neste ambiente. O modo local continua disponível.'}
           </div>
         ) : checking ? (
           <div role="status">Conferindo sua sessão…</div>
