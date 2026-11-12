@@ -16,7 +16,9 @@ export default function CloudAccess() {
   const [error, setError] = useState('');
   const [resetToken] = useState(() => new URLSearchParams(window.location.search).get('token'));
   const [resetError] = useState(() => new URLSearchParams(window.location.search).get('error'));
-  const [recoveryView, setRecoveryView] = useState(() => (resetToken || resetError ? 'reset' : null));
+  const [recoveryView, setRecoveryView] = useState(() =>
+    resetToken || resetError ? 'reset' : null,
+  );
 
   useEffect(() => {
     if (!resetToken && !resetError) return;

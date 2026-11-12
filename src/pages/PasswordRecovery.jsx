@@ -63,11 +63,13 @@ export default function PasswordRecovery({ view, token, onBack }) {
   const heading = view === 'forgot' ? 'Esqueci minha senha' : 'Redefinir senha';
   return (
     <section aria-labelledby="password-recovery-title">
-      <h2 id="password-recovery-title" className="h5 mb-3">{heading}</h2>
+      <h2 id="password-recovery-title" className="h5 mb-3">
+        {heading}
+      </h2>
       {view === 'forgot' && sent ? (
         <div role="status" className="alert alert-success">
-          Se esse e-mail estiver cadastrado, você receberá um link de recuperação.
-          Verifique também o spam. O link expira em 15 minutos.
+          Se esse e-mail estiver cadastrado, você receberá um link de recuperação. Verifique também
+          o spam. O link expira em 15 minutos.
         </div>
       ) : view === 'reset' && completed ? (
         <div role="status" className="alert alert-success">
@@ -118,11 +120,19 @@ export default function PasswordRecovery({ view, token, onBack }) {
             </>
           )}
           <button type="submit" className="btn btn-primary" disabled={pending}>
-            {pending ? 'Aguarde…' : view === 'forgot' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
+            {pending
+              ? 'Aguarde…'
+              : view === 'forgot'
+                ? 'Enviar link de recuperação'
+                : 'Salvar nova senha'}
           </button>
         </form>
       )}
-      {error && <div className="alert alert-danger mt-3" role="alert">{error}</div>}
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {error}
+        </div>
+      )}
       <button type="button" className="btn btn-link mt-2" onClick={onBack} disabled={pending}>
         Voltar ao login
       </button>

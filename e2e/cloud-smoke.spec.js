@@ -32,7 +32,6 @@ test('o Preview com Neon configurado renderiza a página de acesso sem tela bran
   expect(errors).toEqual([]);
 });
 
-
 test('recuperação de senha aparece e não revela se a conta existe', async ({ page }) => {
   await page.route('**/*.neonauth.*/**', async (route) => {
     if (route.request().url().endsWith('/request-password-reset')) {
