@@ -26,7 +26,7 @@ const escapeCsv = (value) => {
       break;
     }
   }
-  const formula = /^[=+\-@]/u.test(text.slice(cursor));
+  const formula = /^[=+\-@＝＋－＠]/u.test(text.slice(cursor));
   const leadingControl = [9, 10, 13].includes(text.charCodeAt(0));
   if (formula || leadingControl) text = `'${text}`;
   return `"${text.replaceAll('"', '""')}"`;
