@@ -1,0 +1,34 @@
+name: Prepare Neon Dependencies
+
+on:
+  push:
+    branches: [feat/neon-backend-foundation]
+    paths: [.github/workflows/prepare-neon-deps.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Resolve and pin production dependencies
+        run: npm install --save-exact pg jose @vercel/functions @neon/auth
+      - name: Verify lockfile reproducibility
+        run: npm ci
+      - name: Commit only dependency manifests to feature branch
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build: lock Neon API and Auth dependencies"
+            git push origin HEAD:feat/neon-backend-foundation
+          fi
