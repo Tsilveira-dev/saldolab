@@ -174,10 +174,18 @@ export default function Layout() {
               <select value={mode} onChange={(event) => switchMode(event.target.value)}>
                 <option value="demo">Modo demonstração</option>
                 <option value="personal">Modo pessoal</option>
+                {mode === 'cloud' && (
+                  <option value="cloud" disabled>
+                    Modo nuvem
+                  </option>
+                )}
               </select>
               <ChevronDown size={13} />
             </label>
-            <span className="profile-avatar" title="Seu espaço local">
+            <span
+              className="profile-avatar"
+              title={mode === 'cloud' ? 'Seu espaço na nuvem' : 'Seu espaço local'}
+            >
               SL
             </span>
           </div>
