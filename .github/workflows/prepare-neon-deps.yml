@@ -1,4 +1,5 @@
 name: Prepare Neon Dependencies
+# Temporary feature-branch-only formatting helper. Remove after lock and formatting are verified.
 
 on:
   push:
