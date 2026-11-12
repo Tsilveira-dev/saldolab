@@ -1,0 +1,44 @@
+[
+  {
+    "asset": "/assets/index-9tZC1ea6.js",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "6d89e6483f5e83760b2e5f6e0c9869365315f04af483e8d9aba730abd41e2e3b"
+  },
+  {
+    "asset": "/assets/framework-BbJyW8w8.js",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "44e7782d3703e7f5de29f13291d64f6bdc03df360fbb3613dcb9966175bcc95e"
+  },
+  {
+    "asset": "/assets/vendor-DOHu4qVI.js",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "badec8fc55c291478163b35b57ab9542955dff0dd7e6ac6b1297c3e399b8eae7"
+  },
+  {
+    "asset": "/assets/forms-BgtMQ4U9.js",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "a27293e419cc5509d40812361f494fb9010700c7efa5292f0859a4ab52b65463"
+  },
+  {
+    "asset": "/assets/charts-BmO5SCy_.js",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "55f9a35179b30db8a5326381f8b9d2316b5d2a10bdd2b3822e7bc7249aec5161"
+  },
+  {
+    "asset": "/assets/vendor-DgmYMAXd.css",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "68127383c121ef49da666ce47cfdd6d74ae123574ca8c8525ed3899699e90749"
+  },
+  {
+    "asset": "/assets/index-DYfdC_F7.css",
+    "download_exit": 0,
+    "matches_local": true,
+    "sha256": "9e85c616fff5229b59734a9f628dfeed30c487165465362127062bdfde7c23f9"
+  }
+]
