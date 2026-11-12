@@ -1,6 +1,6 @@
 import { ApiError } from './errors.js';
 import {
-  entities, assertEntity, validateWrite, validateWholeRecord,
+  assertEntity, validateWrite, validateWholeRecord,
   validateId, validateRevision, serializeRow, newRecordId,
 } from './validation.js';
 
