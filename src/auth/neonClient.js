@@ -10,13 +10,13 @@ if (baseURL) {
     const url = new URL(baseURL.trim());
     if (
       url.protocol !== 'https:' ||
-      !url.pathname.replace(/\\/$/, '').endsWith('/auth') ||
+      !url.pathname.replace(/\/$/, '').endsWith('/auth') ||
       url.username ||
       url.password
     ) {
       throw new Error('Formato da URL inválido.');
     }
-    client = createAuthClient(url.href.replace(/\\/$/, ''), {
+    client = createAuthClient(url.href.replace(/\/$/, ''), {
       adapter: BetterAuthReactAdapter({ fetchOptions: { credentials: 'include' } }),
     });
   } catch {
