@@ -6,6 +6,7 @@ import { readPreferences, savePreferences } from '../repositories/preferencesRep
 
 export default function FinanceProvider({ children }) {
   const [preferences] = useState(readPreferences);
+  const activeMode = useRef(preferences.mode);
   const [mode, setMode] = useState(preferences.mode);
   const [month, setMonth] = useState(currentMonth);
   const [accountId, setAccountId] = useState('');
@@ -30,19 +31,20 @@ export default function FinanceProvider({ children }) {
   }, [mode]);
   const reload = useCallback(async () => {
     const request = ++generation.current;
+    const requestMode = mode;
     setLoading(true);
     try {
       const next = await repository.snapshot();
-      if (request === generation.current) {
+      if (request === generation.current && requestMode === activeMode.current) {
         setData(next);
         setError(null);
       }
     } catch (cause) {
-      if (request === generation.current) setError(cause);
+      if (request === generation.current && requestMode === activeMode.current) setError(cause);
     } finally {
-      if (request === generation.current) setLoading(false);
+      if (request === generation.current && requestMode === activeMode.current) setLoading(false);
     }
-  }, [repository]);
+  }, [repository, mode]);
   useEffect(() => {
     reload();
     const onStorage = () => reload();
@@ -66,6 +68,7 @@ export default function FinanceProvider({ children }) {
   const mutate = async (operation, message = 'Alterações salvas.') => {
     await operation(repository);
     const next = await repository.snapshot();
+    if (mode !== activeMode.current) return;
     setData(next);
     setAccountId((previous) =>
       next.accounts.some((account) => account.id === previous) ? previous : '',
@@ -74,21 +77,25 @@ export default function FinanceProvider({ children }) {
     notify(message);
   };
   const switchMode = (value) => {
+    activeMode.current = value;
     setEditor(null);
     setConfirmation(null);
     setData(null);
     setAccountId('');
     setMode(value);
   };
-  const save = async (entity, values, id) =>
-    mutate((repo) => (id ? repo.update(entity, id, values) : repo.create(entity, values)));
+  const save = async (entity, values, id, expected) =>
+    mutate((repo) =>
+      id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values),
+    );
   const remove = (entity, row) =>
     setConfirmation({
       title: 'Excluir registro?',
       message: `“${row.description ?? row.name ?? 'Este orçamento'}” será removido. Essa ação não pode ser desfeita.`,
       confirmLabel: 'Excluir registro',
       danger: true,
-      action: () => mutate((repo) => repo.remove(entity, row.id), 'Registro excluído.'),
+      action: () =>
+        mutate((repo) => repo.remove(entity, row.id, { expected: row }), 'Registro excluído.'),
     });
   return (
     <FinanceContext.Provider

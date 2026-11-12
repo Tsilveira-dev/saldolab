@@ -286,6 +286,7 @@
   background: var(--surface-soft);
 }
 .transaction-table th {
+  position: relative;
   color: var(--muted);
   padding: 11px 12px;
   font-size: 8px;

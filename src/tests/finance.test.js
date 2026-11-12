@@ -8,6 +8,7 @@ import {
   percentChange,
   parseMoney,
   shortDate,
+  shiftMonth,
   monthlySeries,
   recurringExpenses,
   money,
@@ -34,6 +35,12 @@ const tx = (values) => ({
   ...values,
 });
 describe('regras financeiras em centavos', () => {
+  it.each([
+    ['2026-01', -1, '2025-12'],
+    ['2026-12', 1, '2027-01'],
+  ])('mantém a virada de ano ao deslocar %s', (month, delta, expected) => {
+    expect(shiftMonth(month, delta)).toBe(expected);
+  });
   it('calcula o saldo total a partir de receitas e despesas confirmadas', () => {
     const rows = [tx({ type: 'income', amountCents: 7000 }), tx({ amountCents: 2500 })];
     expect(totalBalance(accounts, rows)).toBe(19500);
@@ -150,6 +157,14 @@ describe('validações de formulário', () => {
   };
   it('aceita valores positivos e dados completos', () =>
     expect(transactionFormSchema.safeParse(valid).success).toBe(true));
+  it.each([
+    ['2024-02-29', true],
+    ['2025-02-29', false],
+    ['2026-04-31', false],
+    ['2026-12-31', true],
+  ])('valida a data civil %s', (date, expected) => {
+    expect(transactionFormSchema.safeParse({ ...valid, date }).success).toBe(expected);
+  });
   it.each([
     { amount: '0' },
     { amount: '-1' },

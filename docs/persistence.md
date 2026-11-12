@@ -2,7 +2,7 @@
 
 ## Contrato do repositório
 
-`createLocalRepository({ mode, storage?, seed? })` devolve um objeto com os seguintes métodos. Todos retornam `Promise`; erros rejeitam a promessa.
+`createLocalRepository({ mode, storage?, seed?, lockManager? })` devolve um objeto com os seguintes métodos. `lockManager` usa `navigator.locks` por padrão e pode ser injetado nos testes. Todos retornam `Promise`; erros rejeitam a promessa.
 
 | Método                       | Resultado                                            |
 | ---------------------------- | ---------------------------------------------------- |
@@ -17,6 +17,10 @@
 | `reset()`                    | Demonstração original ou conjunto pessoal vazio      |
 
 Entidades: `accounts`, `categories`, `transactions`, `budgets`. O provider é o ponto de composição: substitua a criação do repositório ali por uma implementação HTTP. Evite tornar cada componente responsável por clientes, URLs ou credenciais.
+
+Atualizações e exclusões aceitam opcionalmente `{ expected: registroOriginal }` como último argumento. A UI sempre envia o registro apresentado ao usuário; se ele mudou, a operação é rejeitada. Criação/edição retornam a versão normalizada que foi efetivamente persistida.
+
+Existe uma única aba editora por modo, protegida por Web Locks durante a vida do documento. As outras abas preservam leitura e exportação; para editar nelas, fechar a editora e recarregar a página. Sem a API ou sem contexto seguro, a escrita é bloqueada e não há degradação silenciosa para gravações concorrentes. O formato JSON v1 e as chaves locais continuam compatíveis; não foi adicionado banco remoto nem outro armazenamento de dados financeiros.
 
 ## Formato v1
 

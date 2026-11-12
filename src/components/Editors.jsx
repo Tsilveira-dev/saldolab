@@ -122,7 +122,7 @@ function Editor({ entity, row, onClose }) {
         const { limit, ...rest } = values;
         payload = { ...rest, limitCents: parseMoney(limit) };
       }
-      await save(entity, payload, row?.id);
+      await save(entity, payload, row?.id, row);
       onClose();
     } catch (cause) {
       setError(cause.message);

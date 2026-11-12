@@ -11,7 +11,7 @@ test('cria, edita, persiste e exclui uma transação', async ({ page }) => {
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Descrição', { exact: true }).fill('Teste ponta a ponta');
   await dialog.getByLabel('Valor (R$)', { exact: true }).fill('35,20');
-  await dialog.getByLabel('Categoria', { exact: true }).selectOption('food');
+  await dialog.getByRole('combobox', { name: /^Categoria/ }).selectOption('food');
   const month = await page.getByLabel('Mês de referência', { exact: true }).inputValue();
   await dialog.getByLabel('Data', { exact: true }).fill(`${month}-10`);
   await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
@@ -43,17 +43,19 @@ test('navega por todas as páginas, mantém rotas diretas e evita overflow do do
     await page.goto(route);
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
     expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
     ).toBe(true);
   }
 });
 test('isola o modo pessoal e permite voltar à demonstração', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Modo de uso', { exact: true }).selectOption('personal');
+  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('personal');
   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
   await page.reload();
-  await expect(page.getByLabel('Modo de uso', { exact: true })).toHaveValue('personal');
-  await page.getByLabel('Modo de uso', { exact: true }).selectOption('demo');
+  await expect(page.getByRole('combobox', { name: /^Modo de uso/ })).toHaveValue('personal');
+  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('demo');
   await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
 });
 test('protege conta em uso e exporta backup JSON', async ({ page }) => {

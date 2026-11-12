@@ -29,7 +29,7 @@ flowchart LR
 
 ## Estado e falhas
 
-Uma mutação relê o agregado, aplica a alteração, valida e grava uma única chave. `setItem` só substitui o valor após sucesso. Erros de cota ou permissão preservam o valor anterior. A atualização visual acontece após a confirmação da gravação. A aplicação observa eventos `storage` para atualizar abas abertas.
+Uma mutação relê o agregado, aplica a alteração, valida e grava uma única chave. Uma aba editora por modo é eleita com Web Locks; a reserva dura até fechar/recarregar a página. As demais abas podem ler e exportar, mas suas escritas são rejeitadas com instruções para fechar a editora e recarregar. Operações da mesma aba são serializadas e alterações/exclusões da UI verificam o registro esperado para rejeitar formulários desatualizados. `setItem` só substitui o valor após sucesso. Erros de cota ou permissão preservam o valor anterior. A aplicação observa eventos `storage` para atualizar abas abertas.
 
 Leituras inválidas abrem a página de recuperação. O conteúdo bruto pode ser baixado antes de importar outro arquivo. Não há restauração automática de dados corrompidos. Um Error Boundary cobre erros inesperados de renderização.
 
@@ -37,7 +37,7 @@ Modo pessoal e demonstração têm chaves distintas; restauração afeta somente
 
 ## Limites conscientes
 
-O storage local é síncrono internamente, apesar da interface assíncrona. Ele tem cota do navegador e não fornece criptografia própria, autenticação, controle de acesso ou transações entre abas. Escritas simultâneas entre abas podem prevalecer pela última gravação; uma API futura deve usar controle de concorrência. Não há promessa de armazenamento ilimitado ou sincronização.
+O storage local é síncrono internamente, apesar da interface assíncrona. Ele tem cota e não fornece criptografia própria, autenticação, controle de acesso ou transações de banco. A proteção atual exige uma única aba editora por modo; não é uma funcionalidade colaborativa. Sem Web Locks/HTTPS, dados existentes podem ser lidos/exportados, mas não editados. Na atualização futura aprovada para produção, fechar/recarregar todas as abas antigas antes de editar, pois versões anteriores não respeitam os novos bloqueios. Uma API futura deverá aplicar concorrência e autorização no servidor. Não há promessa de armazenamento ilimitado ou sincronização.
 
 Recorrências usam descrição normalizada, categoria e conta, exigindo três meses distintos. A média é por lançamento; padrões não são garantias de gastos futuros. Filtros de conta em orçamento restringem o numerador e mantêm o limite global, explicitamente indicado na página.
 
