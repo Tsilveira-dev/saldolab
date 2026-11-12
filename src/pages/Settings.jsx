@@ -72,6 +72,7 @@ export default function Settings() {
               {[
                 ['demo', 'Demonstração', 'Explore dados fictícios e experimente todas as funções.'],
                 ['personal', 'Pessoal', 'Comece do zero e organize suas próprias finanças.'],
+                ...(import.meta.env.VITE_NEON_AUTH_URL ? [['cloud', 'Nuvem', 'Acesse os dados da sua conta autenticada.']] : []),
               ].map(([value, title, description]) => (
                 <label className={`mode-option ${mode === value ? 'selected' : ''}`} key={value}>
                   <input
@@ -115,11 +116,11 @@ export default function Settings() {
             <span className="settings-large-icon">
               <HardDrive size={25} />
             </span>
-            <h3>Salvo apenas neste navegador</h3>
+            <h3>{mode === 'cloud' ? 'Salvo no Neon PostgreSQL' : 'Salvo apenas neste navegador'}</h3>
             <p>
-              Esta versão utiliza armazenamento local. Os registros não são sincronizados entre
-              dispositivos e podem ser perdidos ao limpar os dados do navegador. Não há autenticação
-              ou envio das suas finanças a um servidor.
+              {mode === 'cloud'
+                ? 'Seus registros estão vinculados à sua conta no Neon. Você pode exportar um backup JSON; a importação remota ainda não está disponível.'
+                : 'Esta versão utiliza armazenamento local. Os registros não são sincronizados entre dispositivos e podem ser perdidos ao limpar os dados do navegador.'}
             </p>
             <div className="backup-buttons">
               <button className="btn btn-primary" onClick={exportBackup}>
@@ -128,7 +129,7 @@ export default function Settings() {
               </button>
               <button
                 className="btn btn-outline-secondary"
-                disabled={!canWrite}
+                disabled={!canWrite || mode === 'cloud'}
                 onClick={() => inputRef.current.click()}
               >
                 <Upload size={16} />
@@ -139,7 +140,7 @@ export default function Settings() {
               ref={inputRef}
               aria-label="Arquivo de backup JSON"
               type="file"
-              disabled={!canWrite}
+              disabled={!canWrite || mode === 'cloud'}
               accept=".json,application/json"
               className="visually-hidden"
               onChange={importFile}
@@ -150,9 +151,9 @@ export default function Settings() {
           </div>
         </Panel>
         <Panel
-          title={mode === 'demo' ? 'Restaurar demonstração' : 'Limpar dados pessoais'}
+          title={mode === 'demo' ? 'Restaurar demonstração' : mode === 'cloud' ? 'Ações remotas protegidas' : 'Limpar dados pessoais'}
           subtitle={
-            mode === 'demo' ? 'Um novo começo para explorar' : 'Operação permanente no modo pessoal'
+            mode === 'demo' ? 'Um novo começo para explorar' : mode === 'cloud' ? 'Exclusão total indisponível' : 'Operação permanente no modo pessoal'
           }
           className="full-width"
         >
@@ -160,9 +161,10 @@ export default function Settings() {
             <p>
               {mode === 'demo'
                 ? 'Restaure as contas e movimentações fictícias para o estado original.'
-                : 'Remova todos os registros pessoais deste navegador. Faça um backup primeiro.'}
+                : mode === 'cloud' ? 'Por segurança, a exclusão completa dos dados na nuvem está desabilitada nesta versão.'
+                  : 'Remova todos os registros pessoais deste navegador. Faça um backup primeiro.'}
             </p>
-            <button className="btn btn-outline-danger" onClick={reset} disabled={!canWrite}>
+            <button className="btn btn-outline-danger" onClick={reset} disabled={!canWrite || mode === 'cloud'}>
               <RotateCcw size={16} />
               {mode === 'demo' ? 'Restaurar demonstração' : 'Apagar dados pessoais'}
             </button>
