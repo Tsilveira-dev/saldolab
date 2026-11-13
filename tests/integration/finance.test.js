@@ -1,5 +1,6 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import pg from 'pg';
 import { createIntegrationHarness } from './harness.js';
 import { closeDatabasePool } from '../../api/_lib/db.js';
@@ -180,6 +181,29 @@ describe('HTTP, JWT assinado e PostgreSQL reais', () => {
         code: '42501',
       });
       await expect(runtime.query('SET ROLE postgres')).rejects.toMatchObject({ code: '42501' });
+      const checks = await runtime.query(
+        await readFile(new URL('../../db/operations/verify-runtime.sql', import.meta.url), 'utf8'),
+      );
+      expect(checks[2].rows).toEqual([]);
+      expect(checks[3].rows[0]).toEqual({
+        can_create_public: false,
+        can_use_auth_schema: false,
+        can_check_session: true,
+      });
+      expect(checks[4].rows.find((row) => row.auth_table === 'session').can_read).toBe(false);
+      expect(checks[5].rows).toHaveLength(4);
+      for (const row of checks[5].rows)
+        expect(row).toMatchObject({
+          can_select: true,
+          can_insert: true,
+          can_update: true,
+          can_delete: true,
+        });
+      expect(checks[6].rows[0]).toMatchObject({
+        security_definer: true,
+        function_settings: ['search_path=pg_catalog'],
+        public_execute: false,
+      });
       const fn = await api.pool.query(
         "SELECT prosecdef, proconfig, has_function_privilege('public',oid,'EXECUTE') AS public_execute FROM pg_proc WHERE oid='public.saldolab_session_active(text,uuid)'::regprocedure",
       );

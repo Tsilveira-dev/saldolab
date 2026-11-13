@@ -46,6 +46,15 @@ export async function createIntegrationHarness() {
     throw new Error(
       'Set SALDOLAB_TEST_DATABASE_URL to an isolated test database; DATABASE_URL is never used as a fallback.',
     );
+  const target = new URL(connection);
+  if (
+    process.env.SALDOLAB_TEST_REAL_AUTH !== '1' &&
+    (!['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname) ||
+      target.pathname !== '/saldolab_integration')
+  )
+    throw new Error(
+      'The synthetic issuer and Auth schema fixtures require the disposable local database.',
+    );
   const pool = new pg.Pool({ connectionString: connection, connectionTimeoutMillis: 8000 });
   await assertIsolatedDatabase(pool, connection);
   await pool.query(

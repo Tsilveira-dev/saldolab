@@ -195,6 +195,9 @@ export default function FinanceProvider({ children }) {
     return result;
   };
   const switchMode = (value) => {
+    // Also invalidate in-flight reads when re-entering the same mode during
+    // sign-out/sign-in; an old response must not repopulate the cleared view.
+    generation.current++;
     repository.stopEditing();
     clearEditingRequest();
     setEditingAccess({
@@ -205,7 +208,9 @@ export default function FinanceProvider({ children }) {
     activeMode.current = value;
     setEditor(null);
     setConfirmation(null);
+    setToast(null);
     setData(null);
+    setDataUserId(null);
     setAccountId('');
     setMode(value);
   };
@@ -223,7 +228,8 @@ export default function FinanceProvider({ children }) {
         mutate((repo) => repo.remove(entity, row.id, { expected: row }), 'Registro excluído.'),
     });
   const cloudUnavailable =
-    mode === 'cloud' && (!cloudUserId || dataUserId !== cloudUserId || Boolean(error) || !data);
+    mode === 'cloud' &&
+    (session.isPending || !cloudUserId || dataUserId !== cloudUserId || Boolean(error) || !data);
   return (
     <FinanceContext.Provider
       value={{

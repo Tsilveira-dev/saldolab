@@ -24,13 +24,14 @@ function repo(snapshot, create = vi.fn()) {
   };
 }
 function Probe() {
-  const { data, canWrite, save, toast } = useFinance();
+  const { data, canWrite, save, toast, switchMode } = useFinance();
   return (
     <>
       <output aria-label="Dados">{data?.marker ?? 'sem dados'}</output>
       <output aria-label="Permissão">{String(canWrite)}</output>
       <output aria-label="Mensagem">{toast?.message ?? ''}</output>
       <button onClick={() => save('accounts', {})}>Salvar</button>
+      <button onClick={() => switchMode('cloud')}>Ocultar antes de autenticar</button>
     </>
   );
 }
@@ -86,6 +87,39 @@ it('uma gravação atrasada de A não substitui os dados de B nem mostra sucesso
   expect(screen.getByLabelText('Dados')).toHaveTextContent('conta B');
   expect(screen.getByLabelText('Mensagem')).toBeEmptyDOMElement();
   state.session = { data: null, isPending: false };
+  view.rerender(app());
+  expect(screen.getByLabelText('Dados')).toHaveTextContent('sem dados');
+  expect(screen.getByLabelText('Permissão')).toHaveTextContent('false');
+});
+
+it('invalida leitura em andamento ao ocultar a nuvem mesmo sem mudar de modo', async () => {
+  let finishRead;
+  const a = repo(
+    vi.fn(
+      () =>
+        new Promise((resolve) => {
+          finishRead = resolve;
+        }),
+    ),
+  );
+  createRemoteRepository.mockReturnValue(a);
+  state.session = session('A');
+  render(app());
+  await waitFor(() => expect(a.snapshot).toHaveBeenCalled());
+  await userEvent
+    .setup()
+    .click(screen.getByRole('button', { name: 'Ocultar antes de autenticar' }));
+  await act(async () => finishRead(dataset('conta A')));
+  expect(screen.getByLabelText('Dados')).toHaveTextContent('sem dados');
+  expect(screen.getByLabelText('Permissão')).toHaveTextContent('false');
+});
+
+it('oculta snapshot e escrita enquanto a identidade está sendo conferida', async () => {
+  createRemoteRepository.mockReturnValue(repo(vi.fn().mockResolvedValue(dataset('conta A'))));
+  state.session = session('A');
+  const view = render(app());
+  await waitFor(() => expect(screen.getByLabelText('Dados')).toHaveTextContent('conta A'));
+  state.session = { ...session('A'), isPending: true };
   view.rerender(app());
   expect(screen.getByLabelText('Dados')).toHaveTextContent('sem dados');
   expect(screen.getByLabelText('Permissão')).toHaveTextContent('false');

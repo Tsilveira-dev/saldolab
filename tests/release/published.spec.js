@@ -10,7 +10,7 @@ const app = new URL(process.env.SALDOLAB_RELEASE_BASE_URL),
   auth = new URL(process.env.NEON_AUTH_BASE_URL);
 let pool, a, b, fixture, backup;
 const resources = [];
-const credentials = new WeakMap();
+const sessionCredentials = new WeakMap();
 async function device(browser) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const transport = await request.newContext({
@@ -51,7 +51,7 @@ async function device(browser) {
       url.pathname === '/api/finance' &&
       authorization?.startsWith('Bearer ')
     )
-      credentials.set(page, {
+      sessionCredentials.set(page, {
         token: authorization.slice(7),
         sessionId: req.headers()['x-saldolab-session-id'],
       });
@@ -71,12 +71,22 @@ async function login(page, credentials = fixture) {
   await expect(
     page.getByRole('button', { name: /Abrir finanças na nuvem|Atualizar dados/ }),
   ).toBeVisible();
+  const loaded = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.origin === app.origin &&
+      url.pathname === '/api/finance' &&
+      !url.searchParams.has('entity') &&
+      response.request().method() === 'GET'
+    );
+  });
   await page.getByRole('button', { name: /Abrir finanças na nuvem|Atualizar dados/ }).click();
+  expect((await loaded).status()).toBe(200);
   await page.goto('/contas');
   await expect(
     page.locator('.page-heading').getByRole('button', { name: 'Adicionar conta', exact: true }),
   ).toBeEnabled();
-  expect(credentials.get(page)?.sessionId).toBeTruthy();
+  expect(sessionCredentials.get(page)?.sessionId).toBeTruthy();
 }
 async function provider(page, path, body) {
   return page.evaluate(
@@ -102,7 +112,7 @@ async function provider(page, path, body) {
     { base: auth.href.replace(/\/$/, ''), path, body },
   );
 }
-async function api(page, method, entity, body, credential = credentials.get(page), id) {
+async function api(page, method, entity, body, credential = sessionCredentials.get(page), id) {
   return page.evaluate(
     async ({ method, entity, body, bearer, sessionId, id }) => {
       const params = new URLSearchParams();
@@ -174,7 +184,7 @@ test('Preview publicado exige verificação e não concede sessão antes dela', 
 });
 
 test('logout individual recusa o JWT com a sessão anterior e preserva o outro dispositivo', async () => {
-  const previous = credentials.get(a);
+  const previous = sessionCredentials.get(a);
   expect((await api(a, 'GET', undefined, undefined, previous)).status).toBe(200);
   await a.goto('/nuvem');
   await a.getByRole('button', { name: 'Sair da conta', exact: true }).click();
@@ -187,8 +197,8 @@ test('logout individual recusa o JWT com a sessão anterior e preserva o outro d
 });
 
 test('logout global da UI impede novos acessos com os dois pares JWT/sessão anteriores', async () => {
-  const previousA = credentials.get(a),
-    previousB = credentials.get(b),
+  const previousA = sessionCredentials.get(a),
+    previousB = sessionCredentials.get(b),
     jwt = previousA.token,
     claims = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
   expect(claims.exp - claims.iat).toBe(900);
@@ -212,11 +222,11 @@ test('logout global da UI impede novos acessos com os dois pares JWT/sessão ant
   expect((await api(a, 'GET', undefined, undefined, previousA)).status).toBe(401);
 });
 
-test('mudança de senha revoga outro dispositivo e recuperação revoga todas as sessões', async () => {
-  const previousB = credentials.get(b);
+test('mudança de senha rotaciona a sessão atual e recuperação revoga todas as anteriores', async () => {
+  const previousB = sessionCredentials.get(b);
   // Refresh the capture on A: the previous assertion deliberately replayed an old pair.
   await login(a);
-  const currentA = credentials.get(a);
+  const currentA = sessionCredentials.get(a);
   const changed = randomUUID() + 'Aa2!';
   const change = await provider(a, '/change-password', {
     currentPassword: fixture.password,
@@ -229,10 +239,12 @@ test('mudança de senha revoga outro dispositivo e recuperação revoga todas as
   expect([200, 401].includes(other.status)).toBe(true);
   expect(other.hasUser).toBe(false);
   expect((await api(b, 'GET', undefined, undefined, previousB)).status).toBe(401);
-  expect((await api(a, 'GET', undefined, undefined, currentA)).status).toBe(200);
+  expect((await api(a, 'GET', undefined, undefined, currentA)).status).toBe(401);
+  await a.reload();
+  await login(a);
   await login(b);
-  const beforeResetA = credentials.get(a),
-    beforeResetB = credentials.get(b);
+  const beforeResetA = sessionCredentials.get(a),
+    beforeResetB = sessionCredentials.get(b);
   const sent = await provider(a, '/request-password-reset', {
     email: fixture.email,
     redirectTo: app.origin + '/nuvem',
@@ -321,8 +333,8 @@ test('exporta backup da nuvem pela UI publicada sem revisões, sessões ou ident
   expect(parsed.data.transactions).toHaveLength(4);
   expect(backup.includes('revision')).toBe(false);
   expect(backup.includes(fixture.email)).toBe(false);
-  expect(backup.includes(credentials.get(a).token)).toBe(false);
-  expect(backup.includes(credentials.get(a).sessionId)).toBe(false);
+  expect(backup.includes(sessionCredentials.get(a).token)).toBe(false);
+  expect(backup.includes(sessionCredentials.get(a).sessionId)).toBe(false);
   const beforeReload = (await api(a, 'GET')).body;
   await a.reload();
   expect((await api(a, 'GET')).body).toEqual(beforeReload);
@@ -503,4 +515,102 @@ for (const type of ['expense', 'income'])
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
       ).toBe(true);
     }
+  });
+
+for (const width of [1440, 390])
+  test(`troca A→B→A na mesma aba não mostra finanças anteriores nem muda para dados locais (${width}px)`, async ({
+    browser,
+  }) => {
+    const page = await device(browser);
+    await page.setViewportSize({ width, height: 900 });
+    const local = {
+      version: 1,
+      accounts: [{ ...account('QA local independente'), id: 'local-only' }],
+      categories: [],
+      transactions: [],
+      budgets: [],
+    };
+    await page.goto('/nuvem');
+    await page.evaluate(
+      (value) => localStorage.setItem('saldolab:v1:personal', JSON.stringify(value)),
+      local,
+    );
+    const register = async (label) => {
+      const values = {
+        email: 'qa-release-switch-' + randomUUID() + '@example.com',
+        password: randomUUID() + 'Aa1!',
+      };
+      await page.getByRole('button', { name: 'Quero criar uma conta', exact: true }).click();
+      await page.getByLabel('Seu nome').fill('QA identidade ' + label);
+      await page.getByLabel('E-mail', { exact: true }).fill(values.email);
+      await privateFill(page.getByLabel('Senha', { exact: true }), values.password);
+      const pending = page.waitForResponse(
+        (r) => r.url() === auth.href.replace(/\/$/, '') + '/sign-up/email',
+      );
+      await page.getByRole('button', { name: 'Criar conta', exact: true }).click();
+      const response = await pending;
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      expect(data.user.emailVerified).toBe(false);
+      await expect(page.getByRole('heading', { name: 'Verificar meu e-mail' })).toBeVisible();
+      await pool.query(
+        'UPDATE neon_auth."user" SET "emailVerified"=true WHERE id=$1 AND email=$2',
+        [data.user.id, values.email],
+      );
+      await page.getByRole('button', { name: 'Voltar ao login', exact: true }).click();
+      return { ...values, id: data.user.id };
+    };
+    const signInWithoutModeButton = async (values) => {
+      await page.getByLabel('E-mail', { exact: true }).fill(values.email);
+      await privateFill(page.getByLabel('Senha', { exact: true }), values.password);
+      await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+      await expect(page.locator('strong').filter({ hasText: values.email })).toBeVisible();
+      await page.goto('/contas');
+      await expect(page.getByText('Neon PostgreSQL', { exact: true })).toBeVisible();
+      await expect(
+        page.locator('.page-heading').getByRole('button', { name: 'Adicionar conta', exact: true }),
+      ).toBeEnabled();
+    };
+    const signOut = async () => {
+      await page.goto('/nuvem');
+      await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+      await expect(page.getByRole('heading', { name: 'Entrar na minha conta' })).toBeVisible();
+      await page.goto('/contas');
+      await expect(page.getByText('QA exclusivo A', { exact: true })).toHaveCount(0);
+      await expect(page.getByText('QA exclusivo B', { exact: true })).toHaveCount(0);
+      await expect(page.getByText('QA local independente', { exact: true })).toHaveCount(0);
+      await expect(page.getByText('Neon PostgreSQL', { exact: true })).toBeVisible();
+      await page.goto('/nuvem');
+    };
+    const first = await register('A');
+    await login(page, first);
+    expect((await api(page, 'POST', 'accounts', account('QA exclusivo A'))).status).toBe(201);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'QA exclusivo A', exact: true })).toBeVisible();
+    await signOut();
+    const second = await register('B');
+    await signInWithoutModeButton(second);
+    await expect(page.getByText('QA exclusivo A', { exact: true })).toHaveCount(0);
+    expect((await api(page, 'GET')).body.accounts).toEqual([]);
+    expect((await api(page, 'POST', 'accounts', account('QA exclusivo B'))).status).toBe(201);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'QA exclusivo B', exact: true })).toBeVisible();
+    await signOut();
+    await signInWithoutModeButton(first);
+    await expect(page.getByRole('heading', { name: 'QA exclusivo A', exact: true })).toBeVisible();
+    await expect(page.getByText('QA exclusivo B', { exact: true })).toHaveCount(0);
+    expect((await api(page, 'GET')).body.accounts.map((row) => row.name)).toEqual([
+      'QA exclusivo A',
+    ]);
+    expect(
+      await page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:v1:personal'))),
+    ).toEqual(local);
+    const rows = await pool.query(
+      'SELECT user_id,name FROM public.accounts WHERE user_id=ANY($1::text[]) ORDER BY name',
+      [[first.id, second.id]],
+    );
+    expect(rows.rows).toEqual([
+      { user_id: first.id, name: 'QA exclusivo A' },
+      { user_id: second.id, name: 'QA exclusivo B' },
+    ]);
   });

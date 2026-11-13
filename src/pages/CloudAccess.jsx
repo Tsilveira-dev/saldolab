@@ -36,6 +36,9 @@ export default function CloudAccess() {
     setSubmitting(true);
     setError('');
     setMessage('');
+    // Entering a cloud identity is an explicit choice of the cloud workspace.
+    // The browser's independent personal data must not appear under that login.
+    switchMode('cloud');
     try {
       const credentials = signUp
         ? { name: name.trim(), email: email.trim(), password }
@@ -53,6 +56,8 @@ export default function CloudAccess() {
       const session = await authClient.getSession();
       if (session.error || !session.data?.user)
         throw new Error('Confirme o e-mail, se necessário, e entre novamente.');
+      if (result.data?.user?.id && session.data.user.id !== result.data.user.id)
+        throw new Error('A conta conectada mudou. Atualize a página e entre novamente.');
       setPassword('');
     } catch (cause) {
       if (
@@ -71,7 +76,9 @@ export default function CloudAccess() {
     setSubmitting(true);
     setError('');
     try {
-      if (mode === 'cloud') switchMode('personal');
+      // Stay in the cloud workspace without a session; local data belongs to the
+      // browser, not to the next email that signs in. Never reset either store.
+      switchMode('cloud');
       if (everywhere) {
         const revoked = await authClient.revokeSessions();
         if (revoked.error)
@@ -87,8 +94,8 @@ export default function CloudAccess() {
   }
 
   function openCloud() {
-    switchMode('cloud');
     if (mode === 'cloud') reload();
+    else switchMode('cloud');
   }
 
   return (
