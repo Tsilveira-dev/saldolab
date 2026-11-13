@@ -1,0 +1,10 @@
+{
+  "recipientRedacted": true,
+  "userConfirmedInboxReceipt": true,
+  "userReportedVerificationResetLogin": true,
+  "releaseQaEmailVerifiedAtReadOnlyCheck": true,
+  "humanCodeReadByAgent": false,
+  "humanFlagChangedByAgent": false,
+  "newOtpRoundAutomated": false,
+  "conclusion": "Prior real OTP flow corroborated by read-only QA state; final financial/mobile owner acceptance remains pending"
+}

@@ -1,0 +1,4 @@
+Running 2 tests using 1 worker
+  ✓  1 tests/release/published.spec.js:521:3 › troca A→B→A na mesma aba não mostra finanças anteriores nem muda para dados locais (1440px) (12.2s)
+  ✓  2 tests/release/published.spec.js:521:3 › troca A→B→A na mesma aba não mostra finanças anteriores nem muda para dados locais (390px) (11.1s)
+  2 passed (26.0s)

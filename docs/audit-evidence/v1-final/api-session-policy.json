@@ -1,0 +1,25 @@
+{
+  "codeCommit": "ca9e3cc2360bf55a62390b00891e73d2569f3930",
+  "sdk": "@neon/auth@0.8.2",
+  "jwtLifetimeSeconds": 900,
+  "clockToleranceSeconds": 10,
+  "jwtHasSessionIdentifierClaim": false,
+  "jwtIntrospectionViaGetSessionBearer": false,
+  "apiRequires": ["valid signed JWT", "opaque active SDK session ID for the same user"],
+  "positiveSessionCache": false,
+  "observedHttp": {
+    "beforeRevocation": 200,
+    "oldPairAfterSingleLogout": 401,
+    "otherActiveDeviceAfterSingleLogout": 200,
+    "oldPairsAfterGlobalLogout": 401,
+    "oldPairsAfterPasswordChange": 401,
+    "newCurrentSessionAfterPasswordChange": 200,
+    "oldPairsAfterPasswordReset": 401,
+    "oldPairAfterNewLogin": 401,
+    "jwtOnly": 401
+  },
+  "scope": "New financial API requests after provider revocation persisted; does not invalidate JWT signature in other verifiers or cancel already authorized in-flight operations",
+  "runtimePrivileges": "CRUD on four finance tables; EXECUTE on fixed SECURITY DEFINER session check; no direct Auth SELECT",
+  "testedWithMinimalRoleInLocalPostgres": true,
+  "productionRoleNotCreatedOrValidated": true
+}

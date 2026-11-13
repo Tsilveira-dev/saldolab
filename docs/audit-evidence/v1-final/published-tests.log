@@ -1,0 +1,12 @@
+Running 10 tests using 1 worker
+  ✓   1 tests/release/published.spec.js:156:1 › Preview publicado exige verificação e não concede sessão antes dela (7.2s)
+  ✓   2 tests/release/published.spec.js:186:1 › logout individual recusa o JWT com a sessão anterior e preserva o outro dispositivo (3.3s)
+  ✓   3 tests/release/published.spec.js:199:1 › logout global da UI impede novos acessos com os dois pares JWT/sessão anteriores (4.2s)
+  ✓   4 tests/release/published.spec.js:225:1 › mudança de senha rotaciona a sessão atual e recuperação revoga todas as anteriores (9.5s)
+  ✓   5 tests/release/published.spec.js:293:1 › exporta backup da nuvem pela UI publicada sem revisões, sessões ou identidade (4.3s)
+  ✓   6 tests/release/published.spec.js:375:1 › outra identidade não lê, edita ou exclui registros do titular fictício no Preview (4.4s)
+  ✓   7 tests/release/published.spec.js:428:3 › transação expense sem contas/categorias usa cadastro rápido e CRUD no Preview desktop/mobile (23.5s)
+  ✓   8 tests/release/published.spec.js:428:3 › transação income sem contas/categorias usa cadastro rápido e CRUD no Preview desktop/mobile (23.7s)
+  ✓   9 tests/release/published.spec.js:521:3 › troca A→B→A na mesma aba não mostra finanças anteriores nem muda para dados locais (1440px) (11.0s)
+  ✓  10 tests/release/published.spec.js:521:3 › troca A→B→A na mesma aba não mostra finanças anteriores nem muda para dados locais (390px) (9.2s)
+  10 passed (1.7m)

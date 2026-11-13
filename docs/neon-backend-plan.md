@@ -1,6 +1,6 @@
 # SaldoLab — Plano técnico de Neon PostgreSQL (ADR-001)
 
-**Estado atual:** API autenticada e repositório remoto implementados com `pg`, Neon Auth e controle de revisão. A validação integrada está em [auditoria do PR #3](auditoria-backend-neon.md). As seções de planejamento abaixo preservam a proposta original; Drizzle não foi introduzido nesta etapa.
+**Estado atual:** API autenticada e repositório remoto implementados com `pg`, Neon Auth, controle de revisão e verificação de sessão ativa por função SQL (`0002`). Resultados finais e implantação futura estão em [lançamento v1.0](lancamento-v1.md) e [migração Production](migracao-production.md); a [auditoria do PR #3](auditoria-backend-neon.md) é histórica. As seções de planejamento abaixo preservam a proposta original; Drizzle não foi introduzido nesta etapa.
 **Data:** 2026-11-12
 **Base:** main após merge do PR #1. O PR #2 (CSV/contraste) é independente e permanece em revisão.
 

@@ -1,5 +1,7 @@
 # SaldoLab — validação do Preview Vercel + Neon (PR #3)
 
+> Histórico da primeira integração com development. Para o Preview QA final, a checagem ativa de sessão e o estado atual de OTP, usar [lancamento-v1.md](lancamento-v1.md) e a descrição do PR. A pendência de acesso/e-mail abaixo pertence à auditoria anterior. Operação independente no [guia sem Codex](guia-lancamento-sem-codex.md).
+
 Data: 2026-11-12. Estado: **CRUD, Auth e concorrência validados com Neon real em QA isolado; Preview do commit final e entrega de e-mail ainda pendentes. Não aprovado para merge/produção**. Veja [auditoria técnica atual](auditoria-backend-neon.md).
 
 ## Escopo e segregação

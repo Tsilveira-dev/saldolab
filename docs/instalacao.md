@@ -29,11 +29,15 @@ Cada ambiente tem banco, identidade e URL Auth próprios. Não copiar senhas, se
 
 Nunca prefixar connection strings, senhas ou tokens com `VITE_`. Guardar arquivos privados fora do Git; `.gitignore` e `.vercelignore` excluem `work/` e arquivos `.env*`. Alterar a URL pública Auth exige novo build.
 
+O exemplo também mostra `DATABASE_URL_UNPOOLED` para administração/migrações por conexão direta. Ela não é uma quinta variável necessária ao runtime Vercel; manter a conexão administrativa separada e não entregar credenciais owner às Functions.
+
 Usar `sslmode=verify-full` nas conexões remotas. Isso explicita a verificação de certificado/hostname e evita o aviso do driver sobre a futura mudança de semântica de `sslmode=require`. O modo sem TLS usado nos túneis de ensaio é restrito ao loopback; a conexão WSS até o Neon valida TLS.
 
 Para desenvolvimento completo com Vercel CLI, conferir primeiro o projeto existente `fair-play7/saldolab` e usar somente configurações QA aprovadas. `vercel dev` fornece Functions locais; não executar `vercel --prod`. Não aceitar vinculação automática a outro projeto. A CLI pode baixar `.env.local`: conferir o escopo e mantê-lo privado antes de iniciar o Vite.
 
-O servidor de ensaio `node tests/neon/server.js` oferece UI e API reais exclusivamente para QA marcado. Exige `SALDOLAB_TEST_DATABASE_URL`, `SALDOLAB_TEST_BRANCH_ID`, `SALDOLAB_TEST_REAL_AUTH=1` e as três URLs Auth correspondentes ao marcador `saldolab_qa.environment`. Valida o marcador antes de aplicar a migração inicial. Não é um servidor de Production.
+O servidor de ensaio `node tests/neon/server.js` oferece UI e API reais exclusivamente para QA marcado. Exige `SALDOLAB_TEST_DATABASE_URL`, `SALDOLAB_TEST_BRANCH_ID`, `SALDOLAB_TEST_REAL_AUTH=1` e as três URLs Auth correspondentes ao marcador `saldolab_qa.environment`. Valida o marcador antes de aplicar as migrações `0001` e `0002`. Não é um servidor de Production.
+
+A API requer `Authorization: Bearer <JWT>` e o header sensível `X-SaldoLab-Session-Id`, ambos obtidos do SDK pelo repositório remoto. A migração `0002` instala a função de sessão ativa, dependente de Neon Auth no mesmo banco; conceder EXECUTE à role restrita conforme [plano](migracao-production.md). Se faltar função/permissão, a API falha fechada. Não apontar essa versão para development sem preparar seu schema por uma mudança autorizada; o Preview QA final tem o pré-requisito aplicado, sem alterar development. Detalhes para o titular no [guia sem Codex](guia-lancamento-sem-codex.md).
 
 ## Acesso ao Preview protegido
 

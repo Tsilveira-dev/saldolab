@@ -12,7 +12,9 @@ Este é um registro operacional da versão em preparação. O responsável preci
 | Operação     | Metadados técnicos de requisição/sessão e falhas           | Provedores Neon/Vercel conforme configuração/plano |
 | Backup JSON  | Finanças exportadas, sem credenciais                       | Arquivo sob controle do titular                    |
 
-Não há envio automático de backups locais à nuvem. Sair ou trocar de usuário oculta o snapshot anterior da interface. Acesso à API depende de JWT e filtro de usuário; o limite de revogação é descrito em [recuperação](recuperacao.md).
+Não há envio automático de backups locais à nuvem. Sair ou trocar de usuário oculta o snapshot anterior da interface. Acesso à API depende de JWT, sessão ativa e filtro de usuário; o alcance da revogação é descrito em [recuperação](recuperacao.md).
+
+O armazenamento pessoal local é um espaço por navegador/origem, independente do e-mail autenticado. A troca de login não o divide nem apaga. Login/cadastro selecionam a nuvem e logout não retorna automaticamente ao espaço local; abrir o modo pessoal é uma escolha explícita.
 
 ## Acesso e suporte
 
@@ -22,6 +24,6 @@ O titular pode consultar, editar, excluir registros individuais e exportar os da
 
 ## Backups, logs e segurança operacional
 
-JSON exportado não é criptografado pela aplicação. Não anexar backup real a PR/chat nem armazená-lo em repositório público. Tokens, senhas, connection strings e URLs de recuperação são secretos; restringir acesso e redigir logs antes de compartilhá-los. Confirmar retenção, acesso e redação de parâmetros sensíveis nos provedores antes de uso real.
+JSON exportado não é criptografado pela aplicação. Não anexar backup real a PR/chat nem armazená-lo em repositório público. Tokens, identificadores opacos de sessão, senhas, connection strings e URLs de recuperação são secretos; restringir acesso e redigir logs antes de compartilhá-los. Confirmar retenção, acesso e redação de parâmetros sensíveis nos provedores antes de uso real.
 
 Definir capacidade e custo dos planos, limite de usuários e suporte do piloto. Se houver uso comercial, confirmar a adequação do plano Vercel; não assumir permissão comercial de um plano Hobby. Não alterar plano ou billing automaticamente. Política pública e expansão multiusuário permanecem condicionadas à revisão do responsável.

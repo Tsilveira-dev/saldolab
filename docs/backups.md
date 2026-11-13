@@ -29,6 +29,8 @@ O JSON foi baixado pela UI de um Preview protegido ligado ao QA. A branch `qa-v1
 
 Resultado: 2 contas, 2 categorias, 4 transações e 1 orçamento, saldo total 275000 centavos, gasto do orçamento 75000 centavos. Novos IDs não colidiram com os originais; repetir a restauração foi bloqueado. A etapa lógica demorou 973 ms neste ensaio, sem incluir provisionamento, revisão ou ativação. Isso não é SLA de RTO. Evidências no [relatório v1](lancamento-v1.md).
 
+Na rodada final, o JSON exportado pelo Preview de código `ca9e3cc` foi restaurado novamente nessa branch isolada, para **outra identidade fictícia nova e vazia**. Contagens e valores coincidiram; os hashes dos registros financeiros anteriores não mudaram, e a repetição continuou bloqueada. Fase lógica: 982ms, novamente sem significado de SLA. Os seis testes de restauração do PostgreSQL 17 também passaram na suíte final. Nenhum destino Production ou usuário existente foi sobrescrito. Instruções de operação independente no [guia sem Codex](guia-lancamento-sem-codex.md).
+
 ## Backup PostgreSQL para Production — plano
 
 Antes da ativação, aprovar retenção/RPO/RTO e confirmar a janela real de histórico/PITR do plano Neon. Proposta para o piloto: JSON após alterações relevantes, backup PostgreSQL diário e antes de mudança, cópia criptografada fora do projeto com retenção de 30 dias, ensaio mensal; objetivos propostos RPO 24h e RTO 60min. Capacidade, agenda, armazenamento e alertas ainda precisam ser autorizados e configurados.

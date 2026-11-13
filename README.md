@@ -10,6 +10,8 @@
 
 **Production existente:** https://saldolab.vercel.app. Ela não foi atualizada nesta preparação. A fundação da nuvem está em `feat/neon-backend-foundation`, [PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3), mantido em draft. Evidências publicadas e gates estão no [relatório v1.0](docs/lancamento-v1.md).
 
+**Administrar sem Codex:** o [guia de lançamento e manutenção](docs/guia-lancamento-sem-codex.md) reúne instalação, checks, aceite, Neon Auth/SMTP, migrações, role mínima, configuração Vercel, backups, monitoramento e rollback para uso pessoal controlado.
+
 ## Executar
 
 Requisitos: **Node.js 24 LTS**, npm e, para scripts opcionais, Python 3.10+. Os modos locais dispensam configuração. O modo nuvem exige Auth e API próprios do ambiente; siga [instalação](docs/instalacao.md), sem usar credenciais de Production em testes.
@@ -41,11 +43,12 @@ npm run preview
 - Orçamentos por categoria e mês, alertas de consumo e proteção contra duplicidade.
 - Relatórios com intervalo de datas, distribuição de gastos, evolução e recorrências identificadas em pelo menos três meses.
 - CSV com separador `;`, UTF-8 com BOM e valores em reais, com proteção contra fórmulas inclusive após prefixos invisíveis. As correções revisadas do PR #2 foram portadas explicitamente para esta branch.
-- Backup JSON versionado, validação de vínculos e confirmação antes de importar.
+- Backup JSON versionado, validação de vínculos e confirmação antes de importar nos modos locais; na nuvem, exportação e recuperação administrativa isolada.
 - Modo demonstração com seis meses de histórico e restauração; modo pessoal inicialmente vazio.
 - Preferências de modo e tema persistentes, navegação móvel, foco visível, formulários rotulados e modais acessíveis.
 - Recuperação de conteúdo corrompido sem sobrescrita automática.
-- Nuvem opcional: cadastro/login, confirmação de e-mail por código, recuperação de senha e encerramento global de sessões do provedor. JWTs já emitidos têm a [janela residual documentada](docs/recuperacao.md).
+- Nuvem opcional: cadastro/login, confirmação de e-mail por código, recuperação de senha e encerramento individual/global. A API exige JWT e sessão ativa conferida no banco; [política e limites de revogação](docs/recuperacao.md).
+- Cadastro rápido de conta e categoria no formulário de transação quando faltarem vínculos, com seleção automática e preservação dos campos preenchidos.
 - CRUD remoto por usuário, revisões de edição (409), backup JSON exportável e procedimento administrativo de restauração ensaiado exclusivamente em QA.
 
 ## Stack
@@ -57,12 +60,14 @@ React 19, Vite 7, JavaScript ES6+, Bootstrap 5 customizado, Lucide, React Router
 1. Explore a demonstração e seus gráficos.
 2. Selecione **Modo pessoal** no cabeçalho ou em Configurações.
 3. Clique em **Ativar edição**; a página recarrega com os dados atuais.
-4. Cadastre contas e categorias antes das primeiras receitas ou despesas.
+4. Cadastre contas e categorias, ou use o cadastro rápido oferecido na primeira transação.
 5. Registre transações e defina orçamentos para o mês selecionado.
 6. Consulte Relatórios e exporte CSV ou backup JSON.
 7. No modo local, use **Encerrar edição** para liberar outra aba. Na nuvem, edições simultâneas são verificadas pelo servidor.
 
-Para a nuvem, abra **Minha nuvem**, confirme seu e-mail quando solicitado, entre e escolha **Abrir finanças na nuvem**. **Esqueci minha senha** envia um link; **Verificar meu e-mail** permite solicitar outro código. Use somente o ambiente informado pelo responsável: identidades e senhas de QA, development e Production são independentes. Veja [recuperação e sessões](docs/recuperacao.md).
+Para a nuvem, abra **Minha nuvem**, confirme seu e-mail quando solicitado e entre. Login/cadastro selecionam o espaço da nuvem; sair mantém esse espaço sem sessão, sem voltar automaticamente para os dados locais. Se você já está autenticado e escolheu outro modo, use **Abrir finanças na nuvem**. **Esqueci minha senha** envia um link; **Verificar meu e-mail** permite solicitar outro código. Use somente o ambiente informado pelo responsável: identidades e senhas de QA, development e Production são independentes. Veja [recuperação e sessões](docs/recuperacao.md).
+
+O modo pessoal local pertence ao navegador/origem, independentemente do e-mail. Trocar de login não apaga nem transfere esses dados. Uma nova identidade na nuvem começa com seus próprios registros vazios; entrar novamente na identidade anterior recupera somente os registros dela.
 
 Nos modos locais, as páginas abrem em **Somente leitura**. Consultar não bloqueia outras abas; **Ativar edição** reserva uma editora por modo. A nuvem exige sessão válida, oculta dados de identidades anteriores e recusa gravações indisponíveis. Use navegador atualizado em HTTPS ou localhost.
 
@@ -132,7 +137,7 @@ Mesma semente e mês final produzem o mesmo CSV. O arquivo contém centavos inte
 
 Chaves locais: `saldolab:v1:demo`, `saldolab:v1:personal` e `saldolab:preferences:v1`. Os componentes não acessam `localStorage`. Os repositórios expõem operações assíncronas e validam o agregado antes da gravação. Um formato desconhecido exige recuperação explícita, sem migração destrutiva automática.
 
-O PR #3 acrescenta Neon Auth, API autenticada e PostgreSQL por usuário, preservando os modos locais. Veja [Arquitetura](docs/architecture.md), [Contrato do repositório](docs/persistence.md) e [auditoria do backend](docs/auditoria-backend-neon.md). O servidor verifica o JWT e aplica autorização; filtros do frontend não protegem acesso.
+O PR #3 acrescenta Neon Auth, API autenticada e PostgreSQL por usuário, preservando os modos locais. Veja [Arquitetura](docs/architecture.md), [Contrato do repositório](docs/persistence.md) e [auditoria do backend](docs/auditoria-backend-neon.md). O servidor verifica JWT, sessão ativa e autorização por usuário; filtros do frontend não protegem acesso. As migrações `0001` e `0002` devem estar aplicadas no ambiente cloud antes do código novo; não há fallback para JWT sozinho.
 
 ## Publicação
 

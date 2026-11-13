@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "01c9273c2351c56eaea4875c3e8d22fbfc0ab8fa",
+  "url": "https://saldolab-i9cni7y69-fair-play7.vercel.app",
+  "deployment": "dpl_AzGYt8Yvyzv4s3Sz6z77ni9PHtmW",
+  "readyState": "READY",
+  "qaBranch": "br-gentle-water-bc8ceb2q",
+  "protectedAccess": "Origin-scoped local Vercel OIDC; SSO unchanged; TLS verified",
+  "suite": {
+    "passed": 10,
+    "failed": 0
+  },
+  "finalHeadAndDeploymentIndex": "PR #3 description after final verification"
+}

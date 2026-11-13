@@ -566,7 +566,8 @@ for (const width of [1440, 390])
       await page.getByRole('button', { name: 'Entrar', exact: true }).click();
       await expect(page.locator('strong').filter({ hasText: values.email })).toBeVisible();
       await page.goto('/contas');
-      await expect(page.getByText('Neon PostgreSQL', { exact: true })).toBeVisible();
+      await expect(page.locator('.local-badge')).toHaveText('Neon PostgreSQL');
+      await expect(page.getByLabel('Edição no banco de dados')).toBeVisible();
       await expect(
         page.locator('.page-heading').getByRole('button', { name: 'Adicionar conta', exact: true }),
       ).toBeEnabled();
@@ -579,7 +580,8 @@ for (const width of [1440, 390])
       await expect(page.getByText('QA exclusivo A', { exact: true })).toHaveCount(0);
       await expect(page.getByText('QA exclusivo B', { exact: true })).toHaveCount(0);
       await expect(page.getByText('QA local independente', { exact: true })).toHaveCount(0);
-      await expect(page.getByText('Neon PostgreSQL', { exact: true })).toBeVisible();
+      await expect(page.locator('.local-badge')).toHaveText('Neon PostgreSQL');
+      await expect(page.getByLabel('Edição no banco de dados')).toBeVisible();
       await page.goto('/nuvem');
     };
     const first = await register('A');

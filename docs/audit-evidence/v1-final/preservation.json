@@ -1,0 +1,19 @@
+{
+  "gitMain": "c8855b0f7e3e1d7c0fab555d78e041eda6246883",
+  "pr2Head": "b637c8586b5dc1022488bb742ce76f444efb17f4",
+  "neonMainFinanceAndAuthTables": 0,
+  "developmentReadOnly": {
+    "users": 1,
+    "accounts": 1,
+    "initialBalanceCents": 100000,
+    "categories": 1,
+    "transactions": 1,
+    "confirmedExpensesCents": 10000,
+    "budgets": 0
+  },
+  "productionDeployment": "dpl_2AW7mCUorWQF4oQBUidAThX8FHW5",
+  "productionVariableCount": 0,
+  "ssoUnchanged": true,
+  "automationBypassCount": 0,
+  "writesThisRound": "Only new fictitious identities and fixtures in isolated QA/local test DB; authorization function added only to release QA/local test DB"
+}

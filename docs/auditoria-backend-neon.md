@@ -1,6 +1,6 @@
 # SaldoLab — auditoria do backend Neon, PR #3
 
-> Histórico da auditoria anterior, preservado. A preparação de lançamento e as novas evidências do Preview, e-mail, sessões e restauração estão em [lançamento v1.0](lancamento-v1.md).
+> Histórico da auditoria anterior, preservado. A preparação de lançamento e as novas evidências do Preview, e-mail, sessões e restauração estão em [lançamento v1.0](lancamento-v1.md). A rodada final acrescentou checagem de sessão ativa na API e a migração `0002`; a descrição stateless abaixo documenta a implementação antiga, não a política atual. Continuidade operacional no [guia sem Codex](guia-lancamento-sem-codex.md).
 
 Data: 12/11/2026, America/Sao_Paulo. Repositório `Tsilveira-dev/saldolab`, branch exclusiva `feat/neon-backend-foundation`. Base da revisão: `0e4b26c`. [PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3).
 
