@@ -260,7 +260,10 @@ function Editor({ entity, row, initialType, onClose }) {
       <form onSubmit={submit} noValidate>
         <div className="modal-body-custom">
           <InlineError message={error} />
-          <fieldset className="form-grid" disabled={!canWrite || creatingCategory || creatingAccount}>
+          <fieldset
+            className="form-grid"
+            disabled={!canWrite || creatingCategory || creatingAccount}
+          >
             {entity === 'transactions' && (
               <>
                 {field(
@@ -318,8 +321,8 @@ function Editor({ entity, row, initialType, onClose }) {
                 {missingAccount && (
                   <div className="full-width alert alert-info">
                     <p role="status">
-                      Você ainda não tem contas. Cadastre uma aqui para continuar sem perder os dados
-                      da transação.
+                      Você ainda não tem contas. Cadastre uma aqui para continuar sem perder os
+                      dados da transação.
                     </p>
                     <label className="d-block">
                       Nome da nova conta
@@ -490,7 +493,14 @@ function Editor({ entity, row, initialType, onClose }) {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || !canWrite || creatingCategory || creatingAccount || missingAccount || missingCategory}
+            disabled={
+              isSubmitting ||
+              !canWrite ||
+              creatingCategory ||
+              creatingAccount ||
+              missingAccount ||
+              missingCategory
+            }
             className="btn btn-primary"
           >
             {isSubmitting ? 'Salvando…' : row ? 'Salvar alterações' : 'Adicionar registro'}
