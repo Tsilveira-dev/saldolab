@@ -54,7 +54,7 @@ function Editor({ entity, row, initialType, onClose }) {
   const [categoryError, setCategoryError] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [accountName, setAccountName] = useState('');
-  const [accountInitialBalance, setAccountInitialBalance] = useState('0,00');
+  const [accountInitialBalance, setAccountInitialBalance] = useState('');
   const [accountError, setAccountError] = useState('');
   const [creatingAccount, setCreatingAccount] = useState(false);
   const defaults = {
@@ -72,7 +72,7 @@ function Editor({ entity, row, initialType, onClose }) {
     accounts: {
       name: row?.name ?? '',
       type: row?.type ?? 'checking',
-      initialBalance: row ? centsInput(row.initialBalanceCents) : '0,00',
+      initialBalance: row ? centsInput(row.initialBalanceCents) : '',
       color: row?.color ?? '#4d6386',
       icon: row?.icon ?? 'bank',
     },
@@ -229,6 +229,9 @@ function Editor({ entity, row, initialType, onClose }) {
       aria-invalid={Boolean(errors[key])}
       {...register(key)}
       {...props}
+      {...(['amount', 'initialBalance', 'limit'].includes(key)
+        ? { onFocus: (event) => event.currentTarget.select() }
+        : {})}
     />
   );
   const select = (key, options, placeholder) => (
@@ -342,6 +345,8 @@ function Editor({ entity, row, initialType, onClose }) {
                         className="form-control mt-1"
                         value={accountInitialBalance}
                         inputMode="decimal"
+                        placeholder="0,00"
+                        onFocus={(event) => event.currentTarget.select()}
                         onChange={(event) => setAccountInitialBalance(event.target.value)}
                       />
                     </label>
@@ -419,7 +424,7 @@ function Editor({ entity, row, initialType, onClose }) {
                 {field(
                   'initialBalance',
                   'Saldo inicial (R$)',
-                  input('initialBalance', { inputMode: 'decimal' }),
+                  input('initialBalance', { inputMode: 'decimal', placeholder: '0,00' }),
                   { hint: 'Pode ser negativo. Movimentações serão somadas a esse valor.' },
                 )}
               </>
