@@ -53,6 +53,10 @@ function Editor({ entity, row, initialType, onClose }) {
   const [categoryName, setCategoryName] = useState('');
   const [categoryError, setCategoryError] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
+  const [accountName, setAccountName] = useState('');
+  const [accountInitialBalance, setAccountInitialBalance] = useState('0,00');
+  const [accountError, setAccountError] = useState('');
+  const [creatingAccount, setCreatingAccount] = useState(false);
   const defaults = {
     transactions: {
       description: row?.description ?? '',
@@ -103,6 +107,7 @@ function Editor({ entity, row, initialType, onClose }) {
   });
   const type = useWatch({ control, name: 'type' });
   const selectedCategoryId = useWatch({ control, name: 'categoryId' });
+  const missingAccount = entity === 'transactions' && !data.accounts.length;
   const missingCategory =
     entity === 'transactions' &&
     type !== 'transfer' &&
@@ -118,6 +123,39 @@ function Editor({ entity, row, initialType, onClose }) {
     )
       setValue('categoryId', '');
   }, [entity, type, selectedCategoryId, data.categories, setValue]);
+  async function createAccount() {
+    if (!canWrite || creatingAccount) return;
+    const parsed = accountFormSchema.safeParse({
+      name: accountName.trim(),
+      type: 'checking',
+      initialBalance: accountInitialBalance,
+      color: '#4d6386',
+      icon: 'bank',
+    });
+    if (!parsed.success) {
+      setAccountError('Confira o nome da conta e o saldo inicial (ex.: 0,00).');
+      return;
+    }
+    setCreatingAccount(true);
+    setAccountError('');
+    try {
+      const { initialBalance, ...rest } = parsed.data;
+      const created = await mutate(
+        (repo) =>
+          repo.create('accounts', {
+            ...rest,
+            initialBalanceCents: parseMoney(initialBalance),
+            createdAt: today(),
+          }),
+        'Conta criada. Conclua a transação.',
+      );
+      if (created?.id) setValue('accountId', created.id, { shouldValidate: true, shouldDirty: true });
+    } catch (cause) {
+      setAccountError(cause.message ?? 'Não foi possível criar a conta.');
+    } finally {
+      setCreatingAccount(false);
+    }
+  }
   async function createCategory() {
     if (!canWrite || creatingCategory) return;
     const parsed = categoryFormSchema.safeParse({
@@ -216,12 +254,12 @@ function Editor({ entity, row, initialType, onClose }) {
     <Modal
       title={`${row ? 'Editar' : 'Adicionar'} ${titles[entity]}`}
       onClose={onClose}
-      busy={isSubmitting || creatingCategory}
+      busy={isSubmitting || creatingCategory || creatingAccount}
     >
       <form onSubmit={submit} noValidate>
         <div className="modal-body-custom">
           <InlineError message={error} />
-          <fieldset className="form-grid" disabled={!canWrite || creatingCategory}>
+          <fieldset className="form-grid" disabled={!canWrite || creatingCategory || creatingAccount}>
             {entity === 'transactions' && (
               <>
                 {field(
@@ -276,25 +314,41 @@ function Editor({ entity, row, initialType, onClose }) {
                         'Selecione a categoria',
                       ),
                     )}
-                {field(
-                  'status',
-                  'Status',
-                  select('status', [
-                    ['confirmed', 'Confirmado'],
-                    ['pending', 'Pendente'],
-                  ]),
-                  { className: 'full-width' },
-                )}
-                {field(
-                  'notes',
-                  'Observações (opcional)',
-                  <textarea
-                    className="form-control"
-                    {...register('notes')}
-                    rows={3}
-                    maxLength={1000}
-                  />,
-                  { className: 'full-width' },
+                {missingAccount && (
+                  <div className="full-width alert alert-info">
+                    <p role="status">
+                      Você ainda não tem contas. Cadastre uma aqui para continuar sem perder os dados
+                      da transação.
+                    </p>
+                    <label className="d-block">
+                      Nome da nova conta
+                      <input
+                        className="form-control mt-1"
+                        value={accountName}
+                        maxLength={100}
+                        placeholder="Ex.: Conta de teste"
+                        onChange={(event) => setAccountName(event.target.value)}
+                      />
+                    </label>
+                    <label className="d-block mt-2">
+                      Saldo inicial da conta (R$)
+                      <input
+                        className="form-control mt-1"
+                        value={accountInitialBalance}
+                        inputMode="decimal"
+                        onChange={(event) => setAccountInitialBalance(event.target.value)}
+                      />
+                    </label>
+                    <InlineError message={accountError} />
+                    <button
+                      className="btn btn-outline-secondary mt-2"
+                      type="button"
+                      disabled={creatingAccount || accountName.trim().length < 2}
+                      onClick={createAccount}
+                    >
+                      {creatingAccount ? 'Criando conta…' : 'Criar conta e selecionar'}
+                    </button>
+                  </div>
                 )}
                 {missingCategory && (
                   <div className="full-width alert alert-info">
@@ -325,10 +379,25 @@ function Editor({ entity, row, initialType, onClose }) {
                     </button>
                   </div>
                 )}
-                {!data.accounts.length && (
-                  <p className="form-note full-width">
-                    Cadastre uma conta na página Contas antes de registrar movimentações.
-                  </p>
+                {field(
+                  'status',
+                  'Status',
+                  select('status', [
+                    ['confirmed', 'Confirmado'],
+                    ['pending', 'Pendente'],
+                  ]),
+                  { className: 'full-width' },
+                )}
+                {field(
+                  'notes',
+                  'Observações (opcional)',
+                  <textarea
+                    className="form-control"
+                    {...register('notes')}
+                    rows={3}
+                    maxLength={1000}
+                  />,
+                  { className: 'full-width' },
                 )}
               </>
             )}
@@ -412,7 +481,7 @@ function Editor({ entity, row, initialType, onClose }) {
         <div className="modal-footer-custom">
           <button
             type="button"
-            disabled={isSubmitting || creatingCategory}
+            disabled={isSubmitting || creatingCategory || creatingAccount}
             className="btn btn-light"
             onClick={onClose}
           >
@@ -420,7 +489,7 @@ function Editor({ entity, row, initialType, onClose }) {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || !canWrite || creatingCategory || missingCategory}
+            disabled={isSubmitting || !canWrite || creatingCategory || creatingAccount || missingAccount || missingCategory}
             className="btn btn-primary"
           >
             {isSubmitting ? 'Salvando…' : row ? 'Salvar alterações' : 'Adicionar registro'}
