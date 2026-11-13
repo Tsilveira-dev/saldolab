@@ -252,14 +252,18 @@ describe('fluxos integrados React → formulário → repositório → indicador
   it('alterna modos sem misturar dados e preserva a preferência no recarregamento', async () => {
     const { user, unmount } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
-    await user.selectOptions(screen.getByLabelText('Modo de uso'), 'demo');
+    await user.click(screen.getByRole('link', { name: 'Configurações' }));
+    await user.click(screen.getByRole('radio', { name: /Exemplo para explorar/ }));
+    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
     await screen.findByText('Cinema com amigos');
     expect(JSON.parse(window.localStorage.getItem(storageKey('personal'))).transactions).toEqual(
       [],
     );
-    await user.selectOptions(screen.getByLabelText('Modo de uso'), 'personal');
+    await user.click(screen.getByRole('link', { name: 'Configurações' }));
+    await user.click(screen.getByRole('radio', { name: /Neste aparelho/ }));
+    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
     await screen.findByText('Nenhuma transação encontrada');
-    expect(screen.getByLabelText('Modo de uso')).toHaveValue('personal');
+    expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
     unmount();
     render(
       <MemoryRouter>
@@ -273,7 +277,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
       </MemoryRouter>,
     );
     await screen.findByText('Nenhuma transação encontrada');
-    expect(screen.getByLabelText('Modo de uso')).toHaveValue('personal');
+    expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
   });
   it('recupera visualmente erros de armazenamento sem sobrescrever o original', async () => {
     window.localStorage.setItem(storageKey('demo'), '{bad');
