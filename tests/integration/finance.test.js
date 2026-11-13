@@ -1,6 +1,8 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import pg from 'pg';
 import { createIntegrationHarness } from './harness.js';
+import { closeDatabasePool } from '../../api/_lib/db.js';
 import { createRecord } from '../../api/_lib/finance.js';
 import { totalBalance, accountBalance, totals, budgetProgress } from '../../src/domain/finance.js';
 
@@ -103,6 +105,130 @@ describe('HTTP, JWT assinado e PostgreSQL reais', () => {
           )
         ).rows[0].n,
       ).toBe(0);
+    }
+  });
+
+  it('JWT válido exige sessão existente do mesmo usuário; ausência e substituição alheia são negadas', async () => {
+    for (const sessionId of [null, 'invalid', randomUUID(), api.sessionIdFor(otherToken)])
+      expect(
+        (await api.request(token, 'GET', undefined, undefined, undefined, { sessionId })).status,
+      ).toBe(401);
+    expect((await api.request(token)).status).toBe(200);
+  });
+
+  it('sessão encerrada impede leitura e toda gravação com o JWT anterior, mesmo com outra sessão ativa', async () => {
+    const user = 'qa-session-' + randomUUID();
+    const old = await api.signToken(user),
+      active = await api.signToken(user);
+    const acc = await create('accounts', account('QA sessão encerrada'), old);
+    await api.pool.query('DELETE FROM neon_auth.session WHERE id=$1', [api.sessionIdFor(old)]);
+    const attempts = [
+      ['GET', undefined, undefined, undefined],
+      ['POST', 'accounts', undefined, account('QA não deve salvar')],
+      ['PATCH', 'accounts', acc.id, { name: 'QA não deve editar', expectedRevision: 1 }],
+      ['DELETE', 'accounts', acc.id, { expectedRevision: 1 }],
+    ];
+    for (const [method, entity, id, body] of attempts)
+      expect((await api.request(old, method, entity, id, body)).status).toBe(401);
+    expect((await api.request(active, 'GET', 'accounts')).body).toEqual([acc]);
+    const newLogin = await api.signToken(user);
+    expect((await api.request(newLogin)).status).toBe(200);
+    expect((await api.request(old)).status).toBe(401);
+  });
+
+  it('sessão expirada recusa JWT ainda válido sem depender do relógio de expiração do JWT', async () => {
+    const bearer = await api.signToken('qa-expiry-' + randomUUID());
+    expect((await api.request(bearer)).status).toBe(200);
+    await api.pool.query(
+      'UPDATE neon_auth.session SET "expiresAt"=now()-interval \'1 second\' WHERE id=$1',
+      [api.sessionIdFor(bearer)],
+    );
+    expect((await api.request(bearer)).status).toBe(401);
+  });
+
+  it('revogação global permanece efetiva contra pares JWT/sessão antigos após novo login', async () => {
+    const user = 'qa-global-' + randomUUID();
+    const first = await api.signToken(user),
+      second = await api.signToken(user);
+    await api.pool.query('DELETE FROM neon_auth.session WHERE "userId"=$1', [user]);
+    expect((await api.request(first)).status).toBe(401);
+    expect((await api.request(second)).status).toBe(401);
+    expect((await api.request(await api.signToken(user))).status).toBe(200);
+    expect((await api.request(first)).status).toBe(401);
+  });
+
+  it('role mínima executa a API sem ler Auth e falha fechada sem EXECUTE na função', async () => {
+    const role = 'qa_runtime_' + randomUUID().replaceAll('-', '');
+    const original = process.env.DATABASE_URL;
+    const restricted = new URL(original);
+    restricted.username = role;
+    restricted.password = '';
+    const runtime = new pg.Pool({ connectionString: restricted.href });
+    await api.pool.query(
+      `CREATE ROLE ${role} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT`,
+    );
+    try {
+      await api.pool.query(`GRANT CONNECT ON DATABASE saldolab_integration TO ${role}`);
+      await api.pool.query(`GRANT USAGE ON SCHEMA public TO ${role}`);
+      await api.pool.query(
+        `GRANT SELECT,INSERT,UPDATE,DELETE ON public.accounts,public.categories,public.transactions,public.budgets TO ${role}`,
+      );
+      await api.pool.query(
+        `GRANT EXECUTE ON FUNCTION public.saldolab_session_active(text,uuid) TO ${role}`,
+      );
+      await expect(runtime.query('SELECT id FROM neon_auth.session')).rejects.toMatchObject({
+        code: '42501',
+      });
+      await expect(runtime.query('SET ROLE postgres')).rejects.toMatchObject({ code: '42501' });
+      const fn = await api.pool.query(
+        "SELECT prosecdef, proconfig, has_function_privilege('public',oid,'EXECUTE') AS public_execute FROM pg_proc WHERE oid='public.saldolab_session_active(text,uuid)'::regprocedure",
+      );
+      expect(fn.rows[0]).toEqual({
+        prosecdef: true,
+        proconfig: ['search_path=pg_catalog'],
+        public_execute: false,
+      });
+      process.env.DATABASE_URL = restricted.href;
+      await closeDatabasePool();
+      expect((await api.request(token)).status).toBe(200);
+      const written = await create('accounts', account('QA role mínima'));
+      await api.pool.query(
+        `REVOKE EXECUTE ON FUNCTION public.saldolab_session_active(text,uuid) FROM ${role}`,
+      );
+      const failed = await api.request(
+        token,
+        'POST',
+        'accounts',
+        undefined,
+        account('QA sem grant'),
+      );
+      expect(failed.status).toBe(500);
+      expect(failed.body.error).not.toMatch(/permission|neon_auth|postgres|session_active/);
+      expect(
+        (await api.pool.query('SELECT name FROM public.accounts WHERE id=$1', [written.id])).rows[0]
+          .name,
+      ).toBe('QA role mínima');
+      expect(
+        (
+          await api.pool.query(
+            'SELECT count(*)::int AS n FROM public.accounts WHERE user_id=$1 AND name=$2',
+            [owner, 'QA sem grant'],
+          )
+        ).rows[0].n,
+      ).toBe(0);
+    } finally {
+      process.env.DATABASE_URL = original;
+      await closeDatabasePool();
+      await runtime.end();
+      await api.pool.query(
+        `REVOKE EXECUTE ON FUNCTION public.saldolab_session_active(text,uuid) FROM ${role}`,
+      );
+      await api.pool.query(
+        `REVOKE SELECT,INSERT,UPDATE,DELETE ON public.accounts,public.categories,public.transactions,public.budgets FROM ${role}`,
+      );
+      await api.pool.query(`REVOKE USAGE ON SCHEMA public FROM ${role}`);
+      await api.pool.query(`REVOKE CONNECT ON DATABASE saldolab_integration FROM ${role}`);
+      await api.pool.query(`DROP ROLE ${role}`);
     }
   });
 

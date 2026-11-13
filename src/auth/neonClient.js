@@ -22,7 +22,7 @@ if (baseURL) {
   } catch {
     // Never print the configured value: it might contain credentials by mistake.
     configurationError =
-      'Não foi possível iniciar o Neon Auth. Confira se VITE_NEON_AUTH_URL é a Base URL HTTPS da branch development e termina em /auth.';
+      'Não foi possível iniciar o Neon Auth. Confira se VITE_NEON_AUTH_URL é a Base URL HTTPS do ambiente correto e termina em /auth.';
   }
 }
 
@@ -37,15 +37,19 @@ export class CloudSessionError extends Error {
   }
 }
 
-export async function getAuthToken({ expectedUserId } = {}) {
+export async function getAuthSession({ expectedUserId } = {}) {
   if (!authClient) throw new CloudSessionError('A conexão com a nuvem não está configurada.', 503);
   const result = await authClient.getSession();
-  if (result.error || !result.data?.session?.token)
+  if (result.error || !result.data?.session?.token || !result.data.session.id)
     throw new CloudSessionError(
       'Sua sessão expirou. Entre novamente para acessar a nuvem.',
       result.error?.status >= 500 ? 503 : 401,
     );
   if (expectedUserId !== undefined && result.data.user?.id !== expectedUserId)
     throw new CloudSessionError('A conta conectada mudou. Reabra seus dados na nuvem.');
-  return result.data.session.token;
+  return { token: result.data.session.token, sessionId: result.data.session.id };
+}
+
+export async function getAuthToken(options) {
+  return (await getAuthSession(options)).token;
 }

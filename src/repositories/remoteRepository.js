@@ -1,4 +1,4 @@
-import { getAuthToken } from '../auth/neonClient';
+import { getAuthSession } from '../auth/neonClient';
 import { exportCloudBackup } from './cloudBackup.js';
 
 const entities = new Set(['accounts', 'categories', 'transactions', 'budgets']);
@@ -18,13 +18,14 @@ async function apiCall(entity, { method = 'GET', id, body, userId } = {}) {
   if (entity) params.set('entity', entity);
   if (id) params.set('id', id);
   const url = '/api/finance' + (params.size ? '?' + params.toString() : '');
-  const token = await getAuthToken({ expectedUserId: userId });
+  const { token, sessionId } = await getAuthSession({ expectedUserId: userId });
   let response;
   try {
     response = await fetch(url, {
       method,
       headers: {
         Authorization: 'Bearer ' + token,
+        'X-SaldoLab-Session-Id': sessionId,
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
       ...(body ? { body: JSON.stringify(body) } : {}),

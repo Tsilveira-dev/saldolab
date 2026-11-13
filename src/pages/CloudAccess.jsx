@@ -159,8 +159,8 @@ export default function CloudAccess() {
               </button>
             </div>
             <p className="text-secondary small mt-3">
-              Ao sair de todos os dispositivos, novas sessões exigem login. Acessos já autorizados
-              podem levar até 15 minutos para expirar.
+              Ao encerrar uma sessão, os próximos acessos aos dados na nuvem exigem uma sessão
+              ativa. Sair de todos os dispositivos encerra todas as sessões dessa conta.
             </p>
           </div>
         ) : (

@@ -54,6 +54,22 @@ export async function createIntegrationHarness() {
       'utf8',
     ),
   );
+  // Only the disposable local database gets a minimal Auth fixture schema.
+  // Real Neon tests use the provider's existing session table, never replace it.
+  if (process.env.SALDOLAB_TEST_REAL_AUTH !== '1')
+    await pool.query(`
+      CREATE SCHEMA IF NOT EXISTS neon_auth;
+      CREATE TABLE IF NOT EXISTS neon_auth.session (
+        id uuid PRIMARY KEY,
+        "userId" text NOT NULL,
+        "expiresAt" timestamptz NOT NULL
+      )`);
+  await pool.query(
+    await readFile(
+      new URL('../../db/migrations/0002_active_session_authorization.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   const resources = [];
   let signToken;
   let issuerAvailable = true;
@@ -110,7 +126,15 @@ export async function createIntegrationHarness() {
         .setAudience(options.audience ?? origin)
         .setIssuedAt();
       if (!options.withoutExpiry) jwt.setExpirationTime(options.expiry ?? '15m');
-      return jwt.sign(privateKey);
+      const token = await jwt.sign(privateKey);
+      const sessionId = randomUUID();
+      await pool.query(
+        'INSERT INTO neon_auth.session(id, "userId", "expiresAt") VALUES($1,$2,now()+interval \'1 hour\')',
+        [sessionId, sub],
+      );
+      // Managed JWTs can be identical across sessions issued in the same second.
+      // Keep the independent opaque session credential with the JWT; no token map.
+      return { token, sessionId };
     };
     resources.push(async () => {
       issuerServer.closeAllConnections();
@@ -143,10 +167,19 @@ export async function createIntegrationHarness() {
     pool,
     origin,
     signToken,
+    sessionIdFor: (credentials) => credentials?.sessionId,
     setIssuerAvailable: (value) => {
       issuerAvailable = value;
     },
-    async request(token, method = 'GET', entity, id, body) {
+    async request(
+      credentials,
+      method = 'GET',
+      entity,
+      id,
+      body,
+      { sessionId = credentials?.sessionId } = {},
+    ) {
+      const token = credentials?.token ?? credentials;
       const params = new URLSearchParams();
       if (entity) params.set('entity', entity);
       if (id) params.set('id', id);
@@ -154,6 +187,7 @@ export async function createIntegrationHarness() {
         method,
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(sessionId ? { 'X-SaldoLab-Session-Id': sessionId } : {}),
           ...(body ? { 'Content-Type': 'application/json' } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),

@@ -27,7 +27,7 @@ export function jsonResponse(data, status = 200) {
     headers: {
       'Cache-Control': 'private, no-store, max-age=0',
       'X-Content-Type-Options': 'nosniff',
-      Vary: 'Authorization',
+      Vary: 'Authorization, X-SaldoLab-Session-Id',
     },
   });
 }

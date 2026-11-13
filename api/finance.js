@@ -1,4 +1,4 @@
-import { authenticatedUser } from './_lib/auth.js';
+import { authenticatedUser, requireActiveSession } from './_lib/auth.js';
 import { withDatabase } from './_lib/db.js';
 import { ApiError, mapDatabaseError, jsonResponse } from './_lib/errors.js';
 import { assertEntity, validateId } from './_lib/validation.js';
@@ -31,13 +31,19 @@ async function handle(request) {
     return new Response(null, { status: 405, headers: { Allow: allowed.join(', ') } });
 
   try {
-    const userId = await authenticatedUser(request);
+    const identity = await authenticatedUser(request);
+    const { userId } = identity;
+    const withUserDatabase = (work, options) =>
+      withDatabase(async (client) => {
+        await requireActiveSession(client, identity);
+        return work(client);
+      }, options);
     const params = getParams(request);
     const entity = params.get('entity');
     if (!entity) {
       if (request.method !== 'GET') throw new ApiError(405, 'Operação não permitida.');
       return jsonResponse(
-        await withDatabase((client) => snapshot(client, userId), { readOnly: true }),
+        await withUserDatabase((client) => snapshot(client, userId), { readOnly: true }),
       );
     }
     assertEntity(entity);
@@ -46,7 +52,7 @@ async function handle(request) {
 
     if (request.method === 'GET') {
       return jsonResponse(
-        await withDatabase(
+        await withUserDatabase(
           async (client) => {
             const all = await listRecords(client, entity, userId);
             if (!recordId) return all;
@@ -62,7 +68,7 @@ async function handle(request) {
       if (recordId !== null) throw new ApiError(422, 'Não especifique ID no cadastro.');
       const body = await parseBody(request);
       return jsonResponse(
-        await withDatabase((client) => createRecord(client, entity, userId, body)),
+        await withUserDatabase((client) => createRecord(client, entity, userId, body)),
         201,
       );
     }
@@ -70,13 +76,13 @@ async function handle(request) {
     if (request.method === 'PATCH') {
       const body = await parseBody(request);
       return jsonResponse(
-        await withDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
+        await withUserDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
       );
     }
     // The delete body carries a required revision: callers cannot delete a stale row.
     const body = await parseBody(request);
     return jsonResponse(
-      await withDatabase((client) =>
+      await withUserDatabase((client) =>
         removeRecord(client, entity, userId, recordId, body.expectedRevision),
       ),
     );

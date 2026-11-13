@@ -100,8 +100,8 @@ export async function createActor(browser, suffix) {
 export async function api(page, method = 'GET', entity, id, body) {
   return page.evaluate(
     async ({ method, entity, id, body }) => {
-      const { getAuthToken } = await import('/src/auth/neonClient.js');
-      const token = await getAuthToken();
+      const { getAuthSession } = await import('/src/auth/neonClient.js');
+      const { token, sessionId } = await getAuthSession();
       const params = new URLSearchParams();
       if (entity) params.set('entity', entity);
       if (id) params.set('id', id);
@@ -109,6 +109,7 @@ export async function api(page, method = 'GET', entity, id, body) {
         method,
         headers: {
           Authorization: 'Bearer ' + token,
+          'X-SaldoLab-Session-Id': sessionId,
           ...(body ? { 'Content-Type': 'application/json' } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),

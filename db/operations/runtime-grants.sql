@@ -7,4 +7,5 @@ GRANT USAGE ON SCHEMA public TO saldolab_runtime;
 GRANT SELECT, INSERT, UPDATE, DELETE
   ON public.accounts, public.categories, public.transactions, public.budgets
   TO saldolab_runtime;
+GRANT EXECUTE ON FUNCTION public.saldolab_session_active(text, uuid) TO saldolab_runtime;
 -- Não conceder CREATE, privilégios em neon_auth, ALL TABLES ou default privileges amplos.

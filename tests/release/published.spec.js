@@ -10,7 +10,7 @@ const app = new URL(process.env.SALDOLAB_RELEASE_BASE_URL),
   auth = new URL(process.env.NEON_AUTH_BASE_URL);
 let pool, a, b, fixture, backup;
 const resources = [];
-const tokens = new WeakMap();
+const credentials = new WeakMap();
 async function device(browser) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const transport = await request.newContext({
@@ -51,15 +51,23 @@ async function device(browser) {
       url.pathname === '/api/finance' &&
       authorization?.startsWith('Bearer ')
     )
-      tokens.set(page, authorization.slice(7));
+      credentials.set(page, {
+        token: authorization.slice(7),
+        sessionId: req.headers()['x-saldolab-session-id'],
+      });
   });
   return page;
 }
 async function login(page, credentials = fixture) {
   await page.goto('/nuvem');
-  await page.getByLabel('E-mail', { exact: true }).fill(credentials.email);
-  await privateFill(page.getByLabel('Senha', { exact: true }), credentials.password);
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  const email = page.getByLabel('E-mail', { exact: true });
+  const open = page.getByRole('button', { name: /Abrir finanças na nuvem|Atualizar dados/ });
+  await expect(email.or(open)).toBeVisible();
+  if (await email.isVisible()) {
+    await email.fill(credentials.email);
+    await privateFill(page.getByLabel('Senha', { exact: true }), credentials.password);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  }
   await expect(
     page.getByRole('button', { name: /Abrir finanças na nuvem|Atualizar dados/ }),
   ).toBeVisible();
@@ -68,7 +76,7 @@ async function login(page, credentials = fixture) {
   await expect(
     page.locator('.page-heading').getByRole('button', { name: 'Adicionar conta', exact: true }),
   ).toBeEnabled();
-  expect(tokens.has(page)).toBe(true);
+  expect(credentials.get(page)?.sessionId).toBeTruthy();
 }
 async function provider(page, path, body) {
   return page.evaluate(
@@ -94,20 +102,24 @@ async function provider(page, path, body) {
     { base: auth.href.replace(/\/$/, ''), path, body },
   );
 }
-async function api(page, method, entity, body, bearer = tokens.get(page)) {
+async function api(page, method, entity, body, credential = credentials.get(page), id) {
   return page.evaluate(
-    async ({ method, entity, body, bearer }) => {
-      const r = await fetch('/api/finance' + (entity ? '?entity=' + entity : ''), {
+    async ({ method, entity, body, bearer, sessionId, id }) => {
+      const params = new URLSearchParams();
+      if (entity) params.set('entity', entity);
+      if (id) params.set('id', id);
+      const r = await fetch('/api/finance?' + params, {
         method,
         headers: {
           Authorization: 'Bearer ' + bearer,
+          ...(sessionId ? { 'X-SaldoLab-Session-Id': sessionId } : {}),
           ...(body ? { 'Content-Type': 'application/json' } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
       return { status: r.status, body: await r.json() };
     },
-    { method, entity, body, bearer },
+    { method, entity, body, bearer: credential.token, sessionId: credential.sessionId, id },
   );
 }
 test.beforeAll(async ({ browser }) => {
@@ -161,8 +173,23 @@ test('Preview publicado exige verificação e não concede sessão antes dela', 
   await login(b);
 });
 
-test('logout global da UI revoga sessões reais; janela do JWT emitido é registrada', async () => {
-  const jwt = tokens.get(a),
+test('logout individual recusa o JWT com a sessão anterior e preserva o outro dispositivo', async () => {
+  const previous = credentials.get(a);
+  expect((await api(a, 'GET', undefined, undefined, previous)).status).toBe(200);
+  await a.goto('/nuvem');
+  await a.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  await expect(a.getByRole('heading', { name: 'Entrar na minha conta' })).toBeVisible();
+  expect((await api(a, 'GET', undefined, undefined, previous)).status).toBe(401);
+  expect((await api(b, 'GET')).status).toBe(200);
+  expect((await api(a, 'GET', undefined, undefined, { token: previous.token })).status).toBe(401);
+  await login(a);
+  expect((await api(a, 'GET', undefined, undefined, previous)).status).toBe(401);
+});
+
+test('logout global da UI impede novos acessos com os dois pares JWT/sessão anteriores', async () => {
+  const previousA = credentials.get(a),
+    previousB = credentials.get(b),
+    jwt = previousA.token,
     claims = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
   expect(claims.exp - claims.iat).toBe(900);
   await a.goto('/nuvem');
@@ -178,18 +205,18 @@ test('logout global da UI revoga sessões reais; janela do JWT emitido é regist
   const other = await provider(b, '/get-session?disableCookieCache=true');
   expect([200, 401].includes(other.status)).toBe(true);
   expect(other.hasUser).toBe(false);
-  const old = await api(a, 'GET', undefined, undefined, jwt);
-  expect(old.status).toBe(200);
-  test.info().annotations.push({
-    type: 'security-residual',
-    description:
-      'Global provider sessions revoked; already issued stateless JWT still accepted until exp (900s plus 10s tolerance).',
-  });
+  expect((await api(a, 'GET', undefined, undefined, previousA)).status).toBe(401);
+  expect((await api(b, 'GET', undefined, undefined, previousB)).status).toBe(401);
   await login(a);
   await login(b);
+  expect((await api(a, 'GET', undefined, undefined, previousA)).status).toBe(401);
 });
 
 test('mudança de senha revoga outro dispositivo e recuperação revoga todas as sessões', async () => {
+  const previousB = credentials.get(b);
+  // Refresh the capture on A: the previous assertion deliberately replayed an old pair.
+  await login(a);
+  const currentA = credentials.get(a);
   const changed = randomUUID() + 'Aa2!';
   const change = await provider(a, '/change-password', {
     currentPassword: fixture.password,
@@ -201,7 +228,11 @@ test('mudança de senha revoga outro dispositivo e recuperação revoga todas as
   const other = await provider(b, '/get-session?disableCookieCache=true');
   expect([200, 401].includes(other.status)).toBe(true);
   expect(other.hasUser).toBe(false);
+  expect((await api(b, 'GET', undefined, undefined, previousB)).status).toBe(401);
+  expect((await api(a, 'GET', undefined, undefined, currentA)).status).toBe(200);
   await login(b);
+  const beforeResetA = credentials.get(a),
+    beforeResetB = credentials.get(b);
   const sent = await provider(a, '/request-password-reset', {
     email: fixture.email,
     redirectTo: app.origin + '/nuvem',
@@ -237,7 +268,13 @@ test('mudança de senha revoga outro dispositivo e recuperação revoga todas as
   const revoked = await provider(b, '/get-session?disableCookieCache=true');
   expect([200, 401].includes(revoked.status)).toBe(true);
   expect(revoked.hasUser).toBe(false);
+  expect((await api(a, 'GET', undefined, undefined, beforeResetA)).status).toBe(401);
+  expect(
+    (await api(b, 'POST', 'accounts', account('QA escrita revogada'), beforeResetB)).status,
+  ).toBe(401);
   await a.getByRole('button', { name: 'Voltar ao login' }).click();
+  await login(a);
+  expect((await api(a, 'GET', undefined, undefined, beforeResetA)).status).toBe(401);
   await login(a);
 });
 
@@ -284,85 +321,186 @@ test('exporta backup da nuvem pela UI publicada sem revisões, sessões ou ident
   expect(parsed.data.transactions).toHaveLength(4);
   expect(backup.includes('revision')).toBe(false);
   expect(backup.includes(fixture.email)).toBe(false);
-  expect(backup.includes(tokens.get(a))).toBe(false);
+  expect(backup.includes(credentials.get(a).token)).toBe(false);
+  expect(backup.includes(credentials.get(a).sessionId)).toBe(false);
+  const beforeReload = (await api(a, 'GET')).body;
+  await a.reload();
+  expect((await api(a, 'GET')).body).toEqual(beforeReload);
+  await a.goto('/nuvem');
+  await a.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  await login(a);
+  expect((await api(a, 'GET')).body).toEqual(beforeReload);
+  const balances = new Map(parsed.data.accounts.map((row) => [row.id, row.initialBalanceCents]));
+  let revenue = 0,
+    expenses = 0;
+  for (const row of parsed.data.transactions) {
+    expect(Number.isSafeInteger(row.amountCents)).toBe(true);
+    if (row.status !== 'confirmed') continue;
+    if (row.type === 'income') {
+      revenue += row.amountCents;
+      balances.set(row.accountId, balances.get(row.accountId) + row.amountCents);
+    } else {
+      balances.set(row.accountId, balances.get(row.accountId) - row.amountCents);
+    }
+    if (row.type === 'expense') expenses += row.amountCents;
+    if (row.type === 'transfer')
+      balances.set(
+        row.destinationAccountId,
+        balances.get(row.destinationAccountId) + row.amountCents,
+      );
+  }
+  expect({
+    revenue,
+    expenses,
+    current: balances.get(current.id),
+    reserve: balances.get(reserve.id),
+  }).toEqual({ revenue: 250000, expenses: 75000, current: 255000, reserve: 20000 });
   await writeFile('work/launch-v1/release-fixture.json', JSON.stringify({ id: fixture.id }), {
     mode: 0o600,
   });
 });
 
-test('transação sem categorias conclui cadastro, edição e exclusão no Preview em desktop/mobile', async ({
+test('outra identidade não lê, edita ou exclui registros do titular fictício no Preview', async ({
   browser,
 }) => {
-  for (const width of [1440, 390]) {
-    const page = await device(browser);
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto('/nuvem');
-    const credentials = {
-      email: 'qa-release-guide-' + randomUUID() + '@example.com',
-      password: randomUUID() + 'Aa1!',
-    };
-    const registered = await page.evaluate(
-      async ({ base, email, password }) => {
-        const r = await fetch(base + '/sign-up/email', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: 'QA categoria guiada', email, password }),
-        });
-        const data = await r.json();
-        return { status: r.status, id: data.user?.id };
-      },
-      { base: auth.href.replace(/\/$/, ''), ...credentials },
-    );
-    expect(registered.status).toBe(200);
-    expect(credentials.email.startsWith('qa-release-guide-')).toBe(true);
-    await pool.query('UPDATE neon_auth."user" SET "emailVerified"=true WHERE id=$1 AND email=$2', [
-      registered.id,
-      credentials.email,
-    ]);
-    await login(page, credentials);
-    expect((await api(page, 'POST', 'accounts', account('QA conta guiada'))).status).toBe(201);
-    await page.goto('/transacoes');
-    await page
-      .locator('.page-heading')
-      .getByRole('button', { name: 'Nova transação', exact: true })
-      .click();
-    const dialog = page.getByRole('dialog');
-    await dialog.locator('[name=description]').fill('QA lançamento guiado');
-    await dialog.locator('[name=amount]').fill('10,00');
-    await expect(
-      dialog.getByRole('button', { name: 'Adicionar registro', exact: true }),
-    ).toBeDisabled();
-    await dialog.getByLabel('Nome da nova categoria').fill('QA categoria guiada');
-    await dialog.getByRole('button', { name: 'Criar categoria de despesa', exact: true }).click();
-    await expect(dialog.locator('[name=categoryId] option:checked')).toHaveText(
-      'QA categoria guiada',
-    );
-    await expect(dialog.locator('[name=description]')).toHaveValue('QA lançamento guiado');
-    await expect(dialog.locator('[name=amount]')).toHaveValue('10,00');
-    await dialog.getByRole('button', { name: 'Adicionar registro', exact: true }).click();
-    await expect(dialog).toHaveCount(0);
-    await page.getByRole('button', { name: 'Editar QA lançamento guiado', exact: true }).click();
-    await dialog.locator('[name=amount]').fill('20,00');
-    await dialog.getByRole('button', { name: 'Salvar alterações' }).click();
-    await expect(dialog).toHaveCount(0);
-    const stored = await pool.query(
-      'SELECT amount_cents FROM public.transactions WHERE user_id=$1',
-      [registered.id],
-    );
-    expect(stored.rows[0].amount_cents).toBe('2000');
-    await page.getByRole('button', { name: 'Excluir QA lançamento guiado', exact: true }).click();
-    await dialog.getByRole('button', { name: 'Excluir registro', exact: true }).click();
-    await expect(dialog).toHaveCount(0);
-    expect(
-      (
-        await pool.query('SELECT count(*)::int AS n FROM public.transactions WHERE user_id=$1', [
-          registered.id,
-        ])
-      ).rows[0].n,
-    ).toBe(0);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
-      true,
-    );
+  const page = await device(browser);
+  const other = {
+    email: 'qa-release-isolation-' + randomUUID() + '@example.com',
+    password: randomUUID() + 'Aa1!',
+  };
+  await page.goto('/nuvem');
+  const registered = await page.evaluate(
+    async ({ base, values }) => {
+      const response = await fetch(base + '/sign-up/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+      const data = await response.json();
+      return { status: response.status, id: data.user?.id };
+    },
+    { base: auth.href.replace(/\/$/, ''), values: { name: 'QA isolamento', ...other } },
+  );
+  expect(registered.status).toBe(200);
+  const user = { id: registered.id };
+  await pool.query('UPDATE neon_auth."user" SET "emailVerified"=true WHERE id=$1 AND email=$2', [
+    user.id,
+    other.email,
+  ]);
+  await login(page, other);
+  expect((await api(page, 'GET')).body.accounts).toEqual([]);
+  const source = (await api(a, 'GET')).body;
+  for (const entity of ['accounts', 'categories', 'transactions', 'budgets']) {
+    const row = source[entity][0];
+    for (const method of ['GET', 'PATCH', 'DELETE']) {
+      const changed =
+        entity === 'transactions'
+          ? { amountCents: 1 }
+          : entity === 'budgets'
+            ? { limitCents: 1 }
+            : { name: 'QA não alterar' };
+      const body =
+        method === 'GET'
+          ? undefined
+          : {
+              expectedRevision: row.revision,
+              ...(method === 'PATCH' ? changed : {}),
+            };
+      expect((await api(page, method, entity, body, undefined, row.id)).status).toBe(404);
+    }
   }
+  expect((await api(a, 'GET')).body).toEqual(source);
 });
+
+for (const type of ['expense', 'income'])
+  test(`transação ${type} sem contas/categorias usa cadastro rápido e CRUD no Preview desktop/mobile`, async ({
+    browser,
+  }) => {
+    for (const width of [1440, 390]) {
+      const page = await device(browser);
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/nuvem');
+      const credentials = {
+        email: 'qa-release-guide-' + randomUUID() + '@example.com',
+        password: randomUUID() + 'Aa1!',
+      };
+      const registered = await page.evaluate(
+        async ({ base, email, password }) => {
+          const r = await fetch(base + '/sign-up/email', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'QA categoria guiada', email, password }),
+          });
+          const data = await r.json();
+          return { status: r.status, id: data.user?.id };
+        },
+        { base: auth.href.replace(/\/$/, ''), ...credentials },
+      );
+      expect(registered.status).toBe(200);
+      expect(credentials.email.startsWith('qa-release-guide-')).toBe(true);
+      await pool.query(
+        'UPDATE neon_auth."user" SET "emailVerified"=true WHERE id=$1 AND email=$2',
+        [registered.id, credentials.email],
+      );
+      await login(page, credentials);
+      await page.goto('/transacoes');
+      await page
+        .locator('.page-heading')
+        .getByRole('button', { name: 'Nova transação', exact: true })
+        .click();
+      const dialog = page.getByRole('dialog');
+      await dialog.locator('[name=type]').selectOption(type);
+      await dialog.locator('[name=description]').fill('QA lançamento guiado');
+      await dialog.locator('[name=amount]').fill('10,00');
+      await expect(
+        dialog.getByRole('button', { name: 'Adicionar registro', exact: true }),
+      ).toBeDisabled();
+      await dialog.getByLabel('Nome da nova conta').fill('QA conta guiada');
+      await dialog.getByLabel('Saldo inicial da conta (R$)').fill('1000,00');
+      await dialog.getByRole('button', { name: 'Criar conta e selecionar', exact: true }).click();
+      await expect(dialog.locator('[name=accountId] option:checked')).toHaveText('QA conta guiada');
+      await expect(dialog.locator('[name=description]')).toHaveValue('QA lançamento guiado');
+      await expect(dialog.locator('[name=amount]')).toHaveValue('10,00');
+      await dialog.getByLabel('Nome da nova categoria').fill('QA categoria guiada');
+      await dialog
+        .getByRole('button', {
+          name: 'Criar categoria de ' + (type === 'income' ? 'receita' : 'despesa'),
+          exact: true,
+        })
+        .click();
+      await expect(dialog.locator('[name=categoryId] option:checked')).toHaveText(
+        'QA categoria guiada',
+      );
+      await expect(dialog.locator('[name=description]')).toHaveValue('QA lançamento guiado');
+      await expect(dialog.locator('[name=amount]')).toHaveValue('10,00');
+      await dialog.getByRole('button', { name: 'Adicionar registro', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      await page.getByRole('button', { name: 'Editar QA lançamento guiado', exact: true }).click();
+      await dialog.locator('[name=amount]').fill('20,00');
+      await dialog.getByRole('button', { name: 'Salvar alterações' }).click();
+      await expect(dialog).toHaveCount(0);
+      const stored = await pool.query(
+        'SELECT amount_cents FROM public.transactions WHERE user_id=$1',
+        [registered.id],
+      );
+      expect(stored.rows[0].amount_cents).toBe('2000');
+      const state = (await api(page, 'GET')).body;
+      expect(state.accounts[0].initialBalanceCents).toBe(100000);
+      await page.reload();
+      expect((await api(page, 'GET')).body).toEqual(state);
+      await page.getByRole('button', { name: 'Excluir QA lançamento guiado', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Excluir registro', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      expect(
+        (
+          await pool.query('SELECT count(*)::int AS n FROM public.transactions WHERE user_id=$1', [
+            registered.id,
+          ])
+        ).rows[0].n,
+      ).toBe(0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+      ).toBe(true);
+    }
+  });

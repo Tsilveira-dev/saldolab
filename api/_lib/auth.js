@@ -3,6 +3,7 @@ import { ApiError } from './errors.js';
 
 let cachedVerifier;
 let cachedConfig;
+const sessionIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function authenticatedUser(request) {
   const authorization = request.headers.get('authorization') ?? '';
@@ -47,7 +48,9 @@ export async function authenticatedUser(request) {
     });
     if (typeof payload.sub !== 'string' || payload.sub.length < 1 || payload.sub.length > 120)
       throw new Error('Identity invalid');
-    return payload.sub;
+    const sessionId = request.headers.get('x-saldolab-session-id') ?? '';
+    if (!sessionIdPattern.test(sessionId)) throw new Error('Session missing or invalid');
+    return { userId: payload.sub, sessionId };
   } catch (error) {
     if (
       error instanceof TypeError ||
@@ -56,4 +59,16 @@ export async function authenticatedUser(request) {
       throw new ApiError(503, 'Não foi possível verificar sua sessão. Tente novamente.');
     throw new ApiError(401, 'Sua sessão expirou ou é inválida. Entre novamente.');
   }
+}
+
+export async function requireActiveSession(client, { userId, sessionId }) {
+  // Managed JWTs identify a user, not a session. The SDK's opaque session ID is
+  // a second credential, checked for this user on every API transaction. Never
+  // accept JWT-only requests or cache a positive session result.
+  const result = await client.query(
+    'SELECT public.saldolab_session_active($1, $2::uuid) AS active',
+    [userId, sessionId],
+  );
+  if (result.rows[0]?.active !== true)
+    throw new ApiError(401, 'Sua sessão foi encerrada ou expirou. Entre novamente.');
 }
