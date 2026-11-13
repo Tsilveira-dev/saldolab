@@ -214,10 +214,19 @@ export default function FinanceProvider({ children }) {
     setAccountId('');
     setMode(value);
   };
-  const save = async (entity, values, id, expected) =>
-    mutate((repo) =>
-      id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values),
+  const save = async (entity, values, id, expected) => {
+    const labels = {
+      accounts: 'Conta',
+      categories: 'Categoria',
+      transactions: 'Transação',
+      budgets: 'Orçamento',
+    };
+    const label = labels[entity] ?? 'Registro';
+    return mutate(
+      (repo) => (id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values)),
+      id ? `${label} atualizado com sucesso.` : `${label} cadastrado com sucesso.`,
     );
+  };
   const remove = (entity, row) =>
     setConfirmation({
       title: 'Excluir registro?',
