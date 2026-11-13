@@ -177,7 +177,7 @@ test('sem Web Locks, avisa somente leitura e desabilita edição preservando os 
   );
   await prepare(page, false);
   await expect(page.getByRole('region', { name: 'Permissão de edição' })).toContainText(
-    'indisponível neste navegador',
+    'não permite alterações seguras',
   );
   await expect(page.getByRole('button', { name: 'Ativar edição', exact: true })).toBeDisabled();
   await expect(
