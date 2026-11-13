@@ -106,6 +106,7 @@ function Editor({ entity, row, initialType, onClose }) {
     shouldFocusError: true,
   });
   const type = useWatch({ control, name: 'type' });
+  const selectedAccountId = useWatch({ control, name: 'accountId' });
   const selectedCategoryId = useWatch({ control, name: 'categoryId' });
   const missingAccount = entity === 'transactions' && !data.accounts.length;
   const missingCategory =
@@ -235,6 +236,7 @@ function Editor({ entity, row, initialType, onClose }) {
       className={`form-select ${errors[key] ? 'is-invalid' : ''}`}
       aria-invalid={Boolean(errors[key])}
       {...register(key)}
+      {...(key === 'accountId' ? { value: selectedAccountId ?? '' } : {})}
       {...(key === 'categoryId' ? { value: selectedCategoryId ?? '' } : {})}
     >
       {placeholder && <option value="">{placeholder}</option>}
