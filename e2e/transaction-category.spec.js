@@ -190,6 +190,8 @@ for (const mode of ['personal', 'demo']) {
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel('Descrição', { exact: true }).fill('Compra registrada');
     await dialog.getByLabel('Valor (R$)', { exact: true }).fill('100,00');
+    await dialog.getByLabel('Categoria', { exact: true }).selectOption('test-expense');
+    await expect(dialog.getByRole('button', { name: 'Adicionar registro' })).toBeEnabled();
     await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByText('Transação cadastrada com sucesso.')).toBeVisible();
