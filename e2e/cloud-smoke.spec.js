@@ -27,7 +27,7 @@ test('o Preview com Neon configurado renderiza a página de acesso sem tela bran
   await page.goto('/nuvem');
   await page.waitForTimeout(1000);
   expect(errors, 'JavaScript errors during Neon initialization').toEqual([]);
-  await expect(page.getByRole('heading', { name: 'Minha conta' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Minha conta', exact: true })).toBeVisible();
   await expect(page.locator('#root')).not.toBeEmpty();
   expect(errors).toEqual([]);
 });
