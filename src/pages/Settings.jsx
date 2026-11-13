@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Download, Upload, RotateCcw, HardDrive, ShieldCheck, Moon, Sun } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { downloadFile } from '../services/files';
@@ -66,12 +67,12 @@ export default function Settings() {
       />
       <InlineError message={error} />
       <div className="settings-grid">
-        <Panel title="Seu espaço" subtitle="Dois modos, dados separados">
+        <Panel title="Onde usar seus dados" subtitle="Escolha apenas se quiser trocar de espaço">
           <div className="settings-body">
             <div className="mode-options">
               {[
-                ['demo', 'Demonstração', 'Explore dados fictícios e experimente todas as funções.'],
-                ['personal', 'Pessoal', 'Comece do zero e organize suas próprias finanças.'],
+                ['personal', 'Neste aparelho', 'Os registros ficam somente neste navegador.'],
+                ['demo', 'Exemplo para explorar', 'Dados fictícios, sem afetar suas finanças.'],
               ].map(([value, title, description]) => (
                 <label className={`mode-option ${mode === value ? 'selected' : ''}`} key={value}>
                   <input
@@ -88,6 +89,14 @@ export default function Settings() {
                 </label>
               ))}
             </div>
+            <p className="settings-footnote">
+              <ShieldCheck size={16} />
+              Os dados deste aparelho não acompanham o login. Para acessar suas finanças em outros
+              dispositivos, use sua conta.
+            </p>
+            <Link className="btn btn-outline-secondary" to="/nuvem">
+              Minha conta e sincronização
+            </Link>
             <div className="setting-divider" />
             <h3>Aparência</h3>
             <div className="appearance-buttons">
@@ -116,11 +125,11 @@ export default function Settings() {
               <HardDrive size={25} />
             </span>
             <h3>
-              {mode === 'cloud' ? 'Salvo no Neon PostgreSQL' : 'Salvo apenas neste navegador'}
+              {mode === 'cloud' ? 'Seus dados estão sincronizados' : 'Salvo apenas neste navegador'}
             </h3>
             <p>
               {mode === 'cloud'
-                ? 'Seus registros estão vinculados à sua conta no Neon. Você pode exportar um backup JSON; a importação remota ainda não está disponível.'
+                ? 'Seus registros estão associados à sua conta. Você pode baixar uma cópia dos seus dados; restaurar esse arquivo na conta ainda não está disponível.'
                 : 'Esta versão utiliza armazenamento local. Os registros não são sincronizados entre dispositivos e podem ser perdidos ao limpar os dados do navegador.'}
             </p>
             <div className="backup-buttons">
