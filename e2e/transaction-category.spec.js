@@ -125,6 +125,8 @@ test('uma transação vazia oferece cadastro rápido de conta e categoria antes 
   await expect(dialog.getByLabel('Nome da nova categoria')).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Adicionar registro' })).toBeDisabled();
   await dialog.getByLabel('Nome da nova conta').fill('Conta para testes');
+  await expect(dialog.getByLabel('Saldo inicial da conta (R$)')).toBeEmpty();
+  await dialog.getByLabel('Saldo inicial da conta (R$)').fill('125,50');
   await dialog.getByRole('button', { name: 'Criar conta e selecionar' }).click();
   await expect(dialog.locator('[name=accountId] option:checked')).toHaveText('Conta para testes');
   await dialog.getByLabel('Nome da nova categoria').fill('Compras QA');
@@ -138,6 +140,7 @@ test('uma transação vazia oferece cadastro rápido de conta e categoria antes 
     JSON.parse(localStorage.getItem('saldolab:v1:personal')),
   );
   expect(stored.accounts).toHaveLength(1);
+  expect(stored.accounts[0].initialBalanceCents).toBe(12550);
   expect(stored.categories).toHaveLength(1);
   expect(stored.transactions).toHaveLength(1);
   expect(stored.transactions[0].amountCents).toBe(10000);
