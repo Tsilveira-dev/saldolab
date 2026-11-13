@@ -216,6 +216,8 @@ describe('fluxos integrados React → formulário → repositório → indicador
     let dialog = within(screen.getByRole('dialog'));
     await user.type(dialog.getByLabelText('Nome da conta'), 'Carteira de viagem');
     await user.selectOptions(dialog.getByLabelText('Tipo da conta'), 'cash');
+    expect(dialog.getByLabelText('Saldo inicial (R$)')).toHaveValue('');
+    await user.type(dialog.getByLabelText('Saldo inicial (R$)'), '125,50');
     await user.click(dialog.getByRole('button', { name: 'Adicionar registro' }));
     await screen.findByRole('heading', { name: 'Carteira de viagem' });
     expect(saved().accounts).toHaveLength(3);
