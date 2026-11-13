@@ -149,7 +149,8 @@ function Editor({ entity, row, initialType, onClose }) {
           }),
         'Conta criada. Conclua a transação.',
       );
-      if (created?.id) setValue('accountId', created.id, { shouldValidate: true, shouldDirty: true });
+      if (created?.id)
+        setValue('accountId', created.id, { shouldValidate: true, shouldDirty: true });
     } catch (cause) {
       setAccountError(cause.message ?? 'Não foi possível criar a conta.');
     } finally {
