@@ -106,8 +106,8 @@ export default function CloudAccess() {
           <h1 className="h4 m-0">Minha conta</h1>
         </div>
         <p className="text-secondary">
-          Entre para acessar suas finanças com segurança em outros dispositivos. Os dados
-          salvos apenas neste aparelho não são enviados automaticamente.
+          Entre para acessar suas finanças com segurança em outros dispositivos. Os dados salvos
+          apenas neste aparelho não são enviados automaticamente.
         </p>
         {!authClient ? (
           <div role="status" className="alert alert-info">

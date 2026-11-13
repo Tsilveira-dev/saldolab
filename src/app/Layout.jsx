@@ -171,7 +171,12 @@ export default function Layout() {
               </span>
             )}
             {authClient && (
-              <NavLink className="profile-avatar" to="/nuvem" aria-label="Minha conta" title="Minha conta">
+              <NavLink
+                className="profile-avatar"
+                to="/nuvem"
+                aria-label="Minha conta"
+                title="Minha conta"
+              >
                 SL
               </NavLink>
             )}
@@ -251,7 +256,9 @@ export default function Layout() {
                   </span>
                   <span>
                     <HardDrive size={12} />
-                    {mode === 'cloud' ? 'Dados salvos na sua conta' : 'Dados somente neste dispositivo'}
+                    {mode === 'cloud'
+                      ? 'Dados salvos na sua conta'
+                      : 'Dados somente neste dispositivo'}
                     {mode === 'demo' ? ' · Exemplo fictício' : ''}
                   </span>
                 </footer>
