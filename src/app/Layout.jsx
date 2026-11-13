@@ -10,6 +10,7 @@ import {
   Settings,
   Menu,
   X,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Moon,
