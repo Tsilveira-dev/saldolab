@@ -150,38 +150,37 @@ for (const mode of ['personal', 'demo']) {
     await page.addInitScript(
       ({ mode }) => {
         const key = `saldolab:v1:${mode}`;
-        if (!localStorage.getItem(key)) localStorage.setItem(
-          key,
-          JSON.stringify({
-            version: 1,
-            accounts: [
-              {
-                id: 'test-account',
-                name: 'Conta teste local',
-                type: 'checking',
-                initialBalanceCents: 100000,
-                color: '#123456',
-                icon: 'bank',
-                createdAt: '2026-11-13',
-              },
-            ],
-            categories: [
-              {
-                id: 'test-expense',
-                name: 'Mercado teste local',
-                type: 'expense',
-                color: '#123456',
-                icon: 'tag',
-              },
-            ],
-            transactions: [],
-            budgets: [],
-          }),
-        );
-        if (!localStorage.getItem('saldolab:preferences:v1')) localStorage.setItem(
-          'saldolab:preferences:v1',
-          JSON.stringify({ mode, theme: 'light' }),
-        );
+        if (!localStorage.getItem(key))
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              version: 1,
+              accounts: [
+                {
+                  id: 'test-account',
+                  name: 'Conta teste local',
+                  type: 'checking',
+                  initialBalanceCents: 100000,
+                  color: '#123456',
+                  icon: 'bank',
+                  createdAt: '2026-11-13',
+                },
+              ],
+              categories: [
+                {
+                  id: 'test-expense',
+                  name: 'Mercado teste local',
+                  type: 'expense',
+                  color: '#123456',
+                  icon: 'tag',
+                },
+              ],
+              transactions: [],
+              budgets: [],
+            }),
+          );
+        if (!localStorage.getItem('saldolab:preferences:v1'))
+          localStorage.setItem('saldolab:preferences:v1', JSON.stringify({ mode, theme: 'light' }));
       },
       { mode },
     );
@@ -194,10 +193,10 @@ for (const mode of ['personal', 'demo']) {
     await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByText('Transação cadastrada com sucesso.')).toBeVisible();
-    const read = () => page.evaluate(
-      ({ mode }) => JSON.parse(localStorage.getItem(`saldolab:v1:${mode}`)),
-      { mode },
-    );
+    const read = () =>
+      page.evaluate(({ mode }) => JSON.parse(localStorage.getItem(`saldolab:v1:${mode}`)), {
+        mode,
+      });
     expect((await read()).transactions).toHaveLength(1);
     expect((await read()).transactions[0].amountCents).toBe(10000);
     await page.reload();
