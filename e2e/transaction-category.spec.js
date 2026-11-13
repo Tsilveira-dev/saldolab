@@ -193,9 +193,11 @@ for (const mode of ['personal', 'demo']) {
     await expect(dialog.locator('[name=categoryId] option[value="test-expense"]')).toHaveCount(1);
     await dialog.locator('[name=categoryId]').selectOption('test-expense');
     await expect(dialog.getByRole('button', { name: 'Adicionar registro' })).toBeEnabled();
+    const registeredMessage = page.getByRole('status').getByText('Transação cadastrada com sucesso.');
+    const notification = registeredMessage.waitFor({ state: 'visible' });
     await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
+    await notification;
     await expect(dialog).toHaveCount(0);
-    await expect(page.getByText('Transação cadastrada com sucesso.')).toBeVisible();
     const read = () =>
       page.evaluate(({ mode }) => JSON.parse(localStorage.getItem(`saldolab:v1:${mode}`)), {
         mode,
