@@ -215,16 +215,15 @@ export default function FinanceProvider({ children }) {
     setMode(value);
   };
   const save = async (entity, values, id, expected) => {
-    const labels = {
-      accounts: 'Conta',
-      categories: 'Categoria',
-      transactions: 'Transação',
-      budgets: 'Orçamento',
+    const messages = {
+      accounts: ['Conta cadastrada com sucesso.', 'Conta atualizada com sucesso.'],
+      categories: ['Categoria cadastrada com sucesso.', 'Categoria atualizada com sucesso.'],
+      transactions: ['Transação cadastrada com sucesso.', 'Transação atualizada com sucesso.'],
+      budgets: ['Orçamento cadastrado com sucesso.', 'Orçamento atualizado com sucesso.'],
     };
-    const label = labels[entity] ?? 'Registro';
     return mutate(
       (repo) => (id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values)),
-      id ? `${label} atualizado com sucesso.` : `${label} cadastrado com sucesso.`,
+      (messages[entity] ?? ['Registro cadastrado.', 'Registro atualizado.'])[id ? 1 : 0],
     );
   };
   const remove = (entity, row) =>
