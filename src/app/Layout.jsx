@@ -10,7 +10,6 @@ import {
   Settings,
   Menu,
   X,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Moon,
@@ -42,7 +41,6 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const {
     mode,
-    switchMode,
     theme,
     setTheme,
     month,
@@ -165,29 +163,17 @@ export default function Layout() {
             <strong>{page}</strong>
           </div>
           <div className="topbar-right">
-            <span className="local-badge">
-              <span />
-              {mode === 'cloud' ? 'Neon PostgreSQL' : 'Armazenamento local'}
-            </span>
-            <label className="mode-select">
-              <span className="visually-hidden">Modo de uso</span>
-              <select value={mode} onChange={(event) => switchMode(event.target.value)}>
-                <option value="demo">Modo demonstração</option>
-                <option value="personal">Modo pessoal</option>
-                {mode === 'cloud' && (
-                  <option value="cloud" disabled>
-                    Modo nuvem
-                  </option>
-                )}
-              </select>
-              <ChevronDown size={13} />
-            </label>
-            <span
-              className="profile-avatar"
-              title={mode === 'cloud' ? 'Seu espaço na nuvem' : 'Seu espaço local'}
-            >
-              SL
-            </span>
+            {mode === 'demo' && (
+              <span className="local-badge" aria-label="Dados de exemplo">
+                <span />
+                Exemplo
+              </span>
+            )}
+            {authClient && (
+              <NavLink className="profile-avatar" to="/nuvem" aria-label="Minha conta" title="Minha conta">
+                SL
+              </NavLink>
+            )}
           </div>
         </header>
         <main id="main-content" className="main-content">
@@ -264,8 +250,8 @@ export default function Layout() {
                   </span>
                   <span>
                     <HardDrive size={12} />
-                    {mode === 'cloud' ? 'Dados protegidos no Neon' : 'Dados apenas neste navegador'}
-                    {mode === 'demo' ? ' · Demonstração fictícia' : ''}
+                    {mode === 'cloud' ? 'Dados salvos na sua conta' : 'Dados somente neste dispositivo'}
+                    {mode === 'demo' ? ' · Exemplo fictício' : ''}
                   </span>
                 </footer>
                 <button
