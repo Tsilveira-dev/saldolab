@@ -1,5 +1,7 @@
 # SaldoLab — auditoria e revisão final do PR #1
 
+> Relatório histórico do PR #1, preservado. A revisão da fundação Neon do PR #3 está em [auditoria-backend-neon.md](auditoria-backend-neon.md); suas conclusões e pendências são independentes.
+
 Revisão de 12/11/2026, America/Sao_Paulo. Branch: `fix/auditoria-saldolab`. PR: https://github.com/Tsilveira-dev/saldolab/pull/1. `main` preservada em `99ae1684380674a15c81817642612d416da262e1`.
 
 O [diagnóstico inicial](auditoria-inicial.md) foi registrado antes das primeiras alterações. Os [resultados da primeira rodada](https://github.com/Tsilveira-dev/saldolab/blob/024d0eb2793ce7924af450e7fb0ded1b272f0f61/docs/auditoria-final.md) permanecem no histórico. Esta revisão parte do commit `024d0eb` e substitui sua política de reserva automática por edição explícita. Todos os dados e perfis utilizados são fictícios e isolados.

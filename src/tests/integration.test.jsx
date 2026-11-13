@@ -216,6 +216,8 @@ describe('fluxos integrados React → formulário → repositório → indicador
     let dialog = within(screen.getByRole('dialog'));
     await user.type(dialog.getByLabelText('Nome da conta'), 'Carteira de viagem');
     await user.selectOptions(dialog.getByLabelText('Tipo da conta'), 'cash');
+    expect(dialog.getByLabelText('Saldo inicial (R$)')).toHaveValue('');
+    await user.type(dialog.getByLabelText('Saldo inicial (R$)'), '125,50');
     await user.click(dialog.getByRole('button', { name: 'Adicionar registro' }));
     await screen.findByRole('heading', { name: 'Carteira de viagem' });
     expect(saved().accounts).toHaveLength(3);
@@ -250,14 +252,18 @@ describe('fluxos integrados React → formulário → repositório → indicador
   it('alterna modos sem misturar dados e preserva a preferência no recarregamento', async () => {
     const { user, unmount } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
-    await user.selectOptions(screen.getByLabelText('Modo de uso'), 'demo');
+    await user.click(screen.getByRole('link', { name: 'Configurações' }));
+    await user.click(screen.getByRole('radio', { name: /Exemplo para explorar/ }));
+    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
     await screen.findByText('Cinema com amigos');
     expect(JSON.parse(window.localStorage.getItem(storageKey('personal'))).transactions).toEqual(
       [],
     );
-    await user.selectOptions(screen.getByLabelText('Modo de uso'), 'personal');
+    await user.click(screen.getByRole('link', { name: 'Configurações' }));
+    await user.click(screen.getByRole('radio', { name: /Neste aparelho/ }));
+    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
     await screen.findByText('Nenhuma transação encontrada');
-    expect(screen.getByLabelText('Modo de uso')).toHaveValue('personal');
+    expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
     unmount();
     render(
       <MemoryRouter>
@@ -271,7 +277,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
       </MemoryRouter>,
     );
     await screen.findByText('Nenhuma transação encontrada');
-    expect(screen.getByLabelText('Modo de uso')).toHaveValue('personal');
+    expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
   });
   it('recupera visualmente erros de armazenamento sem sobrescrever o original', async () => {
     window.localStorage.setItem(storageKey('demo'), '{bad');

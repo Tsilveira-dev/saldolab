@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "source": "published QA UI export ca9e3cc",
+  "targetBranch": "br-cold-base-bc3peopn",
+  "counts": {
+    "accounts": 2,
+    "categories": 2,
+    "transactions": 4,
+    "budgets": 1
+  },
+  "balanceCents": 275000,
+  "budgetSpentCents": 75000,
+  "idsRemapped": true,
+  "existingFinancialRowsPreserved": true,
+  "repeatBlocked": true,
+  "logicalDurationMs": 982,
+  "durationIsNotRto": true,
+  "externalDumpOrHistoricalPitrTested": false
+}

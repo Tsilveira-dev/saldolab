@@ -1,0 +1,15 @@
+{
+  "beforeCode": "ca9e3cc",
+  "before": "Logout selected browser-local personal workspace; controlled local sentinel became visible",
+  "userConfirmedBadge": "Armazenamento local",
+  "fixCode": "01c9273c2351c56eaea4875c3e8d22fbfc0ab8fa",
+  "afterDesktop1440": "PASS",
+  "afterMobile390": "PASS",
+  "sameBrowserFlow": "A sign-in -> own account -> sign-out -> B sign-up/sign-in -> empty B -> own B account -> sign-out -> A sign-in -> own A only",
+  "browserLocalDataPreserved": true,
+  "sqlOwnershipVerified": true,
+  "noDataResetOrImport": true,
+  "ownerConfirmationOfFixPending": false,
+  "ownerConfirmedCloudModeWithoutAutomaticLocalData": true,
+  "ownerMobileAcceptancePending": true
+}

@@ -1,18 +1,20 @@
 # SaldoLab
 
-**Suas finanças em perspectiva.** Uma aplicação de gestão financeira pessoal com React, construída para demonstrar CRUD completo, regras de negócio testadas e uma interface de produto.
+**Suas finanças em perspectiva.** Gestão financeira pessoal com React, modos locais e acesso opcional à nuvem com Neon Auth e PostgreSQL.
 
-> Os dados ficam somente no navegador. Esta versão não possui autenticação, banco remoto ou sincronização. Exporte backups regularmente. O modo demonstração usa exclusivamente registros fictícios.
+> A versão 1.0 está em preparação no PR #3 e permanece **NO-GO para dados financeiros reais** até concluir o [aceite de lançamento](docs/lancamento-v1.md). Demonstração e modo pessoal ficam no navegador; o modo nuvem guarda registros por usuário no PostgreSQL. Não há sincronização automática entre esses modos.
 
 **Prévia privada publicada com Sites:** https://saldolab-financas.boundlessonyx2.chatgpt.site
 
 **Código e histórico atuais:** https://github.com/Tsilveira-dev/saldolab. O ZIP e o Git bundle da prévia Sites são uma entrega anterior e não incluem as correções desta auditoria.
 
-**Aplicação publicada auditada:** https://saldolab.vercel.app. As correções estão em `fix/auditoria-saldolab` e aguardam revisão/autorização de merge e deploy. Veja o [diagnóstico inicial](docs/auditoria-inicial.md) e o [relatório final](docs/auditoria-final.md).
+**Production existente:** https://saldolab.vercel.app. Ela não foi atualizada nesta preparação. A fundação da nuvem está em `feat/neon-backend-foundation`, [PR #3](https://github.com/Tsilveira-dev/saldolab/pull/3), mantido em draft. Evidências publicadas e gates estão no [relatório v1.0](docs/lancamento-v1.md).
+
+**Administrar sem Codex:** o [guia de lançamento e manutenção](docs/guia-lancamento-sem-codex.md) reúne instalação, checks, aceite, Neon Auth/SMTP, migrações, role mínima, configuração Vercel, backups, monitoramento e rollback para uso pessoal controlado.
 
 ## Executar
 
-Requisitos: **Node.js 24 LTS**, npm e, para os scripts opcionais, Python 3.10 ou superior. Nenhuma variável de ambiente ou chave de API é necessária.
+Requisitos: **Node.js 24 LTS**, npm e, para scripts opcionais, Python 3.10+. Os modos locais dispensam configuração. O modo nuvem exige Auth e API próprios do ambiente; siga [instalação](docs/instalacao.md), sem usar credenciais de Production em testes.
 
 ```bash
 git clone https://github.com/Tsilveira-dev/saldolab.git
@@ -23,7 +25,7 @@ npm run dev
 
 Abra a URL exibida pelo Vite, normalmente `http://localhost:5173`.
 
-Para revisar as correções antes do merge, execute `git switch fix/auditoria-saldolab` na cópia clonada.
+Para revisar esta versão antes do merge, execute `git switch feat/neon-backend-foundation` na cópia clonada. O Vite sozinho serve a interface; não hospeda as Vercel Functions de `/api`.
 
 Para servir o build de produção:
 
@@ -40,11 +42,14 @@ npm run preview
 - Categorias com tipo, nome, cor e ícone personalizáveis.
 - Orçamentos por categoria e mês, alertas de consumo e proteção contra duplicidade.
 - Relatórios com intervalo de datas, distribuição de gastos, evolução e recorrências identificadas em pelo menos três meses.
-- CSV com separador `;`, UTF-8 com BOM e valores em reais. A proteção contra fórmulas exige reforço para espaços/quebras iniciais; veja AUD-007 no relatório.
-- Backup JSON versionado, validação de vínculos e confirmação antes de importar.
+- CSV com separador `;`, UTF-8 com BOM e valores em reais, com proteção contra fórmulas inclusive após prefixos invisíveis. As correções revisadas do PR #2 foram portadas explicitamente para esta branch.
+- Backup JSON versionado, validação de vínculos e confirmação antes de importar nos modos locais; na nuvem, exportação e recuperação administrativa isolada.
 - Modo demonstração com seis meses de histórico e restauração; modo pessoal inicialmente vazio.
 - Preferências de modo e tema persistentes, navegação móvel, foco visível, formulários rotulados e modais acessíveis.
 - Recuperação de conteúdo corrompido sem sobrescrita automática.
+- Nuvem opcional: cadastro/login, confirmação de e-mail por código, recuperação de senha e encerramento individual/global. A API exige JWT e sessão ativa conferida no banco; [política e limites de revogação](docs/recuperacao.md).
+- Cadastro rápido de conta e categoria no formulário de transação quando faltarem vínculos, com seleção automática e preservação dos campos preenchidos.
+- CRUD remoto por usuário, revisões de edição (409), backup JSON exportável e procedimento administrativo de restauração ensaiado exclusivamente em QA.
 
 ## Stack
 
@@ -55,12 +60,16 @@ React 19, Vite 7, JavaScript ES6+, Bootstrap 5 customizado, Lucide, React Router
 1. Explore a demonstração e seus gráficos.
 2. Selecione **Modo pessoal** no cabeçalho ou em Configurações.
 3. Clique em **Ativar edição**; a página recarrega com os dados atuais.
-4. Cadastre contas e categorias antes das primeiras receitas ou despesas.
+4. Cadastre contas e categorias, ou use o cadastro rápido oferecido na primeira transação.
 5. Registre transações e defina orçamentos para o mês selecionado.
 6. Consulte Relatórios e exporte CSV ou backup JSON.
-7. Use **Encerrar edição** para liberar a edição em outra aba.
+7. No modo local, use **Encerrar edição** para liberar outra aba. Na nuvem, edições simultâneas são verificadas pelo servidor.
 
-As páginas abrem em **Somente leitura**, com controles de gravação financeira desabilitados. Consultar não bloqueia outras abas. A edição precisa ser ativada explicitamente e fica reservada a uma aba por modo; as demais continuam consultando e exportando. Após fechar ou encerrar a editora, ative a edição na outra aba. Atualizar uma consulta não a transforma em editora. Use navegador atualizado em HTTPS ou localhost.
+Para a nuvem, abra **Minha nuvem**, confirme seu e-mail quando solicitado e entre. Login/cadastro selecionam o espaço da nuvem; sair mantém esse espaço sem sessão, sem voltar automaticamente para os dados locais. Se você já está autenticado e escolheu outro modo, use **Abrir finanças na nuvem**. **Esqueci minha senha** envia um link; **Verificar meu e-mail** permite solicitar outro código. Use somente o ambiente informado pelo responsável: identidades e senhas de QA, development e Production são independentes. Veja [recuperação e sessões](docs/recuperacao.md).
+
+O modo pessoal local pertence ao navegador/origem, independentemente do e-mail. Trocar de login não apaga nem transfere esses dados. Uma nova identidade na nuvem começa com seus próprios registros vazios; entrar novamente na identidade anterior recupera somente os registros dela.
+
+Nos modos locais, as páginas abrem em **Somente leitura**. Consultar não bloqueia outras abas; **Ativar edição** reserva uma editora por modo. A nuvem exige sessão válida, oculta dados de identidades anteriores e recusa gravações indisponíveis. Use navegador atualizado em HTTPS ou localhost.
 
 O CRUD valida a operação inteira antes de gravar. Exclusões exigem confirmação. Contas com movimentações e categorias vinculadas a transações ou orçamentos são protegidas. Alterações incompatíveis no tipo de uma categoria também são recusadas.
 
@@ -78,13 +87,16 @@ src/
   components/      gráficos, tabelas, formulários, modais e elementos visuais
   context/         estado da aplicação e operações assíncronas
   domain/          cálculos puros e esquemas de validação
-  pages/           sete páginas do produto e recuperação de armazenamento
-  repositories/    persistência local e preferências
+  pages/           páginas financeiras, acesso, verificação e recuperação
+  repositories/    persistência local/remota, preferências e backup v1
   services/        demonstração e exportação de arquivos
   styles/          temas, layout, componentes e responsividade
   tests/           regras, repositório e integração React
 e2e/               fluxos de navegador desktop e mobile
 scripts/           geração CSV e testes Python
+api/               Vercel Functions, JWT, autorização e transações SQL
+db/                migração inicial e operações planejadas
+tests/             integrações PostgreSQL, Neon e aceite publicado em QA
 docs/              arquitetura, contrato de dados e publicação
 public/fonts/      fontes locais e licença
 ```
@@ -107,11 +119,11 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-A suíte usa Chromium em desktop e em viewport móvel. Os servidores de preview do build e de módulos Vite (somente para a prova de concorrência do repositório) são iniciados automaticamente. Em ambiente com Chromium do sistema, use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. Para testar uma publicação já acessível, use `BASE_URL=https://seu-dominio.vercel.app npm run test:e2e`. Cada teste tem contexto de navegador isolado. O workflow GitHub Actions executa as verificações e publica relatórios de navegador como artefatos; também permite informar uma URL via **Run workflow**.
+A suíte usa Chromium em desktop e viewport móvel e inicia servidores locais automaticamente. Com Chromium do sistema, use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. Não aponte testes de escrita a Production/development. O aceite de uma publicação isolada usa `npm run test:release`, com os guardas e variáveis descritos em [instalação](docs/instalacao.md). O CI publica relatórios como artefatos.
 
 Os testes cobrem criação de receita e despesa, edição, confirmação de exclusão, indicadores, transferências, pendências, filtros, orçamentos, moeda, base zero, vínculos, modos e backup. Os testes React substituem apenas os componentes de gráficos, porque jsdom não tem layout SVG real; a renderização dos gráficos é verificada pela suíte de navegador.
 
-Resultados e limitações da entrega: [docs/validation.md](docs/validation.md).
+Resultados anteriores: [auditoria do backend](docs/auditoria-backend-neon.md). Aceite atual: [lançamento v1.0](docs/lancamento-v1.md).
 
 ## Python
 
@@ -125,15 +137,17 @@ Mesma semente e mês final produzem o mesmo CSV. O arquivo contém centavos inte
 
 Chaves locais: `saldolab:v1:demo`, `saldolab:v1:personal` e `saldolab:preferences:v1`. Os componentes não acessam `localStorage`. Os repositórios expõem operações assíncronas e validam o agregado antes da gravação. Um formato desconhecido exige recuperação explícita, sem migração destrutiva automática.
 
-Veja [Arquitetura](docs/architecture.md) e [Contrato do repositório e migração futura](docs/persistence.md). A integração com PostgreSQL, autenticação, API REST e autorização por usuário fica para uma fase posterior, após a escolha do responsável. Filtros no frontend nunca serão usados como proteção de acesso.
+O PR #3 acrescenta Neon Auth, API autenticada e PostgreSQL por usuário, preservando os modos locais. Veja [Arquitetura](docs/architecture.md), [Contrato do repositório](docs/persistence.md) e [auditoria do backend](docs/auditoria-backend-neon.md). O servidor verifica JWT, sessão ativa e autorização por usuário; filtros do frontend não protegem acesso. As migrações `0001` e `0002` devem estar aplicadas no ambiente cloud antes do código novo; não há fallback para JWT sozinho.
 
 ## Publicação
 
-Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`; os assets são servidos diretamente. Não há segredos a configurar.
+Preparado para Vercel: preset **Vite**, instalação `npm ci`, build `npm run build` e saída `dist`. As rotas da SPA usam rewrite para `index.html`, preservando `/api/*`. Os modos locais não exigem variáveis. O modo nuvem usa as quatro variáveis de [.env.example](.env.example), com `DATABASE_URL` exclusiva do servidor e escopo do Preview conforme [documentação Neon](docs/preview-vercel-neon.md). A publicação em Production depende de autorização separada.
 
 Repositório publicado: https://github.com/Tsilveira-dev/saldolab. O código de `main` foi confirmado no GitHub; as correções de auditoria ficam em uma branch separada, sem merge automático.
 
 A baseline está publicada em https://saldolab.vercel.app. A branch de auditoria bloqueia seu próprio deploy automático e não altera a versão publicada. O histórico de publicação está em [docs/deployment.md](docs/deployment.md).
+
+O PR #3 gera Previews. O merge em `main` pode disparar Production automaticamente: **não fazer merge antes de autorizar e preparar a infraestrutura**. Veja [migração e configuração Production](docs/migracao-production.md), [backups](docs/backups.md), [rollback](docs/rollback.md) e [privacidade](docs/privacidade.md).
 
 ## Capturas de tela
 
@@ -144,8 +158,9 @@ As capturas `dashboard.png` em desktop e mobile são geradas na suíte Playwrigh
 - [x] CRUD e persistência local versionada.
 - [x] Dashboard, filtros, relatórios, temas e backup.
 - [x] Testes de domínio, repositório, integração e suíte de navegador.
-- [ ] Selecionar banco e estratégia de autenticação com o responsável.
-- [ ] API com autorização por usuário, migrações e auditoria.
+- [x] Neon PostgreSQL e Managed Neon Auth em QA/development.
+- [x] API com autorização por usuário, migração inicial e testes integrados.
+- [ ] Infraestrutura Production autorizada, SMTP próprio, aceite e lançamento v1.0.
 - [ ] Importação de extratos CSV com prévia e reconciliação.
 - [ ] Conciliação, regras de recorrência explícitas e testes de acessibilidade ampliados.
 

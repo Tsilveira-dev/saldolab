@@ -1,0 +1,9 @@
+api-integration	Run npm run test:integration	2026-11-12T19:02:52.7334989Z  Test Files  1 passed (1)
+api-integration	Run npm run test:integration	2026-11-12T19:02:52.7335621Z       Tests  16 passed (16)
+api-integration	Run npm run test:integration	2026-11-12T19:02:52.7336838Z    Duration  1.93s (transform 52ms, setup 0ms, import 1.32s, tests 511ms, environment 0ms)
+check	Run npm run check	2026-11-12T19:02:57.7737637Z  Test Files  11 passed (11)
+check	Run npm run check	2026-11-12T19:02:57.7745331Z       Tests  121 passed (121)
+check	Run npm run test:e2e	2026-11-12T19:04:58.1025165Z   6 skipped
+check	Run npm run test:e2e	2026-11-12T19:04:58.1025527Z   74 passed (1.6m)
+check	Run python3 -m unittest discover -s scripts -p 'test_*.py'	2026-11-12T19:04:58.2258048Z Ran 2 tests in 0.001s
+cloud-auth-smoke	Run npx playwright test e2e/cloud-smoke.spec.js --project=chromium	2026-11-12T19:03:03.8984574Z   3 passed (3.8s)

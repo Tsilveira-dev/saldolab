@@ -3,7 +3,10 @@ export function readPreferences() {
   try {
     const value = JSON.parse(window.localStorage.getItem(key) ?? '{}');
     return {
-      mode: value.mode === 'personal' ? 'personal' : 'demo',
+      mode:
+        value.mode === 'personal' || (value.mode === 'cloud' && import.meta.env.VITE_NEON_AUTH_URL)
+          ? value.mode
+          : 'demo',
       theme: value.theme === 'dark' ? 'dark' : 'light',
     };
   } catch {

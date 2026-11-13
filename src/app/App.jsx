@@ -9,6 +9,7 @@ import Categories from '../pages/Categories';
 import Budgets from '../pages/Budgets';
 import Reports from '../pages/Reports';
 import Settings from '../pages/Settings';
+import CloudAccess from '../pages/CloudAccess';
 
 class ErrorBoundary extends Component {
   state = { error: false };
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="orcamentos" element={<Budgets />} />
               <Route path="relatorios" element={<Reports />} />
               <Route path="configuracoes" element={<Settings />} />
+              <Route path="nuvem" element={<CloudAccess />} />
               <Route
                 path="*"
                 element={

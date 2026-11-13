@@ -52,12 +52,17 @@ test('navega por todas as páginas, mantém rotas diretas e evita overflow do do
   }
 });
 test('isola o modo pessoal e permite voltar à demonstração', async ({ page }) => {
+  await page.goto('/configuracoes');
+  await page.getByRole('radio', { name: /Neste aparelho/ }).check();
   await page.goto('/');
-  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('personal');
   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('combobox', { name: /^Modo de uso/ })).toHaveValue('personal');
-  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('demo');
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode),
+  ).toBe('personal');
+  await page.goto('/configuracoes');
+  await page.getByRole('radio', { name: /Exemplo para explorar/ }).check();
+  await page.goto('/');
   await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
 });
 test('protege conta em uso e exporta backup JSON', async ({ page }) => {

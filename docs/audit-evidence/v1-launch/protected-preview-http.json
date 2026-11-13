@@ -1,0 +1,17 @@
+[
+  {
+    "path": "/api/health",
+    "status": 200,
+    "contentType": "application/json"
+  },
+  {
+    "path": "/api/finance",
+    "status": 401,
+    "contentType": "application/json"
+  },
+  {
+    "path": "/nuvem",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8"
+  }
+]

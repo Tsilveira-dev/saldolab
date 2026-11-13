@@ -1,0 +1,14 @@
+{
+  "ssoBefore": {
+    "deploymentType": "all_except_custom_domains"
+  },
+  "ssoAfter": {
+    "deploymentType": "all_except_custom_domains"
+  },
+  "ownTemporaryBypassRevoked": true,
+  "productionDeploymentBefore": "dpl_2AW7mCUorWQF4oQBUidAThX8FHW5",
+  "productionDeploymentAfter": "dpl_2AW7mCUorWQF4oQBUidAThX8FHW5",
+  "productionPointerUnchanged": true,
+  "productionVariablesUnchanged": true,
+  "productionVariableCount": 0
+}

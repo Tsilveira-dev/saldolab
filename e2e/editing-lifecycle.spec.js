@@ -151,12 +151,16 @@ test('trocar de modo libera o anterior e não reserva edição no modo consultad
 }) => {
   await open(page);
   await activateEditing(page);
-  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('personal');
+  await nav(page, 'Configurações');
+  await page.getByRole('radio', { name: /Neste aparelho/ }).check();
+  await nav(page, 'Dashboard');
   await expect(notice(page)).toContainText('Somente leitura');
   await expect.poll(async () => (await editors(page)).length).toBe(0);
   const other = await context.newPage();
   await open(other);
-  await other.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('demo');
+  await nav(other, 'Configurações');
+  await other.getByRole('radio', { name: /Exemplo para explorar/ }).check();
+  await nav(other, 'Dashboard');
   await activateEditing(other);
   await expect(other.getByRole('button', { name: 'Nova transação', exact: true })).toBeEnabled();
   expect((await editors(page)).map((lock) => lock.name)).toEqual(['saldolab:v1:demo:editor']);

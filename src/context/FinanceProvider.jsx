@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FinanceContext } from './FinanceContext';
 import { createLocalRepository, StorageError } from '../repositories/localRepository';
+import { createRemoteRepository } from '../repositories/remoteRepository';
 import {
   rememberEditingRequest,
   takeEditingRequest,
@@ -8,14 +9,19 @@ import {
 } from '../repositories/editingRequest';
 import { currentMonth } from '../domain/finance';
 import { readPreferences, savePreferences } from '../repositories/preferencesRepository';
+import { useCloudSession } from '../auth/useCloudSession';
+import { CloudSessionError } from '../auth/neonClient';
 
 export default function FinanceProvider({ children }) {
+  const session = useCloudSession();
+  const cloudUserId = session.data?.user?.id ?? null;
   const [preferences] = useState(readPreferences);
   const activeMode = useRef(preferences.mode);
   const [mode, setMode] = useState(preferences.mode);
   const [month, setMonth] = useState(currentMonth);
   const [accountId, setAccountId] = useState('');
   const [data, setData] = useState(null);
+  const [dataUserId, setDataUserId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
@@ -25,9 +31,12 @@ export default function FinanceProvider({ children }) {
   const generation = useRef(0);
   const startup = useRef(null);
   const [activatingEditing, setActivatingEditing] = useState(false);
+  const repositoryUserId = mode === 'cloud' ? cloudUserId : null;
   const repository = useMemo(() => {
     try {
-      return createLocalRepository({ mode });
+      return mode === 'cloud'
+        ? createRemoteRepository({ userId: repositoryUserId })
+        : createLocalRepository({ mode });
     } catch (cause) {
       return {
         getEditingAccess: () => ({ canWrite: false, supported: false, reason: 'blocked' }),
@@ -39,7 +48,7 @@ export default function FinanceProvider({ children }) {
         },
       };
     }
-  }, [mode]);
+  }, [mode, repositoryUserId]);
   const [editingAccess, setEditingAccess] = useState(() => repository.getEditingAccess());
   useEffect(() => {
     if (!editingAccess.canWrite) return;
@@ -53,19 +62,34 @@ export default function FinanceProvider({ children }) {
     const request = ++generation.current;
     const requestMode = mode;
     setLoading(true);
+    if (mode === 'cloud' && session.isPending) return;
     try {
+      if (mode === 'cloud' && !cloudUserId)
+        throw new CloudSessionError('Sua sessão expirou. Entre novamente em Minha nuvem.');
       const next = await repository.snapshot();
       if (request === generation.current && requestMode === activeMode.current) {
         setData(next);
+        setDataUserId(cloudUserId);
         setError(null);
       }
     } catch (cause) {
-      if (request === generation.current && requestMode === activeMode.current) setError(cause);
+      if (request === generation.current && requestMode === activeMode.current) {
+        if (mode === 'cloud') setData(null);
+        setError(cause);
+      }
     } finally {
       if (request === generation.current && requestMode === activeMode.current) setLoading(false);
     }
-  }, [repository, mode]);
+  }, [repository, mode, cloudUserId, session.isPending]);
   useEffect(() => {
+    if (mode !== 'cloud') return;
+    setEditor(null);
+    setConfirmation(null);
+    setToast(null);
+    setAccountId('');
+  }, [cloudUserId, mode]);
+  useEffect(() => {
+    setEditingAccess(repository.getEditingAccess());
     const unsubscribe = repository.subscribeEditing((access) => {
       if (mode === activeMode.current) setEditingAccess(access);
     });
@@ -141,22 +165,39 @@ export default function FinanceProvider({ children }) {
     await repository.stopEditing();
   };
   const mutate = async (operation, message = 'Alterações salvas.') => {
+    if (mode === 'cloud' && (!cloudUserId || session.isPending || error))
+      throw new CloudSessionError('Reabra seus dados em Minha nuvem antes de salvar.');
     if (!repository.getEditingAccess().canWrite) {
       throw new StorageError(
         'Esta aba está em modo somente leitura. Ative a edição para salvar alterações.',
       );
     }
-    await operation(repository);
-    const next = await repository.snapshot();
-    if (mode !== activeMode.current) return;
+    const request = generation.current;
+    let next, result;
+    try {
+      result = await operation(repository);
+      next = await repository.snapshot();
+    } catch (cause) {
+      if (mode === 'cloud' && cause.status === 401 && request === generation.current) {
+        setData(null);
+        setError(cause);
+      }
+      throw cause;
+    }
+    if (mode !== activeMode.current || request !== generation.current) return;
     setData(next);
+    setDataUserId(cloudUserId);
     setAccountId((previous) =>
       next.accounts.some((account) => account.id === previous) ? previous : '',
     );
     setError(null);
     notify(message);
+    return result;
   };
   const switchMode = (value) => {
+    // Also invalidate in-flight reads when re-entering the same mode during
+    // sign-out/sign-in; an old response must not repopulate the cleared view.
+    generation.current++;
     repository.stopEditing();
     clearEditingRequest();
     setEditingAccess({
@@ -167,14 +208,24 @@ export default function FinanceProvider({ children }) {
     activeMode.current = value;
     setEditor(null);
     setConfirmation(null);
+    setToast(null);
     setData(null);
+    setDataUserId(null);
     setAccountId('');
     setMode(value);
   };
-  const save = async (entity, values, id, expected) =>
-    mutate((repo) =>
-      id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values),
+  const save = async (entity, values, id, expected) => {
+    const messages = {
+      accounts: ['Conta cadastrada com sucesso.', 'Conta atualizada com sucesso.'],
+      categories: ['Categoria cadastrada com sucesso.', 'Categoria atualizada com sucesso.'],
+      transactions: ['Transação cadastrada com sucesso.', 'Transação atualizada com sucesso.'],
+      budgets: ['Orçamento cadastrado com sucesso.', 'Orçamento atualizado com sucesso.'],
+    };
+    return mutate(
+      (repo) => (id ? repo.update(entity, id, values, { expected }) : repo.create(entity, values)),
+      (messages[entity] ?? ['Registro cadastrado.', 'Registro atualizado.'])[id ? 1 : 0],
     );
+  };
   const remove = (entity, row) =>
     setConfirmation({
       title: 'Excluir registro?',
@@ -184,6 +235,9 @@ export default function FinanceProvider({ children }) {
       action: () =>
         mutate((repo) => repo.remove(entity, row.id, { expected: row }), 'Registro excluído.'),
     });
+  const cloudUnavailable =
+    mode === 'cloud' &&
+    (session.isPending || !cloudUserId || dataUserId !== cloudUserId || Boolean(error) || !data);
   return (
     <FinanceContext.Provider
       value={{
@@ -193,12 +247,15 @@ export default function FinanceProvider({ children }) {
         setMonth,
         accountId,
         setAccountId,
-        data,
+        data: cloudUnavailable ? null : data,
         error,
         loading,
         reload,
         repository,
-        canWrite: editingAccess.canWrite,
+        canWrite:
+          editingAccess.canWrite &&
+          (mode !== 'cloud' ||
+            Boolean(cloudUserId && !session.isPending && !error && dataUserId === cloudUserId)),
         editingAccess,
         activatingEditing,
         activateEditing,
@@ -208,9 +265,9 @@ export default function FinanceProvider({ children }) {
         notify,
         theme,
         setTheme,
-        editor,
+        editor: cloudUnavailable ? null : editor,
         setEditor,
-        confirmation,
+        confirmation: cloudUnavailable ? null : confirmation,
         setConfirmation,
         save,
         remove,

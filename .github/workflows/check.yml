@@ -12,6 +12,33 @@ on:
 permissions:
   contents: read
 jobs:
+  api-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: saldolab_integration
+        options: >-
+          --publish 127.0.0.1:55433:5432
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SALDOLAB_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55433/saldolab_integration
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:integration
+
   check:
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +64,21 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  cloud-auth-smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      VITE_NEON_AUTH_URL: https://ep-ci-example.neonauth.us-east-1.aws.neon.build/saldolab/auth
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/cloud-smoke.spec.js --project=chromium

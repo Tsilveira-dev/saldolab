@@ -1,5 +1,7 @@
 # Verificação do MVP
 
+> Para a versão cloud atual, usar [lançamento v1.0](lancamento-v1.md) e [guia sem Codex](guia-lancamento-sem-codex.md). Este documento preserva o roteiro do MVP local anterior.
+
 O estado atual está no [relatório final A–F](auditoria-final.md), com evidências de comandos, testes, falhas reproduzidas e correções. O [diagnóstico inicial](auditoria-inicial.md) foi registrado antes das alterações de código.
 
 ## Como repetir

@@ -1,0 +1,57 @@
+
+> saldolab@1.0.0 check
+> npm run lint && npm run format:check && npm run test && npm run build
+
+
+> saldolab@1.0.0 lint
+> eslint . --max-warnings 0
+
+
+> saldolab@1.0.0 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> saldolab@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /workspace/saldolab
+
+
+ Test Files  11 passed (11)
+      Tests  121 passed (121)
+   Start at  18:59:14
+   Duration  46.56s (transform 1.47s, setup 1.67s, import 24.47s, tests 11.01s, environment 7.47s)
+
+
+> saldolab@1.0.0 build
+> vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+node_modules/zod/v4/core/regexes.js (74:0): A comment
+
+"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
+ * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
+ * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
+
+in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/zod/v4/core/util.js (400:0): A comment
+
+"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
+
+in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+✓ 3050 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.71 kB │ gzip:   0.42 kB
+dist/assets/index-CssFyGaF.css  267.22 kB │ gzip:  38.50 kB
+dist/assets/index-Az9k0dg0.js   921.68 kB │ gzip: 278.58 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.35s

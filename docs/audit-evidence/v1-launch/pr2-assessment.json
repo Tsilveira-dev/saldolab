@@ -1,0 +1,16 @@
+{
+  "sourcePr": 2,
+  "sourceCommit": "b637c8586b5dc1022488bb742ce76f444efb17f4",
+  "patchApplies": true,
+  "csvCasesPassed": 9,
+  "contrast": [
+    {
+      "theme": "light",
+      "ratio": 6.09
+    },
+    {
+      "theme": "dark",
+      "ratio": 8.8
+    }
+  ]
+}

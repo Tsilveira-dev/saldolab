@@ -8,7 +8,27 @@ export function downloadFile(content, name, type = 'application/json') {
 }
 const escapeCsv = (value) => {
   let text = String(value ?? '');
-  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  // Some spreadsheet consumers skip whitespace/control prefixes before formulas.
+  // Guard those cells before applying standard CSV quoting.
+  let cursor = 0;
+  while (cursor < text.length) {
+    const character = text[cursor];
+    const code = text.charCodeAt(cursor);
+    if (
+      code <= 31 ||
+      code === 127 ||
+      /\s/u.test(character) ||
+      (code >= 0x200b && code <= 0x200d) ||
+      code === 0x2060
+    ) {
+      cursor += 1;
+    } else {
+      break;
+    }
+  }
+  const formula = /^[=+\-@＝＋－＠]/u.test(text.slice(cursor));
+  const leadingControl = [9, 10, 13].includes(text.charCodeAt(0));
+  if (formula || leadingControl) text = `'${text}`;
   return `"${text.replaceAll('"', '""')}"`;
 };
 export function transactionsCsv(transactions, accounts, categories) {

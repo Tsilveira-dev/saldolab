@@ -1,0 +1,21 @@
+[WebServer] (node:11084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:11102) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/neon/cloud.spec.js:35:1 › SDK 0.8.2 fornece JWT real aceito pelo JWKS e pela API; expiração é verificada (860ms)
+  ✓   2 tests/neon/cloud.spec.js:73:1 › CRUD das quatro entidades confirma gravação, leitura, edição e exclusão no Neon SQL (2.6s)
+  ✓   3 tests/neon/cloud.spec.js:113:1 › saldo, receita, despesa, pendência, transferência e orçamento mantêm centavos exatos (1.4s)
+  ✓   4 tests/neon/cloud.spec.js:178:1 › dois usuários reais não leem, alteram, apagam nem vinculam registros alheios (4.3s)
+  ✓   5 tests/neon/cloud.spec.js:236:1 › duas abas produzem HTTP 200/409 nas quatro entidades e preservam a revisão vencedora (2.9s)
+  ✓   6 tests/neon/cloud.spec.js:269:1 › UI persiste após reload e novo login, com armazenamento pessoal separado da nuvem (8.8s)
+  ✓   7 tests/neon/cloud.spec.js:313:1 › conflito 409 fica visível no editor sem falsa mensagem de sucesso (2.1s)
+  ✓   8 tests/neon/cloud.spec.js:334:1 › falha de rede permanece no formulário, sem sucesso ou gravação silenciosa (1.8s)
+  ✓   9 tests/neon/cloud.spec.js:362:1 › logout em outra aba retira dados antigos, bloqueia gravação e permite entrar como outro usuário (7.0s)
+  ✓  10 tests/neon/cloud.spec.js:396:1 › desktop e mobile mantêm conteúdo e controles acessíveis sem rolagem horizontal (10.3s)
+  ✓  11 tests/neon/cloud.spec.js:411:1 › recuperação real redefine senha e impede reutilização do token; entrega SMTP permanece fora desta evidência (5.7s)
+  ✓  12 tests/neon/cloud.spec.js:514:1 › sessão expirada no provedor não reabre dados nem operações após recarregar (1.0s)
+
+  12 passed (58.1s)

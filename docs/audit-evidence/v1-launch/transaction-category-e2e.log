@@ -1,0 +1,25 @@
+[WebServer] (node:23051) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23083) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 2 workers
+
+(node:23113) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:23114) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/transaction-category.spec.js:4:3 › cria categoria de expense no lançamento e mantém o rascunho até editar/excluir (5.2s)
+  ✓  2 [chromium] › e2e/transaction-category.spec.js:4:3 › cria categoria de income no lançamento e mantém o rascunho até editar/excluir (5.2s)
+(node:23391) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:23401) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [mobile] › e2e/transaction-category.spec.js:4:3 › cria categoria de expense no lançamento e mantém o rascunho até editar/excluir (3.6s)
+  ✓  4 [mobile] › e2e/transaction-category.spec.js:4:3 › cria categoria de income no lançamento e mantém o rascunho até editar/excluir (3.7s)
+
+  4 passed (13.9s)

@@ -379,7 +379,9 @@ test('modos ficam separados e restauração da demonstração preserva o pessoal
   await goto(page, '/');
   await add(page);
   const original = await snapshot(page);
-  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('demo');
+  await nav(page, 'Configurações');
+  await page.getByRole('radio', { name: /Exemplo para explorar/ }).check();
+  await nav(page, 'Dashboard');
   await activateEditing(page);
   await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
   await add(page, {
@@ -404,7 +406,7 @@ test('modos ficam separados e restauração da demonstração preserva o pessoal
     ),
   ).toBe(90);
   expect(await snapshot(page)).toEqual(original);
-  await page.getByRole('combobox', { name: /^Modo de uso/ }).selectOption('personal');
+  await page.getByRole('radio', { name: /Neste aparelho/ }).check();
   await nav(page, 'Dashboard');
   await assertMoney(metric(page, 'Saldo disponível'), '3.500,00');
 });
