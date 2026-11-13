@@ -142,3 +142,72 @@ test('uma transação vazia oferece cadastro rápido de conta e categoria antes 
   expect(stored.transactions).toHaveLength(1);
   expect(stored.transactions[0].amountCents).toBe(10000);
 });
+
+for (const mode of ['personal', 'demo']) {
+  test(`no modo ${mode}, cadastrar transação grava, exibe confirmação correta e persiste após reload`, async ({
+    page,
+  }) => {
+    await page.addInitScript(
+      ({ mode }) => {
+        const key = `saldolab:v1:${mode}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            version: 1,
+            accounts: [
+              {
+                id: 'test-account',
+                name: 'Conta teste local',
+                type: 'checking',
+                initialBalanceCents: 100000,
+                color: '#123456',
+                icon: 'bank',
+                createdAt: '2026-11-13',
+              },
+            ],
+            categories: [
+              {
+                id: 'test-expense',
+                name: 'Mercado teste local',
+                type: 'expense',
+                color: '#123456',
+                icon: 'tag',
+              },
+            ],
+            transactions: [],
+            budgets: [],
+          }),
+        );
+        localStorage.setItem(
+          'saldolab:preferences:v1',
+          JSON.stringify({ mode, theme: 'light' }),
+        );
+      },
+      { mode },
+    );
+    await page.goto('/transacoes');
+    await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
+    await page.locator('.page-heading').getByRole('button', { name: 'Nova transação' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Descrição', { exact: true }).fill('Compra registrada');
+    await dialog.getByLabel('Valor (R$)', { exact: true }).fill('100,00');
+    await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByText('Transação cadastrada com sucesso.')).toBeVisible();
+    const read = () => page.evaluate(
+      ({ mode }) => JSON.parse(localStorage.getItem(`saldolab:v1:${mode}`)),
+      { mode },
+    );
+    expect((await read()).transactions).toHaveLength(1);
+    expect((await read()).transactions[0].amountCents).toBe(10000);
+    await page.reload();
+    expect((await read()).transactions).toHaveLength(1);
+    await expect(page.getByText('Compra registrada', { exact: true })).toBeVisible();
+    const otherMode = mode === 'personal' ? 'demo' : 'personal';
+    const other = await page.evaluate(
+      ({ otherMode }) => localStorage.getItem(`saldolab:v1:${otherMode}`),
+      { otherMode },
+    );
+    expect(other).toBeNull();
+  });
+}
