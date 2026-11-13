@@ -59,6 +59,8 @@ for (const type of ['expense', 'income'])
     await dialog.locator('[name=description]').fill('QA transação guiada');
     await dialog.locator('[name=amount]').fill('10,00');
     await expect(dialog.getByRole('button', { name: 'Adicionar registro' })).toBeDisabled();
+    await expect(dialog.getByLabel('Nome da nova categoria')).toBeVisible();
+    await expect(dialog.getByLabel('Nome da nova categoria')).toBeInViewport();
     await expect(dialog.getByText(/Você ainda não tem categorias de/)).toBeVisible();
     await dialog.getByLabel('Nome da nova categoria').fill('QA categoria no lançamento');
     await dialog
@@ -99,3 +101,44 @@ for (const type of ['expense', 'income'])
       ),
     ).toBe(0);
   });
+
+test('uma transação vazia oferece cadastro rápido de conta e categoria antes de observações', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'saldolab:v1:personal',
+      JSON.stringify({ version: 1, accounts: [], categories: [], transactions: [], budgets: [] }),
+    );
+    localStorage.setItem(
+      'saldolab:preferences:v1',
+      JSON.stringify({ mode: 'personal', theme: 'light' }),
+    );
+  });
+  await page.goto('/transacoes');
+  await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
+  await page.locator('.page-heading').getByRole('button', { name: 'Nova transação' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Descrição', { exact: true }).fill('Mercado QA');
+  await dialog.getByLabel('Valor (R$)', { exact: true }).fill('100,00');
+  await expect(dialog.getByLabel('Nome da nova conta')).toBeVisible();
+  await expect(dialog.getByLabel('Nome da nova categoria')).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Adicionar registro' })).toBeDisabled();
+  await dialog.getByLabel('Nome da nova conta').fill('Conta para testes');
+  await dialog.getByRole('button', { name: 'Criar conta e selecionar' }).click();
+  await expect(dialog.locator('[name=accountId] option:checked')).toHaveText('Conta para testes');
+  await dialog.getByLabel('Nome da nova categoria').fill('Compras QA');
+  await dialog.getByRole('button', { name: 'Criar categoria de despesa' }).click();
+  await expect(dialog.locator('[name=categoryId] option:checked')).toHaveText('Compras QA');
+  await expect(dialog.getByLabel('Descrição', { exact: true })).toHaveValue('Mercado QA');
+  await expect(dialog.getByLabel('Valor (R$)', { exact: true })).toHaveValue('100,00');
+  await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
+  await expect(dialog).toHaveCount(0);
+  const stored = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('saldolab:v1:personal')),
+  );
+  expect(stored.accounts).toHaveLength(1);
+  expect(stored.categories).toHaveLength(1);
+  expect(stored.transactions).toHaveLength(1);
+  expect(stored.transactions[0].amountCents).toBe(10000);
+});
