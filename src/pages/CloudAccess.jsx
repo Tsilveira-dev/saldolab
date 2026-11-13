@@ -103,16 +103,16 @@ export default function CloudAccess() {
       <div className="panel p-4">
         <div className="d-flex gap-2 align-items-center mb-3">
           <Cloud size={24} />
-          <h1 className="h4 m-0">SaldoLab na nuvem</h1>
+          <h1 className="h4 m-0">Minha conta</h1>
         </div>
         <p className="text-secondary">
-          Dados pessoais protegidos em PostgreSQL, separados da demonstração e do armazenamento
-          local. O acesso à nuvem não envia automaticamente seus backups.
+          Entre para acessar suas finanças com segurança em outros dispositivos. Os dados
+          salvos apenas neste aparelho não são enviados automaticamente.
         </p>
         {!authClient ? (
           <div role="status" className="alert alert-info">
             {authClientConfigurationError ??
-              'A conexão ainda não foi configurada neste ambiente. O modo local continua disponível.'}
+              'O acesso à sua conta ainda não está disponível. Você pode continuar usando os dados deste aparelho.'}
           </div>
         ) : checking ? (
           <div role="status">Conferindo sua sessão…</div>
@@ -148,7 +148,7 @@ export default function CloudAccess() {
             <div className="d-flex gap-2 flex-wrap">
               <button className="btn btn-primary" onClick={openCloud} disabled={submitting}>
                 <Cloud size={16} className="me-2" />{' '}
-                {mode === 'cloud' ? 'Atualizar dados' : 'Abrir finanças na nuvem'}
+                {mode === 'cloud' ? 'Atualizar minhas finanças' : 'Acessar minhas finanças'}
               </button>
               <button
                 className="btn btn-outline-secondary"
