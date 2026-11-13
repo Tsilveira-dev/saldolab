@@ -57,7 +57,7 @@ test('isola o modo pessoal e permite voltar à demonstração', async ({ page })
   await page.goto('/');
   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
   await page.reload();
-  await expect(page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode)).resolves.toBe('personal');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode)).toBe('personal');
   await page.goto('/configuracoes');
   await page.getByRole('radio', { name: /Exemplo para explorar/ }).check();
   await page.goto('/');
