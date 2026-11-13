@@ -150,7 +150,7 @@ for (const mode of ['personal', 'demo']) {
     await page.addInitScript(
       ({ mode }) => {
         const key = `saldolab:v1:${mode}`;
-        localStorage.setItem(
+        if (!localStorage.getItem(key)) localStorage.setItem(
           key,
           JSON.stringify({
             version: 1,
@@ -178,7 +178,7 @@ for (const mode of ['personal', 'demo']) {
             budgets: [],
           }),
         );
-        localStorage.setItem(
+        if (!localStorage.getItem('saldolab:preferences:v1')) localStorage.setItem(
           'saldolab:preferences:v1',
           JSON.stringify({ mode, theme: 'light' }),
         );
