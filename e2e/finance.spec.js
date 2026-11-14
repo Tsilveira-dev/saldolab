@@ -44,6 +44,33 @@ test('cria, edita, persiste e exclui uma transação', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Excluir registro' }).click();
   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
 });
+test('campo monetário zerado fica vazio ao focar e preserva o novo saldo', async ({ page }) => {
+  await page.goto('/contas');
+  await activateEditing(page);
+  await page.getByRole('button', { name: 'Adicionar conta', exact: true }).click();
+  let dialog = page.getByRole('dialog');
+  await dialog.locator('[name=name]').fill('QA conta zerada');
+  await dialog.locator('[name=initialBalance]').fill('0,00');
+  await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
+  await expect(dialog).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Editar QA conta zerada', exact: true }).click();
+  dialog = page.getByRole('dialog');
+  const amount = dialog.locator('[name=initialBalance]');
+  await expect(amount).toHaveValue('0,00');
+  await amount.focus();
+  await expect(amount).toBeEmpty();
+  await amount.fill('125,50');
+  await dialog.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(dialog).toHaveCount(0);
+
+  const balance = await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('saldolab:v1:personal'));
+    return data.accounts.find((account) => account.name === 'QA conta zerada').initialBalanceCents;
+  });
+  expect(balance).toBe(12550);
+});
+
 test('navega por todas as páginas, mantém rotas diretas e evita overflow do documento', async ({
   page,
 }) => {
