@@ -8,10 +8,11 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript((data) => {
     if (!localStorage.getItem('saldolab:v1:personal'))
       localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
-    localStorage.setItem(
-      'saldolab:preferences:v1',
-      JSON.stringify({ mode: 'personal', theme: 'light' }),
-    );
+    if (!localStorage.getItem('saldolab:preferences:v1'))
+      localStorage.setItem(
+        'saldolab:preferences:v1',
+        JSON.stringify({ mode: 'personal', theme: 'light' }),
+      );
   }, seed);
 });
 
