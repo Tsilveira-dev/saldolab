@@ -36,7 +36,7 @@ const navigation = [
   ['/categorias', 'Categorias', Tags],
   ['/orcamentos', 'Orçamentos', ChartPie],
   ['/relatorios', 'Relatórios', ChartNoAxesCombined],
-  ...(authClient ? [['/nuvem', 'Minha nuvem', Cloud]] : []),
+  ...(authClient ? [['/nuvem', 'Minha conta', Cloud]] : []),
 ];
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -253,7 +253,6 @@ export default function Layout() {
                     {mode === 'cloud'
                       ? 'Dados salvos na sua conta'
                       : 'Dados somente neste dispositivo'}
-                    {mode === 'demo' ? ' · Exemplo fictício' : ''}
                   </span>
                 </footer>
                 <button
