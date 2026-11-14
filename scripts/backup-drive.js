@@ -2,8 +2,8 @@ import { spawn } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
-import { basename, isAbsolute, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { basename, isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const DRIVE_BACKUP_FOLDER_ID = '1waXRcUZg4hl5ESv1vWI_mrSMTm3gozuT';
 
@@ -31,7 +31,8 @@ export function backupSettings(env) {
     throw new Error('DRIVE_BACKUP_SECRETS_REQUIRED');
   const dir = resolve(env.SALDOLAB_BACKUP_LOCAL_DIR);
   const cwd = resolve(process.cwd());
-  if (dir === cwd || dir.startsWith(cwd + '/'))
+  const relativeToProject = relative(cwd, dir);
+  if (!relativeToProject || (!relativeToProject.startsWith('..') && !isAbsolute(relativeToProject)))
     throw new Error('DRIVE_BACKUP_LOCAL_DIR_MUST_BE_OUTSIDE_PROJECT');
   return { dir, remote };
 }
@@ -92,7 +93,7 @@ async function main() {
   console.log('DRIVE_BACKUP_UPLOAD_VERIFIED');
 }
 
-if (process.argv[1] && import.meta.url === new URL('file://' + resolve(process.argv[1])).href)
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)
   main().catch((error) => {
     const safe = /^DRIVE_BACKUP_[A-Z_]+$/.test(error.message);
     console.error(safe ? error.message : 'DRIVE_BACKUP_FAILED');
