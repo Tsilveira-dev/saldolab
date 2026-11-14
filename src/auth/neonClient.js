@@ -55,11 +55,16 @@ export async function getAuthSessionFromClient(client, { expectedUserId } = {}) 
   if (expectedUserId !== undefined && result.data.user.id !== expectedUserId)
     throw new CloudSessionError('A conta conectada mudou. Reabra seus dados na nuvem.');
 
-  const jwt = await client.token();
-  if (jwt.error || typeof jwt.data?.token !== 'string' || !jwt.data.token)
+  let jwt;
+  try {
+    jwt = await client.token();
+  } catch {
+    throw new CloudSessionError('Não foi possível verificar sua sessão. Tente novamente.', 503);
+  }
+  if (jwt?.error || typeof jwt?.data?.token !== 'string' || !jwt.data.token)
     throw new CloudSessionError(
       'Não foi possível validar sua sessão. Entre novamente.',
-      jwt.error?.status >= 500 ? 503 : 401,
+      jwt?.error?.status >= 500 ? 503 : 401,
     );
   return { token: jwt.data.token, sessionId: result.data.session.id };
 }
