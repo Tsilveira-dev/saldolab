@@ -39,7 +39,11 @@ const navigation = [
   ...(authClient ? [['/nuvem', 'Minha conta', Cloud]] : []),
 ];
 function PageFallback() {
-  return <div className="loading-state" role="status">Carregando página…</div>;
+  return (
+    <div className="loading-state" role="status">
+      Carregando página…
+    </div>
+  );
 }
 
 export default function Layout() {
