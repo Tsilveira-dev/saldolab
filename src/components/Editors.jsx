@@ -356,7 +356,11 @@ function Editor({ entity, row, initialType, onClose }) {
                         value={accountInitialBalance}
                         inputMode="decimal"
                         placeholder="0,00"
-                        onFocus={(event) => event.currentTarget.select()}
+                        onFocus={(event) => {
+                          if (/^-?0(?:[,.]0{1,2})?$/.test(event.currentTarget.value.trim()))
+                            setAccountInitialBalance('');
+                          else event.currentTarget.select();
+                        }}
                         onChange={(event) => setAccountInitialBalance(event.target.value)}
                       />
                     </label>
