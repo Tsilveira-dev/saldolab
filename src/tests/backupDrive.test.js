@@ -25,11 +25,15 @@ describe('preparação do backup remoto Google Drive', () => {
       SALDOLAB_BACKUP_PASSPHRASE: 'not-a-real-secret',
     };
     expect(() => backupSettings(values)).toThrow('DRIVE_BACKUP_LOCAL_DIR_REQUIRED');
+    expect(() => backupSettings({ ...values, SALDOLAB_BACKUP_LOCAL_DIR: process.cwd() })).toThrow(
+      'DRIVE_BACKUP_LOCAL_DIR_MUST_BE_OUTSIDE_PROJECT',
+    );
     expect(() =>
-      backupSettings({ ...values, SALDOLAB_BACKUP_LOCAL_DIR: process.cwd() }),
-    ).toThrow('DRIVE_BACKUP_LOCAL_DIR_MUST_BE_OUTSIDE_PROJECT');
-    expect(() =>
-      backupSettings({ ...values, SALDOLAB_BACKUP_LOCAL_DIR: '/tmp', SALDOLAB_DRIVE_REMOTE: 'a:b' }),
+      backupSettings({
+        ...values,
+        SALDOLAB_BACKUP_LOCAL_DIR: '/tmp',
+        SALDOLAB_DRIVE_REMOTE: 'a:b',
+      }),
     ).toThrow('DRIVE_BACKUP_REMOTE_INVALID');
   });
 });
