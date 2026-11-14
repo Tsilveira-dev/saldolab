@@ -10,7 +10,10 @@ export const DRIVE_BACKUP_FOLDER_ID = '1waXRcUZg4hl5ESv1vWI_mrSMTm3gozuT';
 export function backupFilename(date = new Date(), suffix = randomBytes(6).toString('hex')) {
   if (Number.isNaN(date.getTime()) || !/^[a-f0-9]{12}$/.test(suffix))
     throw new Error('DRIVE_BACKUP_FILENAME_INVALID');
-  const timestamp = date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  const timestamp = date
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}Z$/, 'Z');
   return `saldolab-${timestamp}-${suffix}.saldolab.enc`;
 }
 
@@ -77,14 +80,7 @@ async function main() {
     'create',
     local,
   ]);
-  await run('rclone', [
-    'copyto',
-    local,
-    destination,
-    '--immutable',
-    '--checksum',
-    ...folderOption,
-  ]);
+  await run('rclone', ['copyto', local, destination, '--immutable', '--checksum', ...folderOption]);
   const checksumText = await run('rclone', ['md5sum', destination, ...folderOption], {
     capture: true,
   });
