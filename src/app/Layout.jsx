@@ -38,6 +38,10 @@ const navigation = [
   ['/relatorios', 'Relatórios', ChartNoAxesCombined],
   ...(authClient ? [['/nuvem', 'Minha conta', Cloud]] : []),
 ];
+function PageFallback() {
+  return <div className="loading-state" role="status">Carregando página…</div>;
+}
+
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const {
@@ -179,7 +183,7 @@ export default function Layout() {
         <main id="main-content" className="main-content">
           {location.pathname !== '/nuvem' && <EditingNotice />}
           {location.pathname === '/nuvem' ? (
-            <Suspense fallback={<div className="loading-state" role="status">Carregando página…</div>}>
+            <Suspense fallback={<PageFallback />}>
               <Outlet />
             </Suspense>
           ) : loading ? (
@@ -245,9 +249,9 @@ export default function Layout() {
                     </div>
                   </div>
                 )}
-                <Suspense fallback={<div className="loading-state" role="status">Carregando página…</div>}>
-              <Outlet />
-            </Suspense>
+                <Suspense fallback={<PageFallback />}>
+                  <Outlet />
+                </Suspense>
                 <footer className="content-footer">
                   <span>
                     SaldoLab <span className="footer-dot">·</span> Clareza para o seu próximo passo.
