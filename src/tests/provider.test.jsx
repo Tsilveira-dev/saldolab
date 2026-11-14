@@ -20,7 +20,7 @@ function ModeProbe() {
   );
 }
 
-it('uma gravação demorada dos dados pessoais não substitui a demonstração após trocar de modo', async () => {
+it('não mistura dados após uma gravação demorada e troca de modo', async () => {
   let finishWrite;
   const demo = {
     snapshot: vi.fn().mockResolvedValue({ marker: 'dados demonstrativos', accounts: [] }),
