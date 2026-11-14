@@ -72,7 +72,6 @@ export default function Settings() {
             <div className="mode-options">
               {[
                 ['personal', 'Neste aparelho', 'Os registros ficam somente neste navegador.'],
-                ['demo', 'Exemplo para explorar', 'Dados fictícios, sem afetar suas finanças.'],
               ].map(([value, title, description]) => (
                 <label className={`mode-option ${mode === value ? 'selected' : ''}`} key={value}>
                   <input
