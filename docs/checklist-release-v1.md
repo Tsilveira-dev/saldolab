@@ -29,6 +29,16 @@ As execuções GitHub Actions anteriores aprovaram código e cenários isolados 
 
 Ordem segura para finalizar: (1) confirmar acesso correto ao projeto Vercel, (2) estabelecer cópia independente criptografada e testar restauração, (3) aprovar dados/configuração da branch main e proteção, (4) configurar Auth, remetente SMTP e origens de Production, (5) executar migrações com conferência e role restrita, (6) configurar variáveis de produção, (7) revisar checks do mesmo SHA e validar em celular físico, (8) publicar com plano de rollback e monitoramento. Evitar publicar o PR #3 diretamente antes de integrar as melhorias de UX do PR #4.
 
+## Diagnóstico da conexão Vercel — 14/11/2026
+
+A conexão Vercel disponível neste chat identificou somente a equipe `FAIR PLAY` (`fair-play7`) e um projeto Git vinculado: `fairplay-teste` (`Tsilveira-dev/App_fair_play`). A pesquisa de projetos, inclusive no escopo explícito dessa equipe, **não encontrou `saldolab`**; uma consulta pelo nome devolveu erro `404 project_not_found` e a listagem de deployments retornou `403 forbidden`.
+
+O [plano de migração](migracao-production.md) registra o ID esperado `prj_gawaPXbUz7w8b0OrFlY3cJQzmQnf`, mas a conexão presente **não comprovou acesso a esse projeto**. Isso pode decorrer de conta, equipe, permissão ou integração diferentes; não é evidência de exclusão do projeto.
+
+**Ação necessária:** entrar no painel Vercel com a conta que administra `saldolab.vercel.app`, localizar o projeto SaldoLab, conferir ID, equipe e domínio, e conectar a conta/equipe correta à integração Vercel no ChatGPT. Não copiar tokens ou variáveis secretas para o chat. **Não criar segundo projeto, não alterar Fair Play e não publicar em equipe errada.**
+
+Só considerar acesso PASS depois de consulta autenticada de leitura ao projeto e ambiente Production exatos. Nenhuma implantação foi executada.
+
 ## Impedimentos obrigatórios antes de publicar
 
 - [ ] **Celular físico:** testar cadastro/login, abertura e fechamento do menu, formulário de conta/transação, digitação de valores, reload e fluxo de duas abas. Registrar modelo, navegador, data e resultado, sem expor dados privados.
