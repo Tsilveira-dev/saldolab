@@ -14,7 +14,8 @@ function directDatabaseEnvironment(rawUrl) {
   } catch {
     throw new Error('BACKUP_DATABASE_URL_INVALID');
   }
-  if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error('BACKUP_DATABASE_URL_INVALID');
+  if (!['postgres:', 'postgresql:'].includes(url.protocol))
+    throw new Error('BACKUP_DATABASE_URL_INVALID');
   if (!url.hostname || !url.username || !url.password || !url.pathname.slice(1))
     throw new Error('BACKUP_DATABASE_URL_INVALID');
   if (url.hostname.includes('-pooler')) throw new Error('BACKUP_DIRECT_CONNECTION_REQUIRED');
@@ -54,13 +55,20 @@ async function createBackup(file) {
   if (target.startsWith(resolve(process.cwd()) + sep))
     throw new Error('BACKUP_DESTINATION_MUST_BE_OUTSIDE_PROJECT');
   await access(dirname(target));
-  await stat(target).then(() => {
-    throw new Error('BACKUP_DESTINATION_EXISTS');
-  }, (error) => {
-    if (error.code !== 'ENOENT') throw error;
-  });
+  await stat(target).then(
+    () => {
+      throw new Error('BACKUP_DESTINATION_EXISTS');
+    },
+    (error) => {
+      if (error.code !== 'ENOENT') throw error;
+    },
+  );
   const env = directDatabaseEnvironment(process.env.SALDOLAB_BACKUP_DATABASE_URL);
-  const { child, completed } = command('pg_dump', ['--format=custom', '--no-owner', '--no-acl'], env);
+  const { child, completed } = command(
+    'pg_dump',
+    ['--format=custom', '--no-owner', '--no-acl'],
+    env,
+  );
   try {
     await Promise.all([encryptBackup(child.stdout, target, PASSPHRASE), completed]);
   } catch (error) {
@@ -101,6 +109,8 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)
   main().catch((error) => {
-    console.error(/^BACKUP_[A-Z_]+$/.test(error.message) ? error.message : 'BACKUP_OPERATION_FAILED');
+    console.error(
+      /^BACKUP_[A-Z_]+$/.test(error.message) ? error.message : 'BACKUP_OPERATION_FAILED',
+    );
     process.exitCode = 1;
   });
