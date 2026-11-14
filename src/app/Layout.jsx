@@ -164,12 +164,6 @@ export default function Layout() {
             <strong>{page}</strong>
           </div>
           <div className="topbar-right">
-            {mode === 'demo' && (
-              <span className="local-badge" aria-label="Dados de exemplo">
-                <span />
-                Exemplo
-              </span>
-            )}
             {authClient && (
               <NavLink
                 className="profile-avatar"
