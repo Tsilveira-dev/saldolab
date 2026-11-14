@@ -252,7 +252,7 @@ export default function Dashboard() {
             {stats.pendingCount
               ? `${stats.pendingCount} lançamentos pendentes`
               : !hasTransactions
-                ? 'Seu histórico começa aqui'
+                ? 'Sem pendências por enquanto'
                 : 'Tudo em dia por aqui'}
           </strong>
           <span>
