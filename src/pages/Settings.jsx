@@ -7,16 +7,8 @@ import { parseBackup } from '../repositories/localRepository';
 import { PageHeading, Panel, InlineError } from '../components/ui';
 
 export default function Settings() {
-  const {
-    mode,
-    theme,
-    setTheme,
-    repository,
-    mutate,
-    notify,
-    setConfirmation,
-    canWrite,
-  } = useFinance();
+  const { mode, theme, setTheme, repository, mutate, notify } = useFinance();
+  const { setConfirmation, canWrite } = useFinance();
   const [error, setError] = useState('');
   const inputRef = useRef(null);
   const exportBackup = async () => {
