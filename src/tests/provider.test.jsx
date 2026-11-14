@@ -51,7 +51,9 @@ it('uma gravação demorada dos dados pessoais não substitui a demonstração a
   );
   await user.click(screen.getByRole('button', { name: 'Salvar pessoal' }));
   await user.click(screen.getByRole('button', { name: 'Abrir demonstração' }));
-  await waitFor(() => expect(screen.getByLabelText('Dados')).toHaveTextContent('dados demonstrativos'));
+  await waitFor(() =>
+    expect(screen.getByLabelText('Dados')).toHaveTextContent('dados demonstrativos'),
+  );
   await act(async () => finishWrite());
   expect(personal.create).toHaveBeenCalledTimes(1);
   expect(screen.getByLabelText('Modo')).toHaveTextContent('demo');
