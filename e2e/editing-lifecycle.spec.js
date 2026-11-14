@@ -38,10 +38,7 @@ async function addExpense(page, description) {
   await expect(dialog).toHaveCount(0);
 }
 
-test('a primeira aba edita automaticamente e bloqueia as demais', async ({
-  page,
-  context,
-}) => {
+test('a primeira aba edita automaticamente e bloqueia as demais', async ({ page, context }) => {
   await open(page);
   await activateEditing(page);
   const first = await editors(page);
@@ -49,9 +46,7 @@ test('a primeira aba edita automaticamente e bloqueia as demais', async ({
   await expect(page.getByRole('button', { name: 'Ativar edição' })).toHaveCount(0);
   const second = await context.newPage();
   await open(second);
-  await expect(
-    second.getByRole('button', { name: 'Nova transação', exact: true }),
-  ).toBeDisabled();
+  await expect(second.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
   await expect(
     second.getByRole('region', { name: 'Estado das alterações' }),
   ).toContainText('Outra aba');
