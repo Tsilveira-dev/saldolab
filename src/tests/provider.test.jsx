@@ -46,9 +46,7 @@ it('não mistura dados após uma gravação demorada e troca de modo', async () 
       <ModeProbe />
     </FinanceProvider>,
   );
-  await waitFor(() =>
-    expect(screen.getByLabelText('Dados')).toHaveTextContent('dados pessoais'),
-  );
+  await waitFor(() => expect(screen.getByLabelText('Dados')).toHaveTextContent('dados pessoais'));
   await user.click(screen.getByRole('button', { name: 'Salvar pessoal' }));
   await user.click(screen.getByRole('button', { name: 'Abrir demonstração' }));
   await waitFor(() =>
