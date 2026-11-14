@@ -230,7 +230,17 @@ function Editor({ entity, row, initialType, onClose }) {
       {...register(key)}
       {...props}
       {...(['amount', 'initialBalance', 'limit'].includes(key)
-        ? { onFocus: (event) => event.currentTarget.select() }
+        ? {
+            onFocus: (event) => {
+              const field = event.currentTarget;
+              if (/^-?0(?:[,.]0{1,2})?$/.test(field.value.trim())) {
+                setValue(key, '', { shouldDirty: true });
+                field.value = '';
+              } else {
+                field.select();
+              }
+            },
+          }
         : {})}
     />
   );
