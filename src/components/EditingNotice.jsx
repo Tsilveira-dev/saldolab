@@ -18,7 +18,7 @@ export default function EditingNotice() {
         <p>
           {mode === 'cloud'
             ? 'Confira sua conta em Minha conta para continuar.'
-            : (descriptions[editingAccess.reason] ?? 'Recarregue a página para tentar novamente.')}
+            : descriptions[editingAccess.reason] ?? 'Recarregue a página para tentar novamente.'}
         </p>
       </div>
     </section>
