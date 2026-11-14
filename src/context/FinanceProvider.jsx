@@ -195,6 +195,13 @@ export default function FinanceProvider({ children }) {
     return result;
   };
   const switchMode = (value) => {
+    // Changing from cloud to browser storage needs a fresh document so the
+    // local Web Lock is acquired before any local data is read.
+    if (value === 'personal' && mode !== 'personal') {
+      savePreferences({ mode: 'personal', theme });
+      window.location.reload();
+      return;
+    }
     // Also invalidate in-flight reads when re-entering the same mode during
     // sign-out/sign-in; an old response must not repopulate the cleared view.
     generation.current++;
