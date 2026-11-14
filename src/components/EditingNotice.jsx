@@ -1,49 +1,26 @@
-import { LockKeyhole, Pencil } from 'lucide-react';
+import { LockKeyhole } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 
 export default function EditingNotice() {
-  const { mode, canWrite, editingAccess, activatingEditing, activateEditing, stopEditing } =
-    useFinance();
-  // Successful cloud sessions do not need to expose storage implementation details.
-  if (mode === 'cloud')
-    return canWrite ? null : (
-      <section className="editing-notice" aria-label="Permissão de edição" role="status">
-        <LockKeyhole size={19} aria-hidden="true" />
-        <div>
-          <strong>Não foi possível editar agora</strong>
-          <p>Confira sua conta em Minha conta e atualize a página.</p>
-        </div>
-      </section>
-    );
+  const { mode, canWrite, editingAccess } = useFinance();
+  if (canWrite || (mode !== 'cloud' && editingAccess.reason === 'view')) return null;
   const descriptions = {
-    view: 'Para salvar seus lançamentos, habilite as alterações nesta aba.',
-    'other-tab': 'As alterações estão abertas em outra aba. Feche-a para continuar.',
-    reload: 'Habilite as alterações novamente para continuar.',
-    unsupported: 'Este navegador não permite alterações seguras. Use um navegador atualizado.',
-    blocked: 'O navegador bloqueou as alterações. Confira as permissões.',
+    'other-tab': 'Outra aba está alterando suas finanças. Feche-a e recarregue esta página para continuar.',
+    reload: 'Recarregue a página para continuar fazendo alterações.',
+    unsupported: 'Use um navegador atualizado em HTTPS para salvar com segurança.',
+    blocked: 'O navegador bloqueou as alterações. Confira as permissões de armazenamento.',
   };
   return (
-    <section className="editing-notice" aria-label="Permissão de edição">
-      {canWrite ? (
-        <Pencil size={19} aria-hidden="true" />
-      ) : (
-        <LockKeyhole size={19} aria-hidden="true" />
-      )}
-      <div role="status">
-        <strong>{canWrite ? 'Edição ativa nesta aba' : 'Somente leitura'}</strong>
+    <section className="editing-notice" aria-label="Estado das alterações" role="status">
+      <LockKeyhole size={19} aria-hidden="true" />
+      <div>
+        <strong>Alterações indisponíveis</strong>
         <p>
-          {canWrite
-            ? 'As outras abas continuam disponíveis para consulta. Encerre a edição para liberar outra aba.'
-            : descriptions[editingAccess.reason]}
+          {mode === 'cloud'
+            ? 'Confira sua conta em Minha conta para continuar.'
+            : (descriptions[editingAccess.reason] ?? 'Recarregue a página para tentar novamente.')}
         </p>
       </div>
-      <button
-        className="btn btn-light"
-        disabled={activatingEditing || !editingAccess.supported}
-        onClick={canWrite ? stopEditing : activateEditing}
-      >
-        {activatingEditing ? 'Ativando…' : canWrite ? 'Encerrar edição' : 'Ativar edição'}
-      </button>
     </section>
   );
 }
