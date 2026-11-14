@@ -65,7 +65,7 @@ export default function FinanceProvider({ children }) {
     if (mode === 'cloud' && session.isPending) return;
     try {
       if (mode === 'cloud' && !cloudUserId)
-        throw new CloudSessionError('Sua sessão expirou. Entre novamente em Minha nuvem.');
+        throw new CloudSessionError('Sua sessão expirou. Entre novamente em Minha conta.');
       const next = await repository.snapshot();
       if (request === generation.current && requestMode === activeMode.current) {
         setData(next);
@@ -166,10 +166,10 @@ export default function FinanceProvider({ children }) {
   };
   const mutate = async (operation, message = 'Alterações salvas.') => {
     if (mode === 'cloud' && (!cloudUserId || session.isPending || error))
-      throw new CloudSessionError('Reabra seus dados em Minha nuvem antes de salvar.');
+      throw new CloudSessionError('Reabra seus dados em Minha conta antes de salvar.');
     if (!repository.getEditingAccess().canWrite) {
       throw new StorageError(
-        'Esta aba está em modo somente leitura. Ative a edição para salvar alterações.',
+        'Esta aba não pode salvar alterações. Feche a outra aba que estiver editando e recarregue a página.',
       );
     }
     const request = generation.current;
