@@ -94,6 +94,19 @@ async function addTransaction(
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 }
 describe('fluxos integrados React → formulário → repositório → indicadores', () => {
+  it('orienta novo usuário a cadastrar a primeira conta sem demonstrar resultados fictícios', async () => {
+    const empty = { version: 1, accounts: [], categories: [], transactions: [], budgets: [] };
+    const { user } = await setup('/', empty);
+    await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
+    expect(screen.getByRole('region', { name: 'Comece por aqui' })).toHaveTextContent(
+      'Cadastre a primeira conta',
+    );
+    expect(screen.getByRole('region', { name: 'Saldo disponível' })).toHaveTextContent('R$ 0,00');
+    expect(screen.getByText('Seu histórico começa aqui')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cadastrar primeira conta' }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Adicionar conta');
+    expect(saved().accounts).toHaveLength(0);
+  });
   it('cadastra receita e despesa e atualiza o dashboard imediatamente', async () => {
     const { user } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
