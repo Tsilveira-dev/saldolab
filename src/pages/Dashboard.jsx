@@ -108,8 +108,8 @@ export default function Dashboard() {
         <section className="panel p-4 mb-4" aria-label="Comece por aqui">
           <h2 className="h5 mb-2">Comece pelas suas contas</h2>
           <p className="text-secondary mb-3">
-            Seus saldos começam em zero. Cadastre a primeira conta para organizar suas movimentações.
-            Você poderá registrar receitas e despesas em seguida.
+            Seus saldos começam em zero. Cadastre a primeira conta para organizar suas
+            movimentações. Você poderá registrar receitas e despesas em seguida.
           </p>
           <button
             className="btn btn-primary"
