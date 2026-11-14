@@ -64,7 +64,7 @@ test('navega por todas as páginas, mantém rotas diretas e evita overflow do do
     ).toBe(true);
   }
 });
-test('preserva dados pessoais após recarregar sem mostrar o modo de demonstração', async ({ page }) => {
+test('preserva dados pessoais ao recarregar, sem demonstração', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Cinema com amigos', { exact: true }).first()).toBeVisible();
   await page.goto('/configuracoes');
