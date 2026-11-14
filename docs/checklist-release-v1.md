@@ -14,16 +14,16 @@ Estado: **NO-GO / produção bloqueada**. Revisão em 14/11/2026. Este documento
 
 Consulta realizada diretamente no projeto Neon `soft-term-72911921`, branch `main` (sem consultar ou expor segredos):
 
-| Controle | Constatação | Estado |
-| --- | --- | --- |
-| Neon Auth na branch principal | Não habilitado (consulta retornou 404) | **BLOCKED** |
-| Tabelas financeiras no banco `saldolab` | Nenhuma tabela retornada | **BLOCKED** |
-| Role de runtime de privilégio mínimo | Só foi encontrada `saldolab_owner` | **BLOCKED** |
-| Snapshots automáticos da branch principal | Agenda vazia | **BLOCKED** |
-| Snapshots manuais do projeto | Nenhum retornado | **BLOCKED** |
-| Histórico de recuperação do projeto | 21.600 segundos (6 horas) | **Insuficiente como backup independente** |
-| Proteção da branch principal | `protected: false` | **Revisar antes de aplicar migrações** |
-| Vercel, projetos e deployments | A consulta de projetos não retornou o SaldoLab; a de deployments retornou HTTP 403 | **Sem comprovação de configuração** |
+| Controle                                  | Constatação                                                                        | Estado                                    |
+| ----------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------- |
+| Neon Auth na branch principal             | Não habilitado (consulta retornou 404)                                             | **BLOCKED**                               |
+| Tabelas financeiras no banco `saldolab`   | Nenhuma tabela retornada                                                           | **BLOCKED**                               |
+| Role de runtime de privilégio mínimo      | Só foi encontrada `saldolab_owner`                                                 | **BLOCKED**                               |
+| Snapshots automáticos da branch principal | Agenda vazia                                                                       | **BLOCKED**                               |
+| Snapshots manuais do projeto              | Nenhum retornado                                                                   | **BLOCKED**                               |
+| Histórico de recuperação do projeto       | 21.600 segundos (6 horas)                                                          | **Insuficiente como backup independente** |
+| Proteção da branch principal              | `protected: false`                                                                 | **Revisar antes de aplicar migrações**    |
+| Vercel, projetos e deployments            | A consulta de projetos não retornou o SaldoLab; a de deployments retornou HTTP 403 | **Sem comprovação de configuração**       |
 
 As execuções GitHub Actions anteriores aprovaram código e cenários isolados de QA, não a configuração da branch Neon `main`. **Não aplicar migrações, habilitar Auth, criar roles ou alterar Vercel por tentativa enquanto faltarem o backup independente, o acesso operacional e a autorização de mudança.**
 
