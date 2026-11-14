@@ -68,7 +68,10 @@ test('navegar por páginas não perde nem multiplica a reserva', async ({ page }
   await open(page);
   await activateEditing(page);
   const initial = await editors(page);
+  const mobileMenu = page.getByRole('button', { name: 'Abrir menu', exact: true });
+  if (await mobileMenu.isVisible()) await mobileMenu.click();
   await page.getByRole('link', { name: 'Contas', exact: true }).click();
+  if (await mobileMenu.isVisible()) await mobileMenu.click();
   await page.getByRole('link', { name: 'Categorias', exact: true }).click();
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Um lugar para cada conta.' })).toBeVisible();
