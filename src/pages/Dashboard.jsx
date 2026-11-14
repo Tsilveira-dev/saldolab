@@ -29,7 +29,7 @@ import { ComparisonChart, ExpenseChart, ChartLegend } from '../components/Charts
 import TransactionTable from '../components/TransactionTable';
 
 export default function Dashboard() {
-  const { data, month, accountId, setEditor } = useFinance();
+  const { data, month, accountId, setEditor, canWrite } = useFinance();
   const [line, setLine] = useState(false);
   const startingOut = data.accounts.length === 0;
   const hasTransactions = data.transactions.length > 0;
@@ -114,6 +114,7 @@ export default function Dashboard() {
           <button
             className="btn btn-primary"
             onClick={() => setEditor({ entity: 'accounts' })}
+            disabled={!canWrite}
           >
             Cadastrar primeira conta
           </button>
