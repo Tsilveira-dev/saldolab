@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -179,7 +179,9 @@ export default function Layout() {
         <main id="main-content" className="main-content">
           {location.pathname !== '/nuvem' && <EditingNotice />}
           {location.pathname === '/nuvem' ? (
-            <Outlet />
+            <Suspense fallback={<div className="loading-state" role="status">Carregando página…</div>}>
+              <Outlet />
+            </Suspense>
           ) : loading ? (
             <div className="loading-state" role="status">
               <div className="spinner-border spinner-border-sm" />
@@ -243,7 +245,9 @@ export default function Layout() {
                     </div>
                   </div>
                 )}
-                <Outlet />
+                <Suspense fallback={<div className="loading-state" role="status">Carregando página…</div>}>
+              <Outlet />
+            </Suspense>
                 <footer className="content-footer">
                   <span>
                     SaldoLab <span className="footer-dot">·</span> Clareza para o seu próximo passo.
