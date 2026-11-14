@@ -21,6 +21,6 @@ export async function setFinancialTime(page, date) {
 export async function activateEditing(page) {
   // The app now acquires the local editing lease on startup.
   // On locked/unsupported browsers the add action stays disabled.
-  const addButton = page.getByRole('button', { name: 'Adicionar transação', exact: true });
+  const addButton = page.locator('.mobile-fab');
   await expect(addButton).toBeEnabled();
 }
