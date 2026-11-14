@@ -147,7 +147,7 @@ test('outra editora mantém a aba em consulta, sem sucesso falso nem importaçã
   const writer = await context.newPage();
   await prepare(writer);
   await prepare(page, false);
-  const notice = page.getByRole('region', { name: 'Estado das alterações' });
+  const notice = page.getByRole('status', { name: 'Estado das alterações' });
   await expect(notice).toContainText('outra aba');
   await expect(page.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
   await expect(
@@ -175,7 +175,7 @@ test('sem Web Locks, avisa somente leitura e desabilita edição preservando os 
     Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined }),
   );
   await prepare(page, false);
-  await expect(page.getByRole('region', { name: 'Estado das alterações' })).toContainText(
+  await expect(page.getByRole('status', { name: 'Estado das alterações' })).toContainText(
     'navegador atualizado',
   );
   await expect(
