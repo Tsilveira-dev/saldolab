@@ -102,7 +102,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
       'Cadastre a primeira conta',
     );
     expect(screen.getByRole('region', { name: 'Saldo disponível' })).toHaveTextContent('R$ 0,00');
-    expect(screen.getByText('Seu histórico começa aqui')).toBeInTheDocument();
+    expect(screen.getByText('Sem pendências por enquanto')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cadastrar primeira conta' }));
     expect(screen.getByRole('dialog')).toHaveTextContent('Adicionar conta');
     expect(saved().accounts).toHaveLength(0);
