@@ -13,9 +13,7 @@ const dataset = {
       createdAt: '2026-11-12',
     },
   ],
-  categories: [
-    { id: 'c1', name: 'Alimentação', type: 'expense', color: '#223344', icon: 'food' },
-  ],
+  categories: [{ id: 'c1', name: 'Alimentação', type: 'expense', color: '#223344', icon: 'food' }],
   transactions: [
     {
       id: 't1',
@@ -79,7 +77,11 @@ describe('backup da nuvem sem credenciais e com integridade financeira', () => {
   });
 
   it('recusa orçamento sem categoria de despesa e IDs duplicados', () => {
-    const duplicate = { version: 1, ...dataset, accounts: [...dataset.accounts, ...dataset.accounts] };
+    const duplicate = {
+      version: 1,
+      ...dataset,
+      accounts: [...dataset.accounts, ...dataset.accounts],
+    };
     expect(() => readCloudBackup(JSON.stringify({ app: 'SaldoLab', data: duplicate }))).toThrow(
       'Há identificadores duplicados em accounts.',
     );
