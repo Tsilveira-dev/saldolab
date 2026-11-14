@@ -30,7 +30,10 @@ export async function encryptBackup(source, destination, passphrase) {
     yield cipher.getAuthTag();
   }
   try {
-    await pipeline(Readable.from(chunks()), createWriteStream(temporary, { flags: 'wx', mode: 0o600 }));
+    await pipeline(
+      Readable.from(chunks()),
+      createWriteStream(temporary, { flags: 'wx', mode: 0o600 }),
+    );
     await link(temporary, destination);
   } finally {
     await unlink(temporary).catch(() => {});
@@ -61,7 +64,10 @@ export async function decryptBackup(sourcePath, destination, passphrase) {
   const decipher = createDecipheriv('aes-256-gcm', keyFor(passphrase, salt), iv);
   decipher.setAuthTag(tag);
   async function* chunks() {
-    const encrypted = createReadStream(sourcePath, { start: PREFIX_LENGTH, end: size - TAG_LENGTH - 1 });
+    const encrypted = createReadStream(sourcePath, {
+      start: PREFIX_LENGTH,
+      end: size - TAG_LENGTH - 1,
+    });
     for await (const chunk of encrypted) yield decipher.update(chunk);
     yield decipher.final();
   }
