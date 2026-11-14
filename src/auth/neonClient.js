@@ -22,7 +22,7 @@ if (baseURL) {
   } catch {
     // Never print the configured value: it might contain credentials by mistake.
     configurationError =
-      'Não foi possível iniciar o Neon Auth. Confira se VITE_NEON_AUTH_URL é a Base URL HTTPS do ambiente correto e termina em /auth.';
+      'Não foi possível conectar sua conta agora. Tente novamente mais tarde ou continue usando os dados deste aparelho.';
   }
 }
 
