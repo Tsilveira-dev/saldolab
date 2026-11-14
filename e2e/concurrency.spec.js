@@ -148,7 +148,7 @@ test('outra editora mantém a aba em consulta, sem sucesso falso nem importaçã
   await prepare(writer);
   await prepare(page, false);
   const notice = page.getByRole('status', { name: 'Estado das alterações' });
-  await expect(notice).toContainText('outra aba');
+  await expect(notice).toContainText(/outra aba/i);
   await expect(page.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
   await expect(
     page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
