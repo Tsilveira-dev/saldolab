@@ -93,21 +93,21 @@ export default function FinanceProvider({ children }) {
     const unsubscribe = repository.subscribeEditing((access) => {
       if (mode === activeMode.current) setEditingAccess(access);
     });
-    if (!startup.current) {
-      const request = takeEditingRequest();
-      startup.current = {
-        request,
-        ready: request?.mode === mode ? repository.startEditing() : Promise.resolve(false),
-      };
-    }
+    // Acquire the local write lease before the first read, without a manual button.
+    // A second tab stays read-only until its own reload.
+    const request = startup.current ? null : takeEditingRequest();
+    const entry = {
+      request,
+      ready: mode === 'cloud' ? Promise.resolve(false) : repository.startEditing(),
+    };
+    startup.current = entry;
     let mounted = true;
-    startup.current.ready.then(() => {
+    entry.ready.then(() => {
       if (!mounted) return;
-      const request = startup.current.request;
-      if (request?.mode === mode) {
-        if (/^\d{4}-\d{2}$/.test(request.month)) setMonth(request.month);
-        if (typeof request.accountId === 'string') setAccountId(request.accountId);
-        startup.current.request = null;
+      if (entry.request?.mode === mode) {
+        if (/^\d{4}-\d{2}$/.test(entry.request.month)) setMonth(entry.request.month);
+        if (typeof entry.request.accountId === 'string') setAccountId(entry.request.accountId);
+        entry.request = null;
       }
       reload();
     });
