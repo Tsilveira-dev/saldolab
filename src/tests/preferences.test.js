@@ -40,8 +40,6 @@ describe('preferências pessoais e compatibilidade com dados antigos', () => {
       JSON.stringify({ mode: 'cloud', theme: 'light' }),
     );
 
-    expect(readPreferences().mode).toBe(
-      import.meta.env.VITE_NEON_AUTH_URL ? 'cloud' : 'personal',
-    );
+    expect(readPreferences().mode).toBe(import.meta.env.VITE_NEON_AUTH_URL ? 'cloud' : 'personal');
   });
 });
