@@ -31,6 +31,8 @@ import TransactionTable from '../components/TransactionTable';
 export default function Dashboard() {
   const { data, month, accountId, setEditor } = useFinance();
   const [line, setLine] = useState(false);
+  const startingOut = data.accounts.length === 0;
+  const hasTransactions = data.transactions.length > 0;
   const filtered = filterTransactions(data.transactions, { month, accountId });
   const stats = totals(filtered);
   const previous = totals(
@@ -56,8 +58,11 @@ export default function Dashboard() {
       footer: (
         <span className="balance-caption">
           <span />
-          {accountId ? 'Na conta selecionada' : `Em ${data.accounts.length} contas financeiras`} ·
-          saldo atual
+          {startingOut
+            ? 'Nenhuma conta cadastrada'
+            : accountId
+              ? 'Na conta selecionada · saldo atual'
+              : `Em ${data.accounts.length} contas financeiras · saldo atual`}
         </span>
       ),
     },
@@ -99,6 +104,21 @@ export default function Dashboard() {
         action={() => setEditor({ entity: 'transactions' })}
         label="Nova transação"
       />
+      {startingOut && (
+        <section className="panel p-4 mb-4" aria-label="Comece por aqui">
+          <h2 className="h5 mb-2">Comece pelas suas contas</h2>
+          <p className="text-secondary mb-3">
+            Seus saldos começam em zero. Cadastre a primeira conta para organizar suas movimentações.
+            Você poderá registrar receitas e despesas em seguida.
+          </p>
+          <button
+            className="btn btn-primary"
+            onClick={() => setEditor({ entity: 'accounts' })}
+          >
+            Cadastrar primeira conta
+          </button>
+        </section>
+      )}
       <div className="metrics-grid">
         {cards.map(({ label, value, icon: Icon, className, footer }) => (
           <section key={label} className={`metric-card ${className}`} aria-label={label}>
@@ -141,10 +161,11 @@ export default function Dashboard() {
           <div className="chart-footnote">
             <TrendingUp size={14} />
             <span>
-              {stats.net >= 0
-                ? 'O resultado do período está positivo.'
-                : 'As despesas superaram as receitas neste período.'}{' '}
-              Continue acompanhando.
+              {!hasTransactions
+                ? 'Os gráficos serão preenchidos quando você registrar movimentações.'
+                : stats.net >= 0
+                  ? 'O resultado do período está positivo. Continue acompanhando.'
+                  : 'As despesas superaram as receitas neste período. Continue acompanhando.'}
             </span>
           </div>
         </Panel>
@@ -229,12 +250,16 @@ export default function Dashboard() {
           <strong>
             {stats.pendingCount
               ? `${stats.pendingCount} lançamentos pendentes`
-              : 'Tudo em dia por aqui'}
+              : !hasTransactions
+                ? 'Seu histórico começa aqui'
+                : 'Tudo em dia por aqui'}
           </strong>
           <span>
             {stats.pendingCount
               ? `${money(stats.pendingCents)} aguardando confirmação. Esses valores ainda não alteram seu saldo.`
-              : 'Nenhum lançamento aguardando confirmação neste período.'}
+              : !hasTransactions
+                ? 'Adicione uma conta e registre sua primeira movimentação para acompanhar as pendências.'
+                : 'Nenhum lançamento aguardando confirmação neste período.'}
           </span>
         </div>
         <Link to="/transacoes?status=pending" className="text-link">
