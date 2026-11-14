@@ -45,6 +45,14 @@ describe('Contrato JWT e sessão do Neon Auth', () => {
     await expect(getAuthSessionFromClient(client)).rejects.toMatchObject({ status: 401 });
   });
 
+  it('trata erro de rede ao obter JWT sem usar o token opaco da sessão', async () => {
+    const client = makeClient();
+    client.token.mockRejectedValue(new TypeError('Network error'));
+    await expect(getAuthSessionFromClient(client)).rejects.toMatchObject({
+      status: 503,
+    });
+  });
+
   it('trata indisponibilidade do emissor de JWT como falha temporária', async () => {
     const client = makeClient();
     client.token.mockResolvedValue({ data: null, error: { status: 503 } });
