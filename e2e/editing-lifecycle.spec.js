@@ -5,14 +5,17 @@ import { createDemoData } from '../src/services/demo';
 test.beforeEach(async ({ page }) => {
   await setFinancialTime(page, '2026-11-11T15:00:00Z');
   const seed = createDemoData('2026-11');
-  await page.addInitScript((data) => {
-    if (!localStorage.getItem('saldolab:v1:personal'))
-      localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
-    localStorage.setItem(
-      'saldolab:preferences:v1',
-      JSON.stringify({ mode: 'personal', theme: 'light' }),
-    );
-  }, seed);
+  await page.addInitScript(
+    (data) => {
+      if (!localStorage.getItem('saldolab:v1:personal'))
+        localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
+      localStorage.setItem(
+        'saldolab:preferences:v1',
+        JSON.stringify({ mode: 'personal', theme: 'light' }),
+      );
+    },
+    seed,
+  );
 });
 
 const editors = (page) =>
@@ -35,7 +38,7 @@ async function addExpense(page, description) {
   await expect(dialog).toHaveCount(0);
 }
 
-test('o primeiro acesso obtém edição sem botão manual e mantém o bloqueio entre abas', async ({
+test('a primeira aba edita automaticamente e bloqueia as demais', async ({
   page,
   context,
 }) => {
