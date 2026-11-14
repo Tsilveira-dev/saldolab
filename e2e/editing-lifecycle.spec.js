@@ -5,17 +5,14 @@ import { createDemoData } from '../src/services/demo';
 test.beforeEach(async ({ page }) => {
   await setFinancialTime(page, '2026-11-11T15:00:00Z');
   const seed = createDemoData('2026-11');
-  await page.addInitScript(
-    (data) => {
-      if (!localStorage.getItem('saldolab:v1:personal'))
-        localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
-      localStorage.setItem(
-        'saldolab:preferences:v1',
-        JSON.stringify({ mode: 'personal', theme: 'light' }),
-      );
-    },
-    seed,
-  );
+  await page.addInitScript((data) => {
+    if (!localStorage.getItem('saldolab:v1:personal'))
+      localStorage.setItem('saldolab:v1:personal', JSON.stringify(data));
+    localStorage.setItem(
+      'saldolab:preferences:v1',
+      JSON.stringify({ mode: 'personal', theme: 'light' }),
+    );
+  }, seed);
 });
 
 const editors = (page) =>
@@ -47,9 +44,9 @@ test('a primeira aba edita automaticamente e bloqueia as demais', async ({ page,
   const second = await context.newPage();
   await open(second);
   await expect(second.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
-  await expect(
-    second.getByRole('region', { name: 'Estado das alterações' }),
-  ).toContainText('Outra aba');
+  await expect(second.getByRole('region', { name: 'Estado das alterações' })).toContainText(
+    'Outra aba',
+  );
   expect((await editors(second))[0].clientId).toBe(first[0].clientId);
 });
 
