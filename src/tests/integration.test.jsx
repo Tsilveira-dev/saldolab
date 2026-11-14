@@ -249,20 +249,12 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().budgets).toHaveLength(1);
     expect(saved().budgets[0].month).toBe(currentMonth());
   });
-  it('alterna modos sem misturar dados e preserva a preferência no recarregamento', async () => {
+  it('mantém o espaço pessoal após recarregar e não exibe controles de demonstração', async () => {
     const { user, unmount } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
+    expect(screen.queryByText('Exemplo')).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Configurações' }));
-    await user.click(screen.getByRole('radio', { name: /Exemplo para explorar/ }));
-    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
-    await screen.findByText('Cinema com amigos');
-    expect(JSON.parse(window.localStorage.getItem(storageKey('personal'))).transactions).toEqual(
-      [],
-    );
-    await user.click(screen.getByRole('link', { name: 'Configurações' }));
-    await user.click(screen.getByRole('radio', { name: /Neste aparelho/ }));
-    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
-    await screen.findByText('Nenhuma transação encontrada');
+    expect(screen.queryByRole('radio', { name: /Exemplo para explorar/ })).not.toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
     unmount();
     render(
@@ -280,7 +272,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
   });
   it('recupera visualmente erros de armazenamento sem sobrescrever o original', async () => {
-    window.localStorage.setItem(storageKey('demo'), '{bad');
+    window.localStorage.setItem(storageKey('personal'), '{bad');
     render(
       <MemoryRouter>
         <FinanceProvider>
@@ -296,6 +288,6 @@ describe('fluxos integrados React → formulário → repositório → indicador
       await screen.findByRole('heading', { name: 'Seus dados precisam de atenção' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Exportar conteúdo original' })).toBeInTheDocument();
-    expect(window.localStorage.getItem(storageKey('demo'))).toBe('{bad');
+    expect(window.localStorage.getItem(storageKey('personal'))).toBe('{bad');
   });
 });
