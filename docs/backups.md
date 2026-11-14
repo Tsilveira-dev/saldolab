@@ -38,3 +38,25 @@ Antes da ativação, aprovar retenção/RPO/RTO e confirmar a janela real de his
 Usar `pg_dump`/`pg_restore` compatíveis com PostgreSQL 17 e conexão direta protegida; nunca colocar a senha na linha publicada. Conferir checksum e restauração em uma branch nova. Um clone Neon no mesmo projeto comprova recuperação por snapshot, mas não é uma cópia independente contra perda do projeto/conta. Este ensaio não comprovou PITR histórico nem restore de um dump externo.
 
 Backups físicos/PITR podem incluir `neon_auth`, credenciais e sessões. Restaurar o banco inteiro pode reverter uma troca de senha. Não ativar a cópia sem reconciliar a identidade atual, revogar sessões restauradas e revisar origens/JWKS. A restauração lógica acima transfere somente finanças para uma identidade existente e não copia Auth. Nenhum backup ou identidade de development será migrado automaticamente.
+
+## Ferramenta local de backup PostgreSQL cifrado — preparada, não agendada
+
+A ferramenta `npm run backup:postgres` cria um arquivo PostgreSQL custom format protegido com **AES-256-GCM**, salt aleatório e derivação da chave com scrypt. Os bytes de `pg_dump` são criptografados durante a leitura, sem gerar dump em texto claro no disco. A ferramenta não substitui nem sobrescreve arquivos existentes; verifica o arquivo resultante por descriptografia e `pg_restore --list`, sem restaurar dados.
+
+**Requisitos no computador administrativo:** Node.js, `pg_dump` e `pg_restore` compatíveis com a versão do servidor, conexão **direta** (não pooler) com TLS, diretório de saída fora do repositório, senha de criptografia de pelo menos 20 caracteres e espaço suficiente. A senha e a URL do banco devem ser configuradas no ambiente seguro da máquina, nunca copiadas para scripts, Git, conversas, logs ou argumentos da linha de comando.
+
+Variáveis obrigatórias:
+
+- `SALDOLAB_BACKUP_DATABASE_URL`: URL PostgreSQL direta da branch autorizada, com usuário que possa ler todos os schemas necessários.
+- `SALDOLAB_BACKUP_PASSPHRASE`: segredo de criptografia guardado em local distinto do próprio backup. **Perder essa senha impede a recuperação.**
+
+Após preparar as variáveis pelo gerenciador de segredos local, os comandos são:
+
+```bash
+npm run backup:postgres -- create /caminho/privado/fora-do-projeto/saldolab-AAAA-MM-DD.saldolab.enc
+npm run backup:postgres -- verify /caminho/privado/fora-do-projeto/saldolab-AAAA-MM-DD.saldolab.enc
+```
+
+A etapa `verify` somente autentica o arquivo criptografado e pede ao PostgreSQL que liste sua estrutura; **não comprova restauração funcional**. O formato inclui os schemas do banco, potencialmente incluindo contas e sessões do Auth; não publicar nem compartilhar o arquivo. A ferramenta não implementa envio externo, armazenamento remoto, execução diária, retenção, alertas nem recuperação automática.
+
+**Antes de considerar a produção protegida:** autorizar e configurar uma cópia criptografada em armazenamento externo independente, com agendamento, retenção, testes de restauração em um banco isolado, proteção de acesso e monitoramento. Não executar restauração do banco completo em `main`, nem considerar os seis horários de recuperação do Neon como cópia independente.
