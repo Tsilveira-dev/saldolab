@@ -44,7 +44,7 @@ test('a primeira aba edita automaticamente e bloqueia as demais', async ({ page,
   const second = await context.newPage();
   await open(second);
   await expect(second.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
-  await expect(second.getByRole('region', { name: 'Estado das alterações' })).toContainText(
+  await expect(second.getByRole('status', { name: 'Estado das alterações' })).toContainText(
     'Outra aba',
   );
   expect((await editors(second))[0].clientId).toBe(first[0].clientId);
@@ -101,7 +101,7 @@ test('sem Web Locks, bloqueia gravação mas mantém consulta e backup', async (
     Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined }),
   );
   await open(page);
-  await expect(page.getByRole('region', { name: 'Estado das alterações' })).toContainText(
+  await expect(page.getByRole('status', { name: 'Estado das alterações' })).toContainText(
     'navegador atualizado',
   );
   await expect(page.getByRole('button', { name: 'Nova transação' })).toBeDisabled();
