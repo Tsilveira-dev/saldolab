@@ -15,6 +15,7 @@
     "test:neon": "playwright test --config playwright.neon.config.js",
     "test:release": "playwright test --config playwright.release.config.js",
     "backup:restore:qa": "node scripts/restore-cloud-backup.js",
+    "backup:postgres": "node scripts/backup-postgres.js",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run format:check && npm run test && npm run build"
