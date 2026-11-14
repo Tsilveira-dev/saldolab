@@ -14,20 +14,20 @@ function ModeProbe() {
       <output aria-label="Modo">{mode}</output>
       <output aria-label="Dados">{data?.marker ?? 'carregando'}</output>
       <output aria-label="Mensagem">{toast?.message ?? ''}</output>
-      <button onClick={() => switchMode('personal')}>Abrir pessoal</button>
-      <button onClick={() => save('transactions', {})}>Salvar demonstração</button>
+      <button onClick={() => switchMode('demo')}>Abrir demonstração</button>
+      <button onClick={() => save('transactions', {})}>Salvar pessoal</button>
     </>
   );
 }
 
-it('uma gravação demorada da demonstração não substitui os dados pessoais após trocar de modo', async () => {
+it('uma gravação demorada dos dados pessoais não substitui a demonstração após trocar de modo', async () => {
   let finishWrite;
   const demo = {
     snapshot: vi.fn().mockResolvedValue({ marker: 'dados demonstrativos', accounts: [] }),
-    create: vi.fn(() => new Promise((resolve) => (finishWrite = resolve))),
   };
   const personal = {
     snapshot: vi.fn().mockResolvedValue({ marker: 'dados pessoais', accounts: [] }),
+    create: vi.fn(() => new Promise((resolve) => (finishWrite = resolve))),
   };
   for (const repo of [demo, personal]) {
     repo.getEditingAccess = () => ({ canWrite: true, supported: true, reason: 'editing' });
@@ -36,8 +36,10 @@ it('uma gravação demorada da demonstração não substitui os dados pessoais a
       return () => {};
     };
     repo.stopEditing = async () => {};
+    repo.startEditing = async () => true;
   }
   createLocalRepository.mockImplementation(({ mode }) => (mode === 'demo' ? demo : personal));
+  window.localStorage.setItem('saldolab:preferences:v1', JSON.stringify({ mode: 'personal' }));
   const user = userEvent.setup();
   render(
     <FinanceProvider>
@@ -45,14 +47,14 @@ it('uma gravação demorada da demonstração não substitui os dados pessoais a
     </FinanceProvider>,
   );
   await waitFor(() =>
-    expect(screen.getByLabelText('Dados')).toHaveTextContent('dados demonstrativos'),
+    expect(screen.getByLabelText('Dados')).toHaveTextContent('dados pessoais'),
   );
-  await user.click(screen.getByRole('button', { name: 'Salvar demonstração' }));
-  await user.click(screen.getByRole('button', { name: 'Abrir pessoal' }));
-  await waitFor(() => expect(screen.getByLabelText('Dados')).toHaveTextContent('dados pessoais'));
+  await user.click(screen.getByRole('button', { name: 'Salvar pessoal' }));
+  await user.click(screen.getByRole('button', { name: 'Abrir demonstração' }));
+  await waitFor(() => expect(screen.getByLabelText('Dados')).toHaveTextContent('dados demonstrativos'));
   await act(async () => finishWrite());
-  expect(demo.create).toHaveBeenCalledTimes(1);
-  expect(screen.getByLabelText('Modo')).toHaveTextContent('personal');
-  expect(screen.getByLabelText('Dados')).toHaveTextContent('dados pessoais');
+  expect(personal.create).toHaveBeenCalledTimes(1);
+  expect(screen.getByLabelText('Modo')).toHaveTextContent('demo');
+  expect(screen.getByLabelText('Dados')).toHaveTextContent('dados demonstrativos');
   expect(screen.getByLabelText('Mensagem')).toBeEmptyDOMElement();
 });
