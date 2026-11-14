@@ -94,6 +94,19 @@ async function addTransaction(
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 }
 describe('fluxos integrados React → formulário → repositório → indicadores', () => {
+  it('orienta novo usuário a cadastrar a primeira conta sem demonstrar resultados fictícios', async () => {
+    const empty = { version: 1, accounts: [], categories: [], transactions: [], budgets: [] };
+    const { user } = await setup('/', empty);
+    await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
+    expect(screen.getByRole('region', { name: 'Comece por aqui' })).toHaveTextContent(
+      'Cadastre a primeira conta',
+    );
+    expect(screen.getByRole('region', { name: 'Saldo disponível' })).toHaveTextContent('R$ 0,00');
+    expect(screen.getByText('Sem pendências por enquanto')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cadastrar primeira conta' }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Adicionar conta');
+    expect(saved().accounts).toHaveLength(0);
+  });
   it('cadastra receita e despesa e atualiza o dashboard imediatamente', async () => {
     const { user } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
@@ -249,20 +262,12 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(saved().budgets).toHaveLength(1);
     expect(saved().budgets[0].month).toBe(currentMonth());
   });
-  it('alterna modos sem misturar dados e preserva a preferência no recarregamento', async () => {
+  it('mantém o espaço pessoal após recarregar e não exibe controles de demonstração', async () => {
     const { user, unmount } = await setup();
     await screen.findByRole('heading', { name: 'Tudo em equilíbrio.' });
+    expect(screen.queryByText('Exemplo')).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Configurações' }));
-    await user.click(screen.getByRole('radio', { name: /Exemplo para explorar/ }));
-    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
-    await screen.findByText('Cinema com amigos');
-    expect(JSON.parse(window.localStorage.getItem(storageKey('personal'))).transactions).toEqual(
-      [],
-    );
-    await user.click(screen.getByRole('link', { name: 'Configurações' }));
-    await user.click(screen.getByRole('radio', { name: /Neste aparelho/ }));
-    await user.click(screen.getByRole('link', { name: 'Dashboard' }));
-    await screen.findByText('Nenhuma transação encontrada');
+    expect(screen.queryByRole('radio', { name: /Exemplo para explorar/ })).not.toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
     unmount();
     render(
@@ -280,7 +285,7 @@ describe('fluxos integrados React → formulário → repositório → indicador
     expect(JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode).toBe('personal');
   });
   it('recupera visualmente erros de armazenamento sem sobrescrever o original', async () => {
-    window.localStorage.setItem(storageKey('demo'), '{bad');
+    window.localStorage.setItem(storageKey('personal'), '{bad');
     render(
       <MemoryRouter>
         <FinanceProvider>
@@ -296,6 +301,6 @@ describe('fluxos integrados React → formulário → repositório → indicador
       await screen.findByRole('heading', { name: 'Seus dados precisam de atenção' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Exportar conteúdo original' })).toBeInTheDocument();
-    expect(window.localStorage.getItem(storageKey('demo'))).toBe('{bad');
+    expect(window.localStorage.getItem(storageKey('personal'))).toBe('{bad');
   });
 });

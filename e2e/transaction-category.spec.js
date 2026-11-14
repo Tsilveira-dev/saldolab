@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { activateEditing } from './helpers';
 
 for (const type of ['expense', 'income'])
   test(`cria categoria de ${type} no lançamento e mantém o rascunho até editar/excluir`, async ({
@@ -48,8 +49,7 @@ for (const type of ['expense', 'income'])
       { type },
     );
     await page.goto('/transacoes');
-    await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
-    await expect(page.getByText('Edição ativa nesta aba', { exact: true })).toBeVisible();
+    await activateEditing(page);
     await page
       .locator('.page-heading')
       .getByRole('button', { name: 'Nova transação', exact: true })
@@ -116,7 +116,7 @@ test('uma transação vazia oferece cadastro rápido de conta e categoria antes 
     );
   });
   await page.goto('/transacoes');
-  await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
+  await activateEditing(page);
   await page.locator('.page-heading').getByRole('button', { name: 'Nova transação' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Descrição', { exact: true }).fill('Mercado QA');
@@ -146,7 +146,7 @@ test('uma transação vazia oferece cadastro rápido de conta e categoria antes 
   expect(stored.transactions[0].amountCents).toBe(10000);
 });
 
-for (const mode of ['personal', 'demo']) {
+for (const mode of ['personal']) {
   test(`no modo ${mode}, cadastrar transação grava, exibe confirmação correta e persiste após reload`, async ({
     page,
   }) => {
@@ -188,7 +188,7 @@ for (const mode of ['personal', 'demo']) {
       { mode },
     );
     await page.goto('/transacoes');
-    await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
+    await activateEditing(page);
     await page.locator('.page-heading').getByRole('button', { name: 'Nova transação' }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel('Descrição', { exact: true }).fill('Compra registrada');

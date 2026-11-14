@@ -14,7 +14,7 @@ npm ci
 npm run dev
 ```
 
-O Vite serve a interface em localhost; demonstração e modo pessoal funcionam sem login. `/api/finance` é uma Vercel Function e não é criada por `npm run dev` ou `npm run preview`.
+O Vite serve a interface pessoal em localhost, sem exigir login para registros armazenados neste navegador. Os dados antigos da demonstração não são apagados, mas a demonstração não aparece no fluxo principal. A edição local é solicitada automaticamente e depende de Web Locks para impedir gravação concorrente entre abas. `/api/finance` é uma Vercel Function e não é criada por `npm run dev` ou `npm run preview`.
 
 ## Nuvem e ambiente isolado
 

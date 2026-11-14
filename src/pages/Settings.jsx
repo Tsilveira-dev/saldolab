@@ -7,17 +7,8 @@ import { parseBackup } from '../repositories/localRepository';
 import { PageHeading, Panel, InlineError } from '../components/ui';
 
 export default function Settings() {
-  const {
-    mode,
-    switchMode,
-    theme,
-    setTheme,
-    repository,
-    mutate,
-    notify,
-    setConfirmation,
-    canWrite,
-  } = useFinance();
+  const { mode, theme, setTheme, repository, mutate, notify } = useFinance();
+  const { setConfirmation, canWrite } = useFinance();
   const [error, setError] = useState('');
   const inputRef = useRef(null);
   const exportBackup = async () => {
@@ -67,28 +58,8 @@ export default function Settings() {
       />
       <InlineError message={error} />
       <div className="settings-grid">
-        <Panel title="Onde usar seus dados" subtitle="Escolha apenas se quiser trocar de espaço">
+        <Panel title="Seus dados" subtitle="Gerencie sua conta e preferências">
           <div className="settings-body">
-            <div className="mode-options">
-              {[
-                ['personal', 'Neste aparelho', 'Os registros ficam somente neste navegador.'],
-                ['demo', 'Exemplo para explorar', 'Dados fictícios, sem afetar suas finanças.'],
-              ].map(([value, title, description]) => (
-                <label className={`mode-option ${mode === value ? 'selected' : ''}`} key={value}>
-                  <input
-                    type="radio"
-                    name="mode"
-                    value={value}
-                    checked={mode === value}
-                    onChange={() => switchMode(value)}
-                  />
-                  <span>
-                    <strong>{title}</strong>
-                    <small>{description}</small>
-                  </span>
-                </label>
-              ))}
-            </div>
             <p className="settings-footnote">
               <ShieldCheck size={16} />
               Os dados deste aparelho não acompanham o login. Para acessar suas finanças em outros

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -36,8 +36,16 @@ const navigation = [
   ['/categorias', 'Categorias', Tags],
   ['/orcamentos', 'Orçamentos', ChartPie],
   ['/relatorios', 'Relatórios', ChartNoAxesCombined],
-  ...(authClient ? [['/nuvem', 'Minha nuvem', Cloud]] : []),
+  ...(authClient ? [['/nuvem', 'Minha conta', Cloud]] : []),
 ];
+function PageFallback() {
+  return (
+    <div className="loading-state" role="status">
+      Carregando página…
+    </div>
+  );
+}
+
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const {
@@ -164,12 +172,6 @@ export default function Layout() {
             <strong>{page}</strong>
           </div>
           <div className="topbar-right">
-            {mode === 'demo' && (
-              <span className="local-badge" aria-label="Dados de exemplo">
-                <span />
-                Exemplo
-              </span>
-            )}
             {authClient && (
               <NavLink
                 className="profile-avatar"
@@ -185,7 +187,9 @@ export default function Layout() {
         <main id="main-content" className="main-content">
           {location.pathname !== '/nuvem' && <EditingNotice />}
           {location.pathname === '/nuvem' ? (
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           ) : loading ? (
             <div className="loading-state" role="status">
               <div className="spinner-border spinner-border-sm" />
@@ -249,7 +253,9 @@ export default function Layout() {
                     </div>
                   </div>
                 )}
-                <Outlet />
+                <Suspense fallback={<PageFallback />}>
+                  <Outlet />
+                </Suspense>
                 <footer className="content-footer">
                   <span>
                     SaldoLab <span className="footer-dot">·</span> Clareza para o seu próximo passo.
@@ -259,7 +265,6 @@ export default function Layout() {
                     {mode === 'cloud'
                       ? 'Dados salvos na sua conta'
                       : 'Dados somente neste dispositivo'}
-                    {mode === 'demo' ? ' · Exemplo fictício' : ''}
                   </span>
                 </footer>
                 <button

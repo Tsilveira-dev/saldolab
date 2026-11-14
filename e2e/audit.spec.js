@@ -375,39 +375,16 @@ test('armazenamento bloqueado e cota esgotada não sobrescrevem os dados anterio
   await page.reload();
   await expect(page.getByText(/O navegador bloqueou o armazenamento/)).toBeVisible();
 });
-test('modos ficam separados e restauração da demonstração preserva o pessoal', async ({ page }) => {
+test('os registros pessoais persistem sem expor a demonstração na interface', async ({ page }) => {
   await goto(page, '/');
   await add(page);
   const original = await snapshot(page);
   await nav(page, 'Configurações');
-  await page.getByRole('radio', { name: /Exemplo para explorar/ }).check();
+  await expect(page.getByRole('radio', { name: /Exemplo para explorar/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Exportar backup JSON' })).toBeVisible();
   await nav(page, 'Dashboard');
-  await activateEditing(page);
-  await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
-  await add(page, {
-    type: 'expense',
-    description: 'QA demonstração alterada',
-    amount: '12,00',
-    accountId: 'checking',
-    categoryId: 'food',
-  });
-  expect(
-    await page.evaluate(
-      () => JSON.parse(localStorage.getItem('saldolab:v1:demo')).transactions.length,
-    ),
-  ).toBe(91);
-  await nav(page, 'Configurações');
-  await page.getByRole('button', { name: 'Restaurar demonstração', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Restaurar dados' }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  expect(
-    await page.evaluate(
-      () => JSON.parse(localStorage.getItem('saldolab:v1:demo')).transactions.length,
-    ),
-  ).toBe(90);
+  await page.reload();
   expect(await snapshot(page)).toEqual(original);
-  await page.getByRole('radio', { name: /Neste aparelho/ }).check();
-  await nav(page, 'Dashboard');
   await assertMoney(metric(page, 'Saldo disponível'), '3.500,00');
 });
 test('entrada HTML é apresentada como texto, sem executar scripts', async ({ page }) => {

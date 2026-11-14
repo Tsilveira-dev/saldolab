@@ -112,32 +112,32 @@ test('três abas preservam gravações confirmadas e recusam escritores concorre
   expect(transactions.reduce((sum, tx) => sum + tx.amountCents, 0)).toBe(3000 + successful);
 });
 
-test('uma aba de consulta não bloqueia a editora e assume edição após ela fechar', async ({
+test('a primeira aba edita e a segunda assume a edição após ela fechar', async ({
   page,
   context,
 }) => {
-  await prepare(page, false);
-  expect((await page.evaluate(() => navigator.locks.query())).held).toEqual([]);
-  await expect(
-    page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
-  ).toBeDisabled();
+  await prepare(page);
   const second = await context.newPage();
-  await prepare(second);
-  await second.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
-  await second.getByRole('dialog').locator('[name=amount]').fill('2500,00');
-  await second.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(second.getByRole('dialog')).toHaveCount(0);
-  await expect.poll(async () => (await stored(page))[0].amountCents).toBe(250000);
-  await second.close();
-  await expect
-    .poll(async () => (await page.evaluate(() => navigator.locks.query())).held.length)
-    .toBe(0);
-  await activateEditing(page);
+  await prepare(second, false);
+  await expect(
+    second.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
+  ).toBeDisabled();
   await page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
-  await page.getByRole('dialog').locator('[name=amount]').fill('3000,00');
+  await page.getByRole('dialog').locator('[name=amount]').fill('2500,00');
   await page.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  expect((await stored(page))[0].amountCents).toBe(300000);
+  await expect.poll(async () => (await stored(second))[0].amountCents).toBe(250000);
+  await page.close();
+  await expect
+    .poll(async () => (await second.evaluate(() => navigator.locks.query())).held.length)
+    .toBe(0);
+  await second.reload();
+  await activateEditing(second);
+  await second.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }).click();
+  await second.getByRole('dialog').locator('[name=amount]').fill('3000,00');
+  await second.getByRole('dialog').getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(second.getByRole('dialog')).toHaveCount(0);
+  expect((await stored(second))[0].amountCents).toBe(300000);
 });
 
 test('outra editora mantém a aba em consulta, sem sucesso falso nem importação ou limpeza', async ({
@@ -147,9 +147,8 @@ test('outra editora mantém a aba em consulta, sem sucesso falso nem importaçã
   const writer = await context.newPage();
   await prepare(writer);
   await prepare(page, false);
-  await page.getByRole('button', { name: 'Ativar edição', exact: true }).click();
-  const notice = page.getByRole('region', { name: 'Permissão de edição' });
-  await expect(notice).toContainText('outra aba');
+  const notice = page.getByRole('status', { name: 'Estado das alterações' });
+  await expect(notice).toContainText(/outra aba/i);
   await expect(page.getByRole('button', { name: 'Nova transação', exact: true })).toBeDisabled();
   await expect(
     page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
@@ -176,10 +175,9 @@ test('sem Web Locks, avisa somente leitura e desabilita edição preservando os 
     Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined }),
   );
   await prepare(page, false);
-  await expect(page.getByRole('region', { name: 'Permissão de edição' })).toContainText(
-    'não permite alterações seguras',
+  await expect(page.getByRole('status', { name: 'Estado das alterações' })).toContainText(
+    'navegador atualizado',
   );
-  await expect(page.getByRole('button', { name: 'Ativar edição', exact: true })).toBeDisabled();
   await expect(
     page.getByRole('button', { name: 'Editar QA receita concorrente', exact: true }),
   ).toBeDisabled();
