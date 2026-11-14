@@ -24,7 +24,10 @@ describe('backup PostgreSQL criptografado e atômico', () => {
     const folder = await mkdtemp(join(tmpdir(), 'saldolab-backup-'));
     try {
       const target = join(folder, 'test.saldolab.enc');
-      const data = Buffer.concat([Buffer.from('PGDMP-secret-financial-data'), Buffer.alloc(160000, 7)]);
+      const data = Buffer.concat([
+        Buffer.from('PGDMP-secret-financial-data'),
+        Buffer.alloc(160000, 7),
+      ]);
       await encryptBackup(Readable.from([data]), target, passphrase);
       const encrypted = await readFile(target);
       expect(encrypted.includes(Buffer.from('secret-financial-data'))).toBe(false);
