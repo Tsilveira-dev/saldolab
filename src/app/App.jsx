@@ -1,15 +1,15 @@
-import { Component } from 'react';
+import { Component, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import FinanceProvider from '../context/FinanceProvider';
 import Layout from './Layout';
 import Dashboard from '../pages/Dashboard';
-import Transactions from '../pages/Transactions';
-import Accounts from '../pages/Accounts';
-import Categories from '../pages/Categories';
-import Budgets from '../pages/Budgets';
-import Reports from '../pages/Reports';
-import Settings from '../pages/Settings';
-import CloudAccess from '../pages/CloudAccess';
+const Transactions = lazy(() => import('../pages/Transactions'));
+const Accounts = lazy(() => import('../pages/Accounts'));
+const Categories = lazy(() => import('../pages/Categories'));
+const Budgets = lazy(() => import('../pages/Budgets'));
+const Reports = lazy(() => import('../pages/Reports'));
+const Settings = lazy(() => import('../pages/Settings'));
+const CloudAccess = lazy(() => import('../pages/CloudAccess'));
 
 class ErrorBoundary extends Component {
   state = { error: false };
