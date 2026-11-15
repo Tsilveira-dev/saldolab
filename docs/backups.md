@@ -61,25 +61,24 @@ A etapa `verify` somente autentica o arquivo criptografado e pede ao PostgreSQL 
 
 **Antes de considerar a produção protegida:** autorizar e configurar uma cópia criptografada em armazenamento externo independente, com agendamento, retenção, testes de restauração em um banco isolado, proteção de acesso e monitoramento. Não executar restauração do banco completo em `main`, nem considerar os seis horários de recuperação do Neon como cópia independente.
 
-## Destino Google Drive — pasta privada criada
+## Destino Google Drive — conta validada com teste de leitura e gravação
 
-A pasta **SaldoLab — backups criptografados** foi criada no Google Drive do titular em 14/11/2026 e conferida como vazia. O ID da pasta é `1waXRcUZg4hl5ESv1vWI_mrSMTm3gozuT`. A criação da pasta **não** realiza backup automaticamente nem concede ao código as credenciais necessárias para gravar arquivos.
+**A conta Google efetivamente autorizada no rclone usa a pasta `SaldoLab-Backups` na raiz do Drive pessoal.** Em 15/11/2026, o titular executou `rclone copyto` para enviar `teste-conexao.txt`, confirmou o arquivo na interface do Drive da mesma conta e recuperou o conteúdo correto com `rclone cat`. Esses testes comprovam conectividade e leitura/escrita de **arquivo fictício**, não backup de PostgreSQL nem restauração.
 
-O comando `npm run backup:drive` foi preparado para executar, na máquina administradora, o backup PostgreSQL já criptografado, enviar o arquivo para **essa pasta** usando `rclone` e comparar o MD5 local com o MD5 informado pelo Drive. Nenhum arquivo de banco real foi enviado durante o desenvolvimento.
+A pasta original **`SaldoLab — backups criptografados`** foi criada em uma **outra conta Google**, portanto seu ID `1waXRcUZg4hl5ESv1vWI_mrSMTm3gozuT` resultou em 404 ao tentar enviar por essa conexão. **NÃO reutilizar esse ID**. O script de upload usa agora `saldolab-drive:SaldoLab-Backups/<nome do backup>` e valida a presença da pasta no Drive autenticado antes de gravar. Sem backup válido, não criar pastas alternativas automaticamente.
 
-### Configuração necessária na máquina administradora
+### Configuração necessária no computador ou servidor administrativo
 
-1. Instalar PostgreSQL Client Utilities compatíveis com o servidor (incluindo `pg_dump` e `pg_restore`), Node.js e `rclone`.
-2. Configurar `rclone config` com um remote chamado `saldolab-drive` do tipo **Google Drive** e concluir a autorização OAuth na conta proprietária da pasta. O conector Google Drive do ChatGPT **não é** a autorização do `rclone`. Não inserir OAuth client secrets, tokens de acesso ou arquivos `rclone.conf` no Git.
-3. Confirmar que o remote enxerga a pasta de destino e que o backup pode ser gravado nela. A pasta **não deve ser compartilhada publicamente**.
-4. No computador/servidor de backup, definir em armazenamento seguro estas variáveis: `SALDOLAB_BACKUP_DATABASE_URL` (conexão PostgreSQL **direta**), `SALDOLAB_BACKUP_PASSPHRASE` (senha de cifragem mantida fora do Drive), `SALDOLAB_BACKUP_LOCAL_DIR` (diretório privado **fora** do repositório) e, opcionalmente, `SALDOLAB_DRIVE_REMOTE=saldolab-drive`. Não imprimir nem registrar valores.
-5. Executar manualmente `npm run backup:drive` no computador autorizado. O script gera um nome único, usa `npm run backup:postgres` internamente, faz o envio e falha se a confirmação remota não coincidir com o arquivo local.
+1. Instalar Node.js, PostgreSQL Client Utilities compatíveis com servidor (`pg_dump`, `pg_restore`) e `rclone`. No Windows, o rclone pode ser instalado em diretório privado fora do repositório. Se não estiver no PATH, definir `SALDOLAB_RCLONE_BIN` como caminho absoluto de `rclone.exe`.
+2. Configurar o remote `saldolab-drive` via OAuth no `rclone config`, usando **somente a conta destinatária validada**. Evitar capturas do resumo da configuração: ele mostra `client_secret`, `access_token` e `refresh_token`.
+3. **Segurança pendente:** credenciais e tokens foram expostos em capturas no teste inicial. Revogar os tokens OAuth expostos na conta Google, remover cada segredo exposto do cliente OAuth, criar segredo novo e atualizar a autorização do rclone; comprovar novo acesso sem imprimir credenciais. Não enviar dados financeiros reais antes da rotação completa.
+4. Configurar via armazenamento seguro `SALDOLAB_BACKUP_DATABASE_URL` (conexão direta e somente-leitura apropriada), `SALDOLAB_BACKUP_PASSPHRASE` (senha de cifragem longa, separada do Drive), `SALDOLAB_BACKUP_LOCAL_DIR` (diretório privado fora do repositório), e opcionalmente `SALDOLAB_DRIVE_REMOTE` e `SALDOLAB_RCLONE_BIN`. Nunca inserir valores reais em logs/chat/repositório.
+5. No computador autorizado, executar `npm run backup:drive` após preparar os pré-requisitos e testar o backup local. O script faz dump criptografado, verifica o formato, envia para pasta existente e compara checksum do arquivo criptografado local e remoto.
 
-**Depois da execução:** conferir um novo arquivo `.saldolab.enc` no Drive e guardar um comprovante de sucesso, sem revelar registros. Se o upload ou a confirmação falhar, o arquivo criptografado local é preservado para investigação; não tratar falha como sucesso nem apagar o arquivo automaticamente.
+### Bloqueios antes de produção
 
-### Limitações e liberação operacional
-
-- A rotina ainda **não é agendada**. Para execução diária, configurar um computador ou servidor que permaneça disponível, com agendador de tarefas, monitoramento e alerta de falhas. O aplicativo hospedado na Vercel não executa backups do PostgreSQL sozinho.
-- A cópia permanece legível somente com a senha de criptografia. Guardar essa senha em local protegido e **separado** dos backups. Perder a senha inviabiliza recuperar os dados.
-- A comparação MD5 detecta problemas de transporte, **não substitui** a verificação criptográfica AES-GCM, nem um **ensaio real de restauração** de um arquivo baixado do Drive em banco isolado.
-- Ainda é necessário definir frequência, retenção (proposta de 30 dias), política de descarte, alertas e processo de recuperação. **Não aprovar Production** até que um backup externo tenha sido criado, baixado, autenticado e restaurado em ambiente isolado.
+- Ferramenta ainda **não agendada**; não há alertas de falha nem retenção automatizada. Definir equipamento/servidor sempre disponível, responsável, frequência, retenção e alerta.
+- O teste de texto simples prova acesso, não prova que a criptografia AES-GCM de arquivo de banco, o upload em tamanho real e a restauração funcionem. Baixar uma cópia criptografada do Drive e **ensaiar restauração em PostgreSQL isolado** sem tocar em `main`.
+- Verificar no Google Cloud a situação do OAuth **Testing**: tokens de atualização podem expirar em sete dias, interrompendo backup automatizado; a conta autorizada precisa de política de refresh operacional antes da produção.
+- Armazenar segredos e `rclone.conf` em local protegido, definir controles de acesso e não publicar/compartilhar os arquivos. O escopo atual `drive` tem acesso amplo à conta; considerar conta exclusiva e princípio do menor privilégio.
+- **Nenhum backup financeiro real foi enviado, nenhum job automático está ativo e nenhuma migração ou deploy Production foi feito.**
