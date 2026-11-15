@@ -8,7 +8,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export const DRIVE_BACKUP_FOLDER = 'SaldoLab-Backups';
 
 export function driveBackupPath(remote, filename) {
-  if (!/^[a-z0-9_-]{1,60}$/i.test(remote) || !/^saldolab-[0-9TZ]+-[a-f0-9]{12}\.saldolab\.enc$/.test(filename))
+  if (
+    !/^[a-z0-9_-]{1,60}$/i.test(remote) ||
+    !/^saldolab-[0-9TZ]+-[a-f0-9]{12}\.saldolab\.enc$/.test(filename)
+  )
     throw new Error('DRIVE_BACKUP_DESTINATION_INVALID');
   return `${remote}:${DRIVE_BACKUP_FOLDER}/${filename}`;
 }
