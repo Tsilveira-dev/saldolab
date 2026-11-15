@@ -1,0 +1,47 @@
+name: SaldoLab - preparar backup cloud
+
+# Apenas validações sem acessar Neon ou Google Drive.
+# NÃO ativa backups, NÃO agenda jobs e NÃO imprime credenciais.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/backup-cloud.yml'
+      - 'scripts/backup-*.js'
+      - 'src/tests/backupCrypto.test.js'
+      - 'src/tests/backupDrive.test.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Validar ferramentas de backup sem dados reais
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Dependências
+        run: npm ci
+      - name: Lint e formatação
+        run: |
+          npm run lint
+          npm run format:check
+      - name: Testes de criptografia e destino Drive
+        run: npx vitest run src/tests/backupCrypto.test.js src/tests/backupDrive.test.js
+      - name: Verificar integridade do script e ausência de backup real
+        run: |
+          node --check scripts/backup-crypto.js
+          node --check scripts/backup-postgres.js
+          node --check scripts/backup-drive.js
+          echo 'BACKUP_PREFLIGHT_OK; NO_DATABASE_OR_DRIVE_ACCESSED'
