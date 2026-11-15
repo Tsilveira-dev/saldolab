@@ -5,7 +5,13 @@ import { stat } from 'node:fs/promises';
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const DRIVE_BACKUP_FOLDER_ID = '1waXRcUZg4hl5ESv1vWI_mrSMTm3gozuT';
+export const DRIVE_BACKUP_FOLDER = 'SaldoLab-Backups';
+
+export function driveBackupPath(remote, filename) {
+  if (!/^[a-z0-9_-]{1,60}$/i.test(remote) || !/^saldolab-[0-9TZ]+-[a-f0-9]{12}\.saldolab\.enc$/.test(filename))
+    throw new Error('DRIVE_BACKUP_DESTINATION_INVALID');
+  return `${remote}:${DRIVE_BACKUP_FOLDER}/${filename}`;
+}
 
 export function backupFilename(date = new Date(), suffix = randomBytes(6).toString('hex')) {
   if (Number.isNaN(date.getTime()) || !/^[a-f0-9]{12}$/.test(suffix))
@@ -72,16 +78,21 @@ async function main() {
   if (!info.isDirectory()) throw new Error('DRIVE_BACKUP_LOCAL_DIR_REQUIRED');
   const filename = backupFilename();
   const local = join(dir, filename);
-  const destination = `${remote}:${filename}`;
-  const folderOption = ['--drive-root-folder-id', DRIVE_BACKUP_FOLDER_ID];
+  const destination = driveBackupPath(remote, filename);
+  const rclone = process.env.SALDOLAB_RCLONE_BIN || 'rclone';
+  // A remote must already contain the designated backup folder. Never create a
+  // similarly named folder implicitly after a typo or account change.
+  const folders = await run(rclone, ['lsf', `${remote}:`, '--dirs-only'], { capture: true });
+  if (!folders.split(/\r?\n/).includes(`${DRIVE_BACKUP_FOLDER}/`))
+    throw new Error('DRIVE_BACKUP_FOLDER_NOT_FOUND');
 
   await run(process.execPath, [
     fileURLToPath(new URL('./backup-postgres.js', import.meta.url)),
     'create',
     local,
   ]);
-  await run('rclone', ['copyto', local, destination, '--immutable', '--checksum', ...folderOption]);
-  const checksumText = await run('rclone', ['md5sum', destination, ...folderOption], {
+  await run(rclone, ['copyto', local, destination, '--immutable', '--checksum']);
+  const checksumText = await run(rclone, ['md5sum', destination], {
     capture: true,
   });
   if ((await md5(local)) !== remoteChecksum(checksumText, basename(local)))
