@@ -82,3 +82,18 @@ A pasta original **`SaldoLab — backups criptografados`** foi criada em uma **o
 - Verificar no Google Cloud a situação do OAuth **Testing**: tokens de atualização podem expirar em sete dias, interrompendo backup automatizado; a conta autorizada precisa de política de refresh operacional antes da produção.
 - Armazenar segredos e `rclone.conf` em local protegido, definir controles de acesso e não publicar/compartilhar os arquivos. O escopo atual `drive` tem acesso amplo à conta; considerar conta exclusiva e princípio do menor privilégio.
 - **Nenhum backup financeiro real foi enviado, nenhum job automático está ativo e nenhuma migração ou deploy Production foi feito.**
+
+## Preparação cloud sem instalar PostgreSQL no Windows (GitHub Actions)
+
+O fluxo `.github/workflows/backup-cloud.yml` é um **preflight manual e de pull request**, isolado de produção. Roda em Linux temporário do GitHub: Node 24, lint/Prettier, testes do backup e validação sintática dos scripts. Não utiliza `DATABASE_URL`, não conecta Neon, não conecta Drive, não cria backup e não agenda tarefas. Como está em branch de PR, o acionamento manual pela interface Actions pode não aparecer antes de existir na branch padrão; o gatilho PR permite testes preliminares.
+
+### Etapas necessárias antes de habilitar backup real
+
+1. **Rotacionar todas as credenciais OAuth expostas** (Client Secret e tokens) e comprovar acesso com a conta proprietária de `SaldoLab-Backups`. Não usar `rclone.conf` antigo ou capturas de configuração que exponham tokens em GitHub.
+2. Retirar OAuth do modo Testing **de maneira apropriada e permitida**, ou escolher autenticação estável aprovada; em Testing, tokens de refresh de aplicativos externos com acesso ao Drive podem expirar em 7 dias, incompatível com backups diários confiáveis.
+3. Criar environment GitHub protegido para backup e aprovações; configurar a URL PostgreSQL direta com role restrita e senha de criptografia longa em secrets privados **apenas após** autorização. A conta Google correta deve ser autenticada em um remote seguro do runner; nunca gravar tokens no YAML, logs ou artefatos.
+4. Antes do primeiro dump: Neon main ainda não tem schema financeiro em produção. Preparar ambiente de QA separado para exercício de backup e restauração. Não apontar para Production como teste.
+5. O futuro workflow real deverá ter autorização manual, revisão de seleção de ambiente, preflight de conexão/role, `pg_dump` e `pg_restore` compatíveis com o servidor, upload cifrado, verificação de checksum e download com restauração em ambiente isolado. Somente depois adicionar agenda, alertas, retenção e responsável.
+6. Os runners GitHub têm armazenamento temporário e limites de tempo/cota. Backups grandes e operação diária requerem monitoramento de falhas, retenção no Drive e local seguro para a chave de cifragem; GitHub Actions não substitui estratégia de recuperação.
+
+**Status:** só fluxo de validação de código preparado; não há backup real, schedule, upload nem secrets novos configurados.
