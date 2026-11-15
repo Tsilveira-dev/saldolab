@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { backupFilename, backupSettings, driveBackupPath, remoteChecksum } from '../../scripts/backup-drive.js';
+import {
+  backupFilename,
+  backupSettings,
+  driveBackupPath,
+  remoteChecksum,
+} from '../../scripts/backup-drive.js';
 
 describe('preparação do backup remoto Google Drive', () => {
   it('direciona todos os backups à pasta da conta autenticada, nunca ao ID antigo', () => {
@@ -10,6 +15,7 @@ describe('preparação do backup remoto Google Drive', () => {
     expect(() => driveBackupPath('saldolab-drive:other', file)).toThrow();
     expect(() => driveBackupPath('saldolab-drive', 'other.txt')).toThrow();
   });
+
   it('cria nomes únicos e ordenáveis sem informações financeiras', () => {
     const name = backupFilename(new Date('2026-11-14T12:34:56Z'), 'aabbccddeeff');
     expect(name).toBe('saldolab-20261114T123456Z-aabbccddeeff.saldolab.enc');
