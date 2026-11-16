@@ -65,14 +65,23 @@ async function main() {
     );
     const dump = spawn(
       'docker',
-      ['exec', CONTAINER, 'pg_dump', '-U', 'postgres', '-Fc', '--no-owner', '--no-acl', '-d', SOURCE],
+      [
+        'exec',
+        CONTAINER,
+        'pg_dump',
+        '-U',
+        'postgres',
+        '-Fc',
+        '--no-owner',
+        '--no-acl',
+        '-d',
+        SOURCE,
+      ],
       { stdio: ['ignore', 'pipe', 'pipe'] },
     );
     const completed = new Promise((resolve, reject) => {
       dump.on('error', reject);
-      dump.on('close', (code) =>
-        code === 0 ? resolve() : reject(new Error('QA_DUMP_FAILED')),
-      );
+      dump.on('close', (code) => (code === 0 ? resolve() : reject(new Error('QA_DUMP_FAILED'))));
     });
     completed.catch(() => {});
     await Promise.all([encryptBackup(dump.stdout, encrypted, SECRET), completed]);
@@ -103,14 +112,11 @@ async function main() {
     });
     restored.catch(() => {});
     await Promise.all([decryptBackup(encrypted, restore.stdin, SECRET), restored]);
-    const source = (
-      await db(SOURCE, 'SELECT count(*), sum(cents) FROM financial_fixture')
-    ).trim();
+    const source = (await db(SOURCE, 'SELECT count(*), sum(cents) FROM financial_fixture')).trim();
     const target = (
       await db(RESTORED, 'SELECT count(*), sum(cents) FROM financial_fixture')
     ).trim();
-    if (source !== '2|200000' || target !== source)
-      throw new Error('QA_RESTORE_MISMATCH');
+    if (source !== '2|200000' || target !== source) throw new Error('QA_RESTORE_MISMATCH');
     console.log('QA_POSTGRES_17_ENCRYPT_DECRYPT_RESTORE_OK');
   } finally {
     await rm(folder, { force: true, recursive: true });
