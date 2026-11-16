@@ -33,6 +33,8 @@ jobs:
           cache: npm
       - name: Dependências
         run: npm ci
+      - name: Pré-visualizar formato do ensaio QA
+        run: npx prettier scripts/backup-rehearsal.js
       - name: Lint e formatação
         run: |
           npm run lint
