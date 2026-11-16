@@ -97,3 +97,9 @@ O fluxo `.github/workflows/backup-cloud.yml` é um **preflight manual e de pull 
 6. Os runners GitHub têm armazenamento temporário e limites de tempo/cota. Backups grandes e operação diária requerem monitoramento de falhas, retenção no Drive e local seguro para a chave de cifragem; GitHub Actions não substitui estratégia de recuperação.
 
 **Status:** só fluxo de validação de código preparado; não há backup real, schedule, upload nem secrets novos configurados.
+
+### Evidência do ensaio PostgreSQL 17 local ao runner (16/11/2026)
+
+O novo `scripts/backup-rehearsal.js` e o workflow `backup-cloud.yml` criaram um contêiner PostgreSQL **17** efêmero no GitHub Actions; criaram duas bases fictícias separadas, gravaram dois registros artificiais, executaram `pg_dump -Fc`, cifraram o fluxo com a rotina AES-256-GCM do SaldoLab, decifraram o arquivo para `pg_restore` em outro banco e compararam contagem e soma de centavos (2 registros, 200000 centavos). A execução do preflight de confirmação foi concluída com sucesso: https://github.com/Tsilveira-dev/saldolab/actions/runs/43789382658
+
+Limites: **não houve conexão ao banco Neon, upload ao Drive, restauração de um download nem validação de credenciais de Production**. O ensaio não comprova continuidade do OAuth, retenção, monitoramento ou recuperação de dados reais. Não se deve afirmar que o backup automático já funciona.
