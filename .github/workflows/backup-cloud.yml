@@ -39,9 +39,23 @@ jobs:
           npm run format:check
       - name: Testes de criptografia e destino Drive
         run: npx vitest run src/tests/backupCrypto.test.js src/tests/backupDrive.test.js
+      - name: Subir PostgreSQL 17 totalmente isolado para ensaio
+        run: |
+          docker run -d --name saldolab-backup-rehearsal -e POSTGRES_PASSWORD=qa-fixture-only --tmpfs /var/lib/postgresql/data:rw,size=256m postgres:17
+          for i in $(seq 1 40); do
+            if docker exec saldolab-backup-rehearsal pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Ensaiar criptografia e restauração PostgreSQL 17 sem rede externa
+        run: node scripts/backup-rehearsal.js
+      - name: Remover banco de ensaio efêmero
+        if: always()
+        run: docker rm -f saldolab-backup-rehearsal >/dev/null 2>&1 || true
       - name: Verificar integridade do script e ausência de backup real
         run: |
           node --check scripts/backup-crypto.js
           node --check scripts/backup-postgres.js
           node --check scripts/backup-drive.js
+          node --check scripts/backup-rehearsal.js
           echo 'BACKUP_PREFLIGHT_OK; NO_DATABASE_OR_DRIVE_ACCESSED'
