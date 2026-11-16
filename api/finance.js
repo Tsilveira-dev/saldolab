@@ -59,6 +59,11 @@ async function handle(request) {
         await requireActiveSession(client, identity);
         return work(client);
       }, options);
+    const withUserWriteDatabase = (work) =>
+      withUserDatabase(async (client) => {
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [userId]);
+        return work(client);
+      });
     const params = getParams(request);
     const operation = params.get('operation');
     if (operation === 'import') {
@@ -99,7 +104,7 @@ async function handle(request) {
       if (recordId !== null) throw new ApiError(422, 'Não especifique ID no cadastro.');
       const body = await parseBody(request);
       return jsonResponse(
-        await withUserDatabase((client) => createRecord(client, entity, userId, body)),
+        await withUserWriteDatabase((client) => createRecord(client, entity, userId, body)),
         201,
       );
     }
@@ -107,13 +112,13 @@ async function handle(request) {
     if (request.method === 'PATCH') {
       const body = await parseBody(request);
       return jsonResponse(
-        await withUserDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
+        await withUserWriteDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
       );
     }
     // The delete body carries a required revision: callers cannot delete a stale row.
     const body = await parseBody(request);
     return jsonResponse(
-      await withUserDatabase((client) =>
+      await withUserWriteDatabase((client) =>
         removeRecord(client, entity, userId, recordId, body.expectedRevision),
       ),
     );
