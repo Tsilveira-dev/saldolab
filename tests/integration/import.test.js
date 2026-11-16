@@ -162,3 +162,34 @@ it('exige autenticação e sessão ativa antes de importar', async () => {
   });
   expect(expiredSession.status).toBe(401);
 });
+
+it('reverte todas as entidades quando uma gravação falha no meio da transação', async () => {
+  const rollbackUser = randomUUID();
+  await api.pool.query('INSERT INTO neon_auth."user"(id) VALUES($1)', [rollbackUser]);
+  const rollbackCredentials = await api.signToken(rollbackUser);
+  await api.pool.query(`
+    CREATE OR REPLACE FUNCTION public.saldolab_test_fail_budget_insert()
+    RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      RAISE EXCEPTION 'forced integration rollback';
+    END;
+    $$;
+    CREATE TRIGGER saldolab_test_fail_budget_insert
+    BEFORE INSERT ON public.budgets
+    FOR EACH ROW EXECUTE FUNCTION public.saldolab_test_fail_budget_insert();
+  `);
+  try {
+    const response = await importRequest({ backup }, rollbackCredentials);
+    expect(response.status).toBe(500);
+    const after = await snapshot(api.pool, rollbackUser);
+    expect(after).toMatchObject({
+      accounts: [],
+      categories: [],
+      transactions: [],
+      budgets: [],
+    });
+  } finally {
+    await api.pool.query('DROP TRIGGER IF EXISTS saldolab_test_fail_budget_insert ON public.budgets');
+    await api.pool.query('DROP FUNCTION IF EXISTS public.saldolab_test_fail_budget_insert()');
+  }
+});
