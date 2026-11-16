@@ -1,5 +1,19 @@
 import { test, expect } from '@playwright/test';
 import { activateEditing } from './helpers';
+import { createDemoData } from '../src/services/demo';
+
+test.beforeEach(async ({ page }) => {
+  const fixture = createDemoData();
+  await page.addInitScript((seed) => {
+    if (!localStorage.getItem('saldolab:v1:personal'))
+      localStorage.setItem('saldolab:v1:personal', JSON.stringify(seed));
+    if (!localStorage.getItem('saldolab:preferences:v1'))
+      localStorage.setItem(
+        'saldolab:preferences:v1',
+        JSON.stringify({ mode: 'personal', theme: 'light' }),
+      );
+  }, fixture);
+});
 
 async function navigate(page, name) {
   const opener = page.getByRole('button', { name: 'Abrir menu' });
@@ -30,6 +44,33 @@ test('cria, edita, persiste e exclui uma transação', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Excluir registro' }).click();
   await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
 });
+test('campo monetário zerado fica vazio ao focar e preserva o novo saldo', async ({ page }) => {
+  await page.goto('/contas');
+  await activateEditing(page);
+  await page.getByRole('button', { name: 'Adicionar conta', exact: true }).click();
+  let dialog = page.getByRole('dialog');
+  await dialog.locator('[name=name]').fill('QA conta zerada');
+  await dialog.locator('[name=initialBalance]').fill('0,00');
+  await dialog.getByRole('button', { name: 'Adicionar registro' }).click();
+  await expect(dialog).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Editar QA conta zerada', exact: true }).click();
+  dialog = page.getByRole('dialog');
+  const amount = dialog.locator('[name=initialBalance]');
+  await expect(amount).toHaveValue('0,00');
+  await amount.focus();
+  await expect(amount).toBeEmpty();
+  await amount.fill('125,50');
+  await dialog.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(dialog).toHaveCount(0);
+
+  const balance = await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('saldolab:v1:personal'));
+    return data.accounts.find((account) => account.name === 'QA conta zerada').initialBalanceCents;
+  });
+  expect(balance).toBe(12550);
+});
+
 test('navega por todas as páginas, mantém rotas diretas e evita overflow do documento', async ({
   page,
 }) => {
@@ -51,19 +92,17 @@ test('navega por todas as páginas, mantém rotas diretas e evita overflow do do
     ).toBe(true);
   }
 });
-test('isola o modo pessoal e permite voltar à demonstração', async ({ page }) => {
-  await page.goto('/configuracoes');
-  await page.getByRole('radio', { name: /Neste aparelho/ }).check();
+test('preserva dados pessoais ao recarregar, sem demonstração', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Nenhuma transação encontrada')).toBeVisible();
+  await expect(page.getByText('Cinema com amigos', { exact: true }).first()).toBeVisible();
+  await page.goto('/configuracoes');
+  await expect(page.getByRole('radio', { name: /Exemplo para explorar/ })).toHaveCount(0);
   await page.reload();
   expect(
     await page.evaluate(() => JSON.parse(localStorage.getItem('saldolab:preferences:v1')).mode),
   ).toBe('personal');
-  await page.goto('/configuracoes');
-  await page.getByRole('radio', { name: /Exemplo para explorar/ }).check();
   await page.goto('/');
-  await expect(page.getByText('Cinema com amigos', { exact: true })).toBeVisible();
+  await expect(page.getByText('Cinema com amigos', { exact: true }).first()).toBeVisible();
 });
 test('protege conta em uso e exporta backup JSON', async ({ page }) => {
   await page.goto('/contas');
@@ -76,7 +115,7 @@ test('protege conta em uso e exporta backup JSON', async ({ page }) => {
   await navigate(page, 'Configurações');
   const downloaded = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar backup JSON' }).click();
-  expect((await downloaded).suggestedFilename()).toBe('saldolab-demo-backup.json');
+  expect((await downloaded).suggestedFilename()).toBe('saldolab-personal-backup.json');
 });
 test('cria orçamento, alerta duplicidade e alterna aparência', async ({ page }) => {
   await page.goto('/orcamentos');

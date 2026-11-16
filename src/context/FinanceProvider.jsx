@@ -65,7 +65,7 @@ export default function FinanceProvider({ children }) {
     if (mode === 'cloud' && session.isPending) return;
     try {
       if (mode === 'cloud' && !cloudUserId)
-        throw new CloudSessionError('Sua sessão expirou. Entre novamente em Minha nuvem.');
+        throw new CloudSessionError('Sua sessão expirou. Entre novamente em Minha conta.');
       const next = await repository.snapshot();
       if (request === generation.current && requestMode === activeMode.current) {
         setData(next);
@@ -93,21 +93,21 @@ export default function FinanceProvider({ children }) {
     const unsubscribe = repository.subscribeEditing((access) => {
       if (mode === activeMode.current) setEditingAccess(access);
     });
-    if (!startup.current) {
-      const request = takeEditingRequest();
-      startup.current = {
-        request,
-        ready: request?.mode === mode ? repository.startEditing() : Promise.resolve(false),
-      };
-    }
+    // Acquire the local write lease before the first read, without a manual button.
+    // A second tab stays read-only until its own reload.
+    const request = startup.current ? null : takeEditingRequest();
+    const entry = {
+      request,
+      ready: mode === 'cloud' ? Promise.resolve(false) : repository.startEditing(),
+    };
+    startup.current = entry;
     let mounted = true;
-    startup.current.ready.then(() => {
+    entry.ready.then(() => {
       if (!mounted) return;
-      const request = startup.current.request;
-      if (request?.mode === mode) {
-        if (/^\d{4}-\d{2}$/.test(request.month)) setMonth(request.month);
-        if (typeof request.accountId === 'string') setAccountId(request.accountId);
-        startup.current.request = null;
+      if (entry.request?.mode === mode) {
+        if (/^\d{4}-\d{2}$/.test(entry.request.month)) setMonth(entry.request.month);
+        if (typeof entry.request.accountId === 'string') setAccountId(entry.request.accountId);
+        entry.request = null;
       }
       reload();
     });
@@ -166,10 +166,10 @@ export default function FinanceProvider({ children }) {
   };
   const mutate = async (operation, message = 'Alterações salvas.') => {
     if (mode === 'cloud' && (!cloudUserId || session.isPending || error))
-      throw new CloudSessionError('Reabra seus dados em Minha nuvem antes de salvar.');
+      throw new CloudSessionError('Reabra seus dados em Minha conta antes de salvar.');
     if (!repository.getEditingAccess().canWrite) {
       throw new StorageError(
-        'Esta aba está em modo somente leitura. Ative a edição para salvar alterações.',
+        'Esta aba não pode salvar alterações. Feche a outra aba que estiver editando e recarregue a página.',
       );
     }
     const request = generation.current;
@@ -195,6 +195,13 @@ export default function FinanceProvider({ children }) {
     return result;
   };
   const switchMode = (value) => {
+    // Changing from cloud to browser storage needs a fresh document so the
+    // local Web Lock is acquired before any local data is read.
+    if (value === 'personal' && mode !== 'personal') {
+      savePreferences({ mode: 'personal', theme });
+      window.location.reload();
+      return;
+    }
     // Also invalidate in-flight reads when re-entering the same mode during
     // sign-out/sign-in; an old response must not repopulate the cleared view.
     generation.current++;

@@ -22,7 +22,7 @@ if (baseURL) {
   } catch {
     // Never print the configured value: it might contain credentials by mistake.
     configurationError =
-      'Não foi possível iniciar o Neon Auth. Confira se VITE_NEON_AUTH_URL é a Base URL HTTPS do ambiente correto e termina em /auth.';
+      'Não foi possível conectar sua conta agora. Tente novamente mais tarde ou continue usando os dados deste aparelho.';
   }
 }
 
@@ -39,15 +39,34 @@ export class CloudSessionError extends Error {
 
 export async function getAuthSession({ expectedUserId } = {}) {
   if (!authClient) throw new CloudSessionError('A conexão com a nuvem não está configurada.', 503);
-  const result = await authClient.getSession();
-  if (result.error || !result.data?.session?.token || !result.data.session.id)
+  return getAuthSessionFromClient(authClient, { expectedUserId });
+}
+
+// The Better Auth session token is NOT the signed JWT expected by /api/finance.
+// Get a short-lived JWT from the managed Auth SDK and keep the separate opaque
+// session ID for server-side revocation checks.
+export async function getAuthSessionFromClient(client, { expectedUserId } = {}) {
+  const result = await client.getSession();
+  if (result.error || !result.data?.session?.id || !result.data?.user?.id)
     throw new CloudSessionError(
       'Sua sessão expirou. Entre novamente para acessar a nuvem.',
       result.error?.status >= 500 ? 503 : 401,
     );
-  if (expectedUserId !== undefined && result.data.user?.id !== expectedUserId)
+  if (expectedUserId !== undefined && result.data.user.id !== expectedUserId)
     throw new CloudSessionError('A conta conectada mudou. Reabra seus dados na nuvem.');
-  return { token: result.data.session.token, sessionId: result.data.session.id };
+
+  let jwt;
+  try {
+    jwt = await client.token();
+  } catch {
+    throw new CloudSessionError('Não foi possível verificar sua sessão. Tente novamente.', 503);
+  }
+  if (jwt?.error || typeof jwt?.data?.token !== 'string' || !jwt.data.token)
+    throw new CloudSessionError(
+      'Não foi possível validar sua sessão. Entre novamente.',
+      jwt?.error?.status >= 500 ? 503 : 401,
+    );
+  return { token: jwt.data.token, sessionId: result.data.session.id };
 }
 
 export async function getAuthToken(options) {

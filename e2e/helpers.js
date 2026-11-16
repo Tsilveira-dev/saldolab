@@ -19,10 +19,8 @@ export async function setFinancialTime(page, date) {
 }
 
 export async function activateEditing(page) {
-  const notice = page.getByRole('region', { name: 'Permissão de edição' });
-  await expect(notice).toBeVisible();
-  if (await notice.getByRole('button', { name: 'Encerrar edição', exact: true }).isVisible())
-    return;
-  await notice.getByRole('button', { name: 'Ativar edição', exact: true }).click();
-  await expect(notice.getByText('Edição ativa nesta aba', { exact: true })).toBeVisible();
+  // The app now acquires the local editing lease on startup.
+  // On locked/unsupported browsers the add action stays disabled.
+  const addButton = page.locator('.mobile-fab');
+  await expect(addButton).toBeEnabled();
 }

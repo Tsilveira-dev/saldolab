@@ -57,19 +57,16 @@ React 19, Vite 7, JavaScript ES6+, Bootstrap 5 customizado, Lucide, React Router
 
 ## Fluxo de uso
 
-1. Explore a demonstração e seus gráficos.
-2. Selecione **Modo pessoal** no cabeçalho ou em Configurações.
-3. Clique em **Ativar edição**; a página recarrega com os dados atuais.
-4. Cadastre contas e categorias, ou use o cadastro rápido oferecido na primeira transação.
-5. Registre transações e defina orçamentos para o mês selecionado.
-6. Consulte Relatórios e exporte CSV ou backup JSON.
-7. No modo local, use **Encerrar edição** para liberar outra aba. Na nuvem, edições simultâneas são verificadas pelo servidor.
+1. Abra o SaldoLab: o espaço pessoal inicia vazio, sem registros fictícios.
+2. Cadastre contas e categorias, ou use o cadastro rápido disponível ao criar uma transação.
+3. Registre receitas, despesas e transferências e acompanhe seu saldo.
+4. Defina orçamentos, confira os relatórios e exporte CSV ou backup JSON.
 
-Para a nuvem, abra **Minha nuvem**, confirme seu e-mail quando solicitado e entre. Login/cadastro selecionam o espaço da nuvem; sair mantém esse espaço sem sessão, sem voltar automaticamente para os dados locais. Se você já está autenticado e escolheu outro modo, use **Abrir finanças na nuvem**. **Esqueci minha senha** envia um link; **Verificar meu e-mail** permite solicitar outro código. Use somente o ambiente informado pelo responsável: identidades e senhas de QA, development e Production são independentes. Veja [recuperação e sessões](docs/recuperacao.md).
+No espaço pessoal deste navegador, a aplicação tenta reservar automaticamente a edição ao abrir. Se outra aba já estiver editando, esta aba permanece em consulta para evitar sobrescrever dados. Feche a aba que está editando e recarregue a outra para continuar. Em navegadores sem suporte a Web Locks, consultar e exportar backups continuam disponíveis, mas salvar alterações é bloqueado por segurança. Use HTTPS ou localhost com navegador atualizado.
 
-O modo pessoal local pertence ao navegador/origem, independentemente do e-mail. Trocar de login não apaga nem transfere esses dados. Uma nova identidade na nuvem começa com seus próprios registros vazios; entrar novamente na identidade anterior recupera somente os registros dela.
+Em **Minha conta**, é possível criar conta, confirmar e-mail, fazer login e recuperar senha quando a conexão com a nuvem estiver disponível. O login usa um espaço independente por usuário; os registros locais deste navegador não são transferidos automaticamente. Sair mantém o espaço da nuvem sem sessão e não expõe dados locais ao próximo usuário. Identidades de QA, desenvolvimento e produção são independentes. Consulte [recuperação e sessões](docs/recuperacao.md).
 
-Nos modos locais, as páginas abrem em **Somente leitura**. Consultar não bloqueia outras abas; **Ativar edição** reserva uma editora por modo. A nuvem exige sessão válida, oculta dados de identidades anteriores e recusa gravações indisponíveis. Use navegador atualizado em HTTPS ou localhost.
+As preferências antigas de demonstração são direcionadas à interface pessoal, sem excluir os registros fictícios já guardados no navegador. A área de demonstração não aparece na navegação normal. Os modos técnicos continuam documentados para manutenção, mas não devem ser expostos desnecessariamente ao usuário.
 
 O CRUD valida a operação inteira antes de gravar. Exclusões exigem confirmação. Contas com movimentações e categorias vinculadas a transações ou orçamentos são protegidas. Alterações incompatíveis no tipo de uma categoria também são recusadas.
 
