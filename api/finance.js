@@ -29,15 +29,15 @@ async function parseBody(request) {
 
 
 async function parseImportBody(request) {
-  const maxBytes = 2_000_000;
+  const maxBytes = 4_000_000;
   const length = Number(request.headers.get('content-length'));
   if (Number.isFinite(length) && length > maxBytes)
-    throw new ApiError(413, 'O backup ultrapassa o limite de 2 MB.');
+    throw new ApiError(413, 'O arquivo enviado ultrapassa o limite de 4 MB.');
   if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json'))
     throw new ApiError(415, 'Envie o backup em JSON.');
   const raw = await request.text();
   if (new TextEncoder().encode(raw).byteLength > maxBytes)
-    throw new ApiError(413, 'O backup ultrapassa o limite de 20 MB.');
+    throw new ApiError(413, 'O arquivo enviado ultrapassa o limite de 4 MB.');
   let body;
   try { body = JSON.parse(raw); }
   catch { throw new ApiError(400, 'JSON inválido.'); }
