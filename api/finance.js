@@ -29,10 +29,10 @@ async function parseBody(request) {
 
 
 async function parseImportBody(request) {
-  const maxBytes = 4_000_000;
+  const maxBytes = 2_000_000;
   const length = Number(request.headers.get('content-length'));
   if (Number.isFinite(length) && length > maxBytes)
-    throw new ApiError(413, 'O backup ultrapassa o limite de 4 MB.');
+    throw new ApiError(413, 'O backup ultrapassa o limite de 2 MB.');
   if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json'))
     throw new ApiError(415, 'Envie o backup em JSON.');
   const raw = await request.text();
