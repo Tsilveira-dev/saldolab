@@ -35,7 +35,7 @@ export default function Settings() {
     if (!file) return;
     setError('');
     try {
-      if (file.size > 4_000_000) throw new Error('O backup deve ter no máximo 4 MB nesta versão.');
+      if (file.size > 2_000_000) throw new Error('O backup deve ter no máximo 2 MB nesta versão.');
       const text = await file.text();
       const candidate = mode === 'cloud' ? readCloudBackup(text) : parseBackup(text);
       const counts = `${candidate.accounts.length} contas, ${candidate.categories.length} categorias, ${candidate.transactions.length} transações e ${candidate.budgets.length} orçamentos`;
