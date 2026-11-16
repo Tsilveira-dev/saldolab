@@ -31,7 +31,23 @@ async function command(commandName, args, input) {
 }
 
 const db = (database, sql) =>
-  command('docker', ['exec', CONTAINER, 'psql', '-X', '-q', '-A', '-t', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', database, '-c', sql]);
+  command('docker', [
+    'exec',
+    CONTAINER,
+    'psql',
+    '-X',
+    '-q',
+    '-A',
+    '-t',
+    '-v',
+    'ON_ERROR_STOP=1',
+    '-U',
+    'postgres',
+    '-d',
+    database,
+    '-c',
+    sql,
+  ]);
 
 async function main() {
   const folder = await mkdtemp(join(tmpdir(), 'saldolab-restore-rehearsal-'));
@@ -39,31 +55,62 @@ async function main() {
   try {
     await db('postgres', 'CREATE DATABASE ' + SOURCE);
     await db('postgres', 'CREATE DATABASE ' + RESTORED);
-    await db(SOURCE, "CREATE TABLE financial_fixture (id integer PRIMARY KEY, cents integer NOT NULL, label text NOT NULL)");
-    await db(SOURCE, "INSERT INTO financial_fixture VALUES (1, 275000, 'fixture'), (2, -75000, 'fixture-two')");
-    const dump = spawn('docker', ['exec', CONTAINER, 'pg_dump', '-U', 'postgres', '-Fc', '--no-owner', '--no-acl', '-d', SOURCE], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    await db(
+      SOURCE,
+      'CREATE TABLE financial_fixture (id integer PRIMARY KEY, cents integer NOT NULL, label text NOT NULL)',
+    );
+    await db(
+      SOURCE,
+      "INSERT INTO financial_fixture VALUES (1, 275000, 'fixture'), (2, -75000, 'fixture-two')",
+    );
+    const dump = spawn(
+      'docker',
+      ['exec', CONTAINER, 'pg_dump', '-U', 'postgres', '-Fc', '--no-owner', '--no-acl', '-d', SOURCE],
+      { stdio: ['ignore', 'pipe', 'pipe'] },
+    );
     const completed = new Promise((resolve, reject) => {
       dump.on('error', reject);
-      dump.on('close', (code) => code === 0 ? resolve() : reject(new Error('QA_DUMP_FAILED')));
+      dump.on('close', (code) =>
+        code === 0 ? resolve() : reject(new Error('QA_DUMP_FAILED')),
+      );
     });
     completed.catch(() => {});
     await Promise.all([encryptBackup(dump.stdout, encrypted, SECRET), completed]);
     const bytes = await readFile(encrypted);
     if (bytes.includes(Buffer.from('fixture-two'))) throw new Error('QA_ENCRYPTION_LEAK');
-    const restore = spawn('docker', ['exec', '-i', CONTAINER, 'pg_restore', '-U', 'postgres', '-d', RESTORED, '--no-owner', '--no-acl', '--exit-on-error'], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
+    const restore = spawn(
+      'docker',
+      [
+        'exec',
+        '-i',
+        CONTAINER,
+        'pg_restore',
+        '-U',
+        'postgres',
+        '-d',
+        RESTORED,
+        '--no-owner',
+        '--no-acl',
+        '--exit-on-error',
+      ],
+      { stdio: ['pipe', 'pipe', 'pipe'] },
+    );
     const restored = new Promise((resolve, reject) => {
       restore.on('error', reject);
-      restore.on('close', (code) => code === 0 ? resolve() : reject(new Error('QA_RESTORE_FAILED')));
+      restore.on('close', (code) =>
+        code === 0 ? resolve() : reject(new Error('QA_RESTORE_FAILED')),
+      );
     });
     restored.catch(() => {});
     await Promise.all([decryptBackup(encrypted, restore.stdin, SECRET), restored]);
-    const source = (await db(SOURCE, 'SELECT count(*), sum(cents) FROM financial_fixture')).trim();
-    const target = (await db(RESTORED, 'SELECT count(*), sum(cents) FROM financial_fixture')).trim();
-    if (source !== '2|200000' || target !== source) throw new Error('QA_RESTORE_MISMATCH');
+    const source = (
+      await db(SOURCE, 'SELECT count(*), sum(cents) FROM financial_fixture')
+    ).trim();
+    const target = (
+      await db(RESTORED, 'SELECT count(*), sum(cents) FROM financial_fixture')
+    ).trim();
+    if (source !== '2|200000' || target !== source)
+      throw new Error('QA_RESTORE_MISMATCH');
     console.log('QA_POSTGRES_17_ENCRYPT_DECRYPT_RESTORE_OK');
   } finally {
     await rm(folder, { force: true, recursive: true });
