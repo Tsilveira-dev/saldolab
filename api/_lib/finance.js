@@ -157,9 +157,8 @@ export async function removeRecord(client, entity, userId, id, expectedRevision)
  */
 export async function importBackupRecords(client, userId, data) {
   const entities = ['accounts', 'categories', 'transactions', 'budgets'];
-  await client.query(
-    'LOCK TABLE public.accounts, public.categories, public.transactions, public.budgets IN SHARE ROW EXCLUSIVE MODE',
-  );
+  // Serialize writes for this user without blocking unrelated users.
+  await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [userId]);
   for (const entity of entities) {
     const existing = await client.query(
       'SELECT 1 FROM public.' + entity + ' WHERE user_id = $1 LIMIT 1',
