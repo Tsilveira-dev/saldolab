@@ -12,11 +12,12 @@ export class RemoteApiError extends Error {
     this.status = status;
   }
 }
-async function apiCall(entity, { method = 'GET', id, body, userId } = {}) {
+async function apiCall(entity, { method = 'GET', id, operation, body, userId } = {}) {
   if (entity) checkEntity(entity);
   const params = new URLSearchParams();
   if (entity) params.set('entity', entity);
   if (id) params.set('id', id);
+  if (operation) params.set('operation', operation);
   const url = '/api/finance' + (params.size ? '?' + params.toString() : '');
   const { token, sessionId } = await getAuthSession({ expectedUserId: userId });
   let response;
@@ -79,11 +80,7 @@ export function createRemoteRepository({ userId } = {}) {
       const snap = await call();
       return exportCloudBackup(snap);
     },
-    importBackup: async () => {
-      throw new Error(
-        'Importação para a nuvem requer prévia e confirmação. Use o modo pessoal para restaurar backups locais.',
-      );
-    },
+    importBackup: async (backup) => call(null, { method: 'POST', operation: 'import', body: { backup } }),
     reset: async () => {
       throw new Error('Limpeza de dados remotos está desabilitada por segurança.');
     },
