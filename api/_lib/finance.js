@@ -148,3 +148,50 @@ export async function removeRecord(client, entity, userId, id, expectedRevision)
     ? new ApiError(409, 'Registro alterado em outra sessão.')
     : new ApiError(404, 'Registro não encontrado.');
 }
+
+
+/**
+ * Imports a validated v1 dataset into an empty user space.
+ * The caller must run this inside the authenticated database transaction.
+ * IDs are regenerated and all foreign keys are remapped before insertion.
+ */
+export async function importBackupRecords(client, userId, data) {
+  const entities = ['accounts', 'categories', 'transactions', 'budgets'];
+  // Serialize writes for this user without blocking unrelated users.
+  await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [userId]);
+  for (const entity of entities) {
+    const existing = await client.query(
+      'SELECT 1 FROM public.' + entity + ' WHERE user_id = $1 LIMIT 1',
+      [userId],
+    );
+    if (existing.rows.length)
+      throw new ApiError(409, 'A conta já possui dados. A importação foi bloqueada para evitar duplicidade ou sobrescrita.');
+  }
+
+  const accountIds = new Map();
+  const categoryIds = new Map();
+  for (const { id, ...row } of data.accounts)
+    accountIds.set(id, (await createRecord(client, 'accounts', userId, row)).id);
+  for (const { id, ...row } of data.categories)
+    categoryIds.set(id, (await createRecord(client, 'categories', userId, row)).id);
+  for (const { id: _id, ...row } of data.transactions)
+    await createRecord(client, 'transactions', userId, {
+      ...row,
+      accountId: accountIds.get(row.accountId),
+      destinationAccountId: row.destinationAccountId
+        ? accountIds.get(row.destinationAccountId)
+        : null,
+      categoryId: row.categoryId ? categoryIds.get(row.categoryId) : null,
+    });
+  for (const { id: _id, ...row } of data.budgets)
+    await createRecord(client, 'budgets', userId, {
+      ...row,
+      categoryId: categoryIds.get(row.categoryId),
+    });
+
+  return {
+    status: 'imported',
+    counts: Object.fromEntries(entities.map((entity) => [entity, data[entity].length])),
+    idsRemapped: true,
+  };
+}

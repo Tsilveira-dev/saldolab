@@ -2,7 +2,8 @@ import { authenticatedUser, requireActiveSession } from './_lib/auth.js';
 import { withDatabase } from './_lib/db.js';
 import { ApiError, mapDatabaseError, jsonResponse } from './_lib/errors.js';
 import { assertEntity, validateId } from './_lib/validation.js';
-import { snapshot, listRecords, createRecord, updateRecord, removeRecord } from './_lib/finance.js';
+import { snapshot, listRecords, createRecord, updateRecord, removeRecord, importBackupRecords } from './_lib/finance.js';
+import { readCloudBackup } from '../src/repositories/cloudBackup.js';
 
 const allowed = ['GET', 'POST', 'PATCH', 'DELETE'];
 const getParams = (request) => new URL(request.url).searchParams;
@@ -26,6 +27,26 @@ async function parseBody(request) {
   return body;
 }
 
+
+async function parseImportBody(request) {
+  const maxBytes = 4_000_000;
+  const length = Number(request.headers.get('content-length'));
+  if (Number.isFinite(length) && length > maxBytes)
+    throw new ApiError(413, 'O arquivo enviado ultrapassa o limite de 4 MB.');
+  if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json'))
+    throw new ApiError(415, 'Envie o backup em JSON.');
+  const raw = await request.text();
+  if (new TextEncoder().encode(raw).byteLength > maxBytes)
+    throw new ApiError(413, 'O arquivo enviado ultrapassa o limite de 4 MB.');
+  let body;
+  try { body = JSON.parse(raw); }
+  catch { throw new ApiError(400, 'JSON inválido.'); }
+  if (!body || typeof body.backup !== 'string')
+    throw new ApiError(422, 'Arquivo de backup inválido.');
+  try { return readCloudBackup(body.backup); }
+  catch { throw new ApiError(422, 'Backup inválido ou incompatível. Confira o arquivo JSON do SaldoLab.'); }
+}
+
 async function handle(request) {
   if (!allowed.includes(request.method))
     return new Response(null, { status: 405, headers: { Allow: allowed.join(', ') } });
@@ -38,7 +59,22 @@ async function handle(request) {
         await requireActiveSession(client, identity);
         return work(client);
       }, options);
+    const withUserWriteDatabase = (work) =>
+      withUserDatabase(async (client) => {
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [userId]);
+        return work(client);
+      });
     const params = getParams(request);
+    const operation = params.get('operation');
+    if (operation === 'import') {
+      if (request.method !== 'POST') throw new ApiError(405, 'Método não permitido para importação.');
+      const data = await parseImportBody(request);
+      return jsonResponse(
+        await withUserDatabase((client) => importBackupRecords(client, userId, data)),
+        201,
+      );
+    }
+    if (operation !== null) throw new ApiError(404, 'Operação não encontrada.');
     const entity = params.get('entity');
     if (!entity) {
       if (request.method !== 'GET') throw new ApiError(405, 'Operação não permitida.');
@@ -68,7 +104,7 @@ async function handle(request) {
       if (recordId !== null) throw new ApiError(422, 'Não especifique ID no cadastro.');
       const body = await parseBody(request);
       return jsonResponse(
-        await withUserDatabase((client) => createRecord(client, entity, userId, body)),
+        await withUserWriteDatabase((client) => createRecord(client, entity, userId, body)),
         201,
       );
     }
@@ -76,13 +112,13 @@ async function handle(request) {
     if (request.method === 'PATCH') {
       const body = await parseBody(request);
       return jsonResponse(
-        await withUserDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
+        await withUserWriteDatabase((client) => updateRecord(client, entity, userId, recordId, body)),
       );
     }
     // The delete body carries a required revision: callers cannot delete a stale row.
     const body = await parseBody(request);
     return jsonResponse(
-      await withUserDatabase((client) =>
+      await withUserWriteDatabase((client) =>
         removeRecord(client, entity, userId, recordId, body.expectedRevision),
       ),
     );

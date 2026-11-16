@@ -14,7 +14,7 @@ export function exportCloudBackup(snapshot) {
 }
 
 export function readCloudBackup(text) {
-  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > 20_000_000)
+  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > 2_000_000)
     throw new Error('BACKUP_SIZE_INVALID');
   let parsed;
   try {

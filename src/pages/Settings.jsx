@@ -4,6 +4,7 @@ import { Download, Upload, RotateCcw, HardDrive, ShieldCheck, Moon, Sun } from '
 import { useFinance } from '../context/FinanceContext';
 import { downloadFile } from '../services/files';
 import { parseBackup } from '../repositories/localRepository';
+import { readCloudBackup } from '../repositories/cloudBackup.js';
 import { PageHeading, Panel, InlineError } from '../components/ui';
 
 export default function Settings() {
@@ -34,14 +35,17 @@ export default function Settings() {
     if (!file) return;
     setError('');
     try {
-      if (file.size > 20_000_000) throw new Error('O backup deve ter no máximo 20 MB.');
+      if (file.size > 2_000_000) throw new Error('O backup deve ter no máximo 2 MB nesta versão.');
       const text = await file.text();
-      const candidate = parseBackup(text);
+      const candidate = mode === 'cloud' ? readCloudBackup(text) : parseBackup(text);
+      const counts = `${candidate.accounts.length} contas, ${candidate.categories.length} categorias, ${candidate.transactions.length} transações e ${candidate.budgets.length} orçamentos`;
       setConfirmation({
-        title: 'Substituir os dados deste modo?',
-        message: `O backup contém ${candidate.transactions.length} transações, ${candidate.accounts.length} contas, ${candidate.categories.length} categorias e ${candidate.budgets.length} orçamentos. Os dados do modo ${mode === 'demo' ? 'demonstração' : 'pessoal'} serão substituídos. Exporte um backup dos dados atuais antes de continuar.`,
+        title: mode === 'cloud' ? 'Importar dados para sua conta?' : 'Substituir os dados deste modo?',
+        message: mode === 'cloud'
+          ? `O arquivo contém ${counts}. A importação só será permitida se sua conta na nuvem estiver vazia. Os IDs serão recriados e os vínculos preservados. Seus dados locais não serão apagados. Essa operação não pode ser desfeita.`
+          : `O backup contém ${counts}. Os dados do modo ${mode === 'demo' ? 'demonstração' : 'pessoal'} serão substituídos. Exporte um backup dos dados atuais antes de continuar.`,
         confirmLabel: 'Importar backup',
-        action: () => mutate((repo) => repo.importBackup(text), 'Backup importado com sucesso.'),
+        action: () => mutate((repo) => repo.importBackup(text), mode === 'cloud' ? 'Dados importados para sua conta.' : 'Backup importado com sucesso.'),
       });
     } catch (cause) {
       setError(cause.message);
@@ -129,7 +133,7 @@ export default function Settings() {
             </h3>
             <p>
               {mode === 'cloud'
-                ? 'Seus registros estão associados à sua conta. Você pode baixar uma cópia dos seus dados; restaurar esse arquivo na conta ainda não está disponível.'
+                ? 'Seus registros estão associados à sua conta. Você pode exportar um backup ou importar um arquivo JSON para uma conta vazia.'
                 : 'Esta versão utiliza armazenamento local. Os registros não são sincronizados entre dispositivos e podem ser perdidos ao limpar os dados do navegador.'}
             </p>
             <div className="backup-buttons">
@@ -139,7 +143,7 @@ export default function Settings() {
               </button>
               <button
                 className="btn btn-outline-secondary"
-                disabled={!canWrite || mode === 'cloud'}
+                disabled={!canWrite}
                 onClick={() => inputRef.current.click()}
               >
                 <Upload size={16} />
@@ -150,13 +154,13 @@ export default function Settings() {
               ref={inputRef}
               aria-label="Arquivo de backup JSON"
               type="file"
-              disabled={!canWrite || mode === 'cloud'}
+              disabled={!canWrite}
               accept=".json,application/json"
               className="visually-hidden"
               onChange={importFile}
             />
             <p className="settings-footnote">
-              <ShieldCheck size={16} />O arquivo é validado antes de substituir os dados.
+              <ShieldCheck size={16} />No modo nuvem, a importação exige uma conta vazia e preserva os dados locais.
             </p>
           </div>
         </Panel>
